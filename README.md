@@ -1,4 +1,6 @@
-# CubeSat Kit
+<img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/HSFL%20Logo.jpg" width="200"> <img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/UH_Manoa_Logo.jpg" width="192">
+
+# Artemis CubeSat Kit
 
 Software for cubesat kit functionality
 
