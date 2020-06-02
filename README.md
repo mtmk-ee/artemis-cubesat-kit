@@ -1,4 +1,4 @@
-<img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/HSFL%20Logo.jpg" width="200"> <img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/UH_Manoa_Logo.jpg" width="192">
+<img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/HSFL%20Logo.jpg" width="200"> <img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/UH_Manoa_Logo.png" width="192">
 
 # Artemis CubeSat Kit
 
