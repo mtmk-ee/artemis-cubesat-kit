@@ -1,0 +1,13 @@
+add_executable(agent_eps agent_eps.cpp)
+add_executable(agent_adcs agent_adcs.cpp)
+add_executable(agent_comms agent_comms.cpp)
+add_executable(agent_thermal agent_thermal.cpp)
+add_executable(agent_pycubed agent_pycubed.cpp)
+add_executable(agent_payload agent_payload.cpp)
+
+target_link_libraries(agent_eps ${COSMOS_LIBS})
+target_link_libraries(agent_adcs ${COSMOS_LIBS})
+target_link_libraries(agent_comms ${COSMOS_LIBS})
+target_link_libraries(agent_thermal ${COSMOS_LIBS})
+target_link_libraries(agent_pycubed ${COSMOS_LIBS})
+target_link_libraries(agent_payload ${COSMOS_LIBS})
