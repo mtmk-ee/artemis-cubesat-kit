@@ -10,17 +10,19 @@ Implementation Notes
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 
-
+# If larger than number, subtracts other number from itself?
 def _to_signed(num):
     if num > 0x7FFF:
         num -= 0x10000
     return num
 
+#Setting data V and I
 DATA_V_MASK = const(0xF0)
 DATA_I_MASK = const(0x0F)
 
 class ADM1176:
 
+    # Initiates device
     def __init__(self, i2c_bus, addr=0x4A):
         self.i2c_device = I2CDevice(i2c_bus, addr)
         self.i2c_addr = addr
@@ -34,6 +36,8 @@ class ADM1176:
 
     _BUFFER = bytearray(3)
     _STATUS = bytearray(1)
+    
+    # Configures necessary values?
     def config(self, value):
         if 'V_CONT' in value:
             self._cmd[0] |= (1<<0)
@@ -48,6 +52,7 @@ class ADM1176:
         with self.i2c_device as i2c:
             i2c.write(self._cmd)
 
+    # Calculates and returns voltage and current
     def read(self):
         with self.i2c_device as i2c:
             i2c.readinto(self._BUFFER)
@@ -57,12 +62,14 @@ class ADM1176:
         _current = ((0.10584/4096)*raw_current)/self.sense_resistor # amperes
         return (_voltage,_current)
 
+    # Turns off?
     @property
     def OFF(self):
         self._extcmd[1]=1
         with self.i2c_device as i2c:
             i2c.write(self._extcmd)
 
+    # Truns on?
     @property
     def ON(self):
         self._extcmd[1]=0
