@@ -439,7 +439,6 @@ class RFM9x:
             device.write(self._BUFFER, end=2)
 
     def reset(self):
-        """Perform a reset of the chip."""
         # See section 7.2.2 of the datasheet for reset description.
         self._reset.switch_to_output(value=False)
         time.sleep(0.0001)  # 100 us
