@@ -587,10 +587,6 @@ class RFM9x:
     # Gets spreading factor used by radio
     @property
     def spreading_factor(self):
-        """The spreading factor used by the radio (try setting to a higher
-        value to increase the receiver's ability to distinguish signal from
-        noise or to a lower value to increase the data transmission rate).
-        Valid values are limited to 6, 7, 8, 9, 10, 11, or 12."""
         sf_id = (self._read_u8(_RH_RF95_REG_1E_MODEM_CONFIG2) & 0xf0) >> 4
         return sf_id
 
@@ -619,9 +615,6 @@ class RFM9x:
     # Gets enable CRC true or false
     @property
     def enable_crc(self):
-        """Set to True to enable hardware CRC checking of incoming packets.
-        Incoming packets that fail the CRC check are not processed.  Set to
-        False to disable CRC checking and process all incoming packets."""
         return (self._read_u8(_RH_RF95_REG_1E_MODEM_CONFIG2) & 0x04) == 0x04
 
     # Sets enable CRC
