@@ -76,4 +76,3 @@ class ADM1176:
         with self.i2c_device as i2c:
             i2c.write(self._extcmd)
         self.config('V_CONT,I_CONT')
-© 2020 GitHub, Inc.
