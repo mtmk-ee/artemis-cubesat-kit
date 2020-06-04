@@ -55,11 +55,13 @@ _TDIE_ADC1      = const(0x23)
 _TDIE_ADC0      = const(0x24)
 _PART_INFO      = const(0x25)
 
+# If greater than number, reduce by other number from itself?
 def _to_signed(num):
     if num > 0x7FFF:
         num -= 0x10000
     return num
 
+# Setting values
 class BQ25883:
     _pn                  = ROBits(4,_PART_INFO,3,1,False)
     _fault_status        = ROBits(8,_FAULT_STAT,0,1,False)
@@ -76,11 +78,13 @@ class BQ25883:
     _stat_dis            =  RWBit(_CHRGR_CRTL1, 6, 1, False)
     _inlim               =  RWBit(_CHRGI_LIM, 6, 1, False)
 
+    # Initiate battery
     def __init__(self, i2c_bus, addr=0x6B):
         self.i2c_device = I2CDevice(i2c_bus, addr)
         self.i2c_addr = addr
         assert self._pn == 3, "Unable to find BQ25883"
 
+    # Prints status of battery
     @property
     def status(self):
         print('Fault:',bin(self._fault_status))   
@@ -91,18 +95,23 @@ class BQ25883:
         print('NTC Status:',bin(self._ntc_stat))  
         print('OTG:',hex(self._otg_ctrl))
 
-
+    # Prints charging
     @property
     def charging(self):
         print('Charge Control2:',bin(self._chrg_ctrl2))    
+   
+    # Sets charging to value if value is a bool
     @charging.setter
     def charging(self,value):
         assert type(value) == bool
         self._en_chrg=value
-
+    
+    # Prints watchdog timer
     @property
     def wdt(self):
         print('Watchdog Timer:',bin(self._wdt))    
+   
+    # Sets watchdog timer to value if not None, [], or 0
     @wdt.setter
     def wdt(self,value):
         if not value:
@@ -110,9 +119,12 @@ class BQ25883:
         else:
             self._wdt=value
 
+    # Prints LED satus
     @property
     def led(self):
         print('Status LED:',bin(self._stat_dis))    
+   
+    # Sets LED to the inverse of the value
     @led.setter
     def led(self,value):
         assert type(value) == bool
