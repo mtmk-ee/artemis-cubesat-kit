@@ -265,17 +265,10 @@ class _ScaledReadOnlyStruct(Struct):
 # TODO replace _SclaedReadOnlyStruct with Struct in BMX160 so that the
 # scale factor can be changed as a function of range mode
 
-
+# Driver for BMX160 accelerometer, magnetometer, gyrsocope.
+# In Buffer, bytes allocated as follows
+# mag 0-5, rhall 6-7, gyro 8-13, accel 14-19, sensor time 20-22
 class BMX160:
-    """
-    Driver for the BMX160 accelerometer, magnetometer, gyroscope.
-    In the buffer, bytes are allocated as follows:
-        - mag 0-5
-        - rhall 6-7 (not relevant?)
-        - gyro 8-13
-        - accel 14-19
-        - sensor time 20-22
-    """
 
     # multiplicative constants
 
@@ -414,24 +407,24 @@ class BMX160:
         self.gyro_odr = 25
         self.gyro_powermode = BMX160_GYRO_NORMAL_MODE
 
+    # Returns gyro range
     @property
     def gyro_range(self):
         return self._gyro_range
 
+    # Sets gyro range
+    # The input is expected to be the BMX160-constant associated with the range.
+    #   deg/s | bmxconst value | bmxconst_name
+    #   ------------------------------------------------------
+    #   2000  |   0            |  BMX160_GYRO_RANGE_2000_DPS
+    #   1000  |   1            |  BMX160_GYRO_RANGE_1000_DPS
+    #   500   |   2            |  BMX160_GYRO_RANGE_500_DPS
+    #   250   |   3            |  BMX160_GYRO_RANGE_250_DPS
+    #   125   |   4            |  BMX160_GYRO_RANGE_125_DPS
+    #   ex: bmx.gyro_range = BMX160_GYRO_RANGE_500_DPS
+    #   equivalent to: bmx.gyro_range = 2
     @gyro_range.setter
     def gyro_range(self, rangeconst):
-        """
-        The input is expected to be the BMX160-constant associated with the range.
-        deg/s | bmxconst value | bmxconst_name
-        ------------------------------------------------------
-        2000  |   0            |  BMX160_GYRO_RANGE_2000_DPS
-        1000  |   1            |  BMX160_GYRO_RANGE_1000_DPS
-        500   |   2            |  BMX160_GYRO_RANGE_500_DPS
-        250   |   3            |  BMX160_GYRO_RANGE_250_DPS
-        125   |   4            |  BMX160_GYRO_RANGE_125_DPS
-        ex: bmx.gyro_range = BMX160_GYRO_RANGE_500_DPS
-        equivalent to: bmx.gyro_range = 2
-        """
 
         if rangeconst in BMX160_GYRO_RANGE_CONSTANTS:
             self._gyro_range = rangeconst
@@ -442,18 +435,17 @@ class BMX160:
         else:
             pass
 
-
+    # Gets gyro output data rate
     @property
     def gyro_odr(self):
         return self._gyro_odr
 
+    # Set gryo output data rate
+    # The possible ODRs are 1600, 800, 400, 200, 100,
+    # 50, 25, 12.5, 6.25, 3.12, 1.56, and 0.78 Hz
+    # Setting value between listed values will round downwards
     @gyro_odr.setter
     def gyro_odr(self, odr):
-        """
-        Set the output data rate of the gyroscope. The possible ODRs are 1600, 800, 400, 200, 100,
-        50, 25, 12.5, 6.25, 3.12, 1.56, and 0.78 Hz. Note, setting a value between the listed ones
-        will round *downwards*.
-        """
         res = self.generic_setter(odr, BMX160_GYRO_ODR_VALUES,
                                   BMX160_GYRO_ODR_CONSTANTS,
                                   BMX160_GYRO_CONFIG_ADDR,
@@ -461,19 +453,14 @@ class BMX160:
         if res != None:
             self._gyro_odr = res[1]
 
+    # Get gyro powermoade
     @property
     def gyro_powermode(self):
         return self._gyro_powermode
 
+    # Sets gyro powermode, possible modes are suspend, normal, and fast startup
     @gyro_powermode.setter
     def gyro_powermode(self, powermode):
-        """
-        Set the power mode of the gyroscope. Unlike other setters, this one has to directly take the
-        BMX160-const associated with the power mode. The possible modes are:
-        `BMX160_GYRO_SUSPEND_MODE`
-        `BMX160_GYRO_NORMAL_MODE`
-        `BMX160_GYRO_FASTSTARTUP_MODE`
-        """
         if powermode not in BMX160_GYRO_MODES:
             print("Unknown gyroscope powermode: " + str(powermode))
             return
@@ -500,24 +487,22 @@ class BMX160:
         self.accel_odr = 25
         self.accel_powermode = BMX160_ACCEL_NORMAL_MODE
 
+    # Gets accel range
     @property
     def accel_range(self):
         return self._accel_range
-
+    # Sets accel range
+    #The input is expected to be the BMX160-constant associated with the range.
+    #   deg/s | bmxconst value | bmxconst name
+    #   ------------------------------------------------------
+    #   2     |   3            | BMX160_ACCEL_RANGE_2G
+    #   4     |   5            | BMX160_ACCEL_RANGE_4G
+    #   8     |   8            | BMX160_ACCEL_RANGE_8G
+    #   16    |   12           | BMX160_ACCEL_RANGE_16G
+    #   ex: bmx.accel_range = BMX160_ACCEL_RANGE_4G
+    #   equivalent to: bmx.accel_range = 5
     @accel_range.setter
     def accel_range(self, rangeconst):
-        """
-        The input is expected to be the BMX160-constant associated with the range.
-        deg/s | bmxconst value | bmxconst name
-        ------------------------------------------------------
-        2     |   3            | BMX160_ACCEL_RANGE_2G
-        4     |   5            | BMX160_ACCEL_RANGE_4G
-        8     |   8            | BMX160_ACCEL_RANGE_8G
-        16    |   12           | BMX160_ACCEL_RANGE_16G
-        ex: bmx.accel_range = BMX160_ACCEL_RANGE_4G
-        equivalent to: bmx.accel_range = 5
-        """
-
         if rangeconst in BMX160_ACCEL_RANGE_CONSTANTS:
             self._accel_range = rangeconst
             # read out the value to see if it changed successfully
@@ -529,10 +514,12 @@ class BMX160:
         else:
             pass
 
+    # Get accel output data rate
     @property
     def accel_odr(self):
         return self._accel_odr
 
+    # Set accel output data rate
     @accel_odr.setter
     def accel_odr(self, odr):
         res = self.generic_setter(odr, BMX160_ACCEL_ODR_VALUES,
@@ -542,19 +529,14 @@ class BMX160:
         if res != None:
             self._accel_odr = res[1]
 
+    # Get accel powermode
     @property
     def accel_powermode(self):
         return self._accel_powermode
 
+    # Set accel powermoade, possible modes are, normal, low power, and suspend
     @accel_powermode.setter
     def accel_powermode(self, powermode):
-        """
-        Set the power mode of the accelerometer. Unlike other setters, this one has to directly take the
-        BMX160-const associated with the power mode. The possible modes are:
-        `BMI160_ACCEL_NORMAL_MODE`
-        `BMI160_ACCEL_LOWPOWER_MODE`
-        `BMI160_ACCEL_SUSPEND_MODE`
-        """
         if powermode not in BMX160_ACCEL_MODES:
             print("Unknown accelerometer power mode: " + str(powermode))
             return
@@ -610,9 +592,8 @@ class BMX160:
         else:
             settingswarning(warning_interp)
 
-
+# Driver for the BMX160 connect over I2C
 class BMX160_I2C(BMX160):
-    """Driver for the BMX160 connect over I2C."""
 
     def __init__(self, i2c):
 
@@ -623,31 +604,34 @@ class BMX160_I2C(BMX160):
 
         super().__init__()
 
+    # Reads one byte from address
     def read_u8(self, address):
         with self.i2c_device as i2c:
             self._BUFFER[0] = address & 0xFF
             i2c.write_then_readinto(self._BUFFER, self._BUFFER, out_end=1, in_start=1, in_end=2)
         return self._BUFFER[1]
 
+    # Reads certain amount from address
     def read_bytes(self, address, count, buf):
         with self.i2c_device as i2c:
             buf[0] = address & 0xFF
             i2c.write_then_readinto(buf, buf, out_end=1, in_end=count)
         return buf
 
+    # Write number of bytes to address
     def write_u8(self, address, val):
         with self.i2c_device as i2c:
             self._BUFFER[0] = address & 0xFF
             self._BUFFER[1] = val & 0xFF
             i2c.write(self._BUFFER, end=2, stop=True)
 
-
+# Driver for BMX160 connect over SPI
 class BMX160_SPI(BMX160):
-    """Driver for the BMX160 connect over SPI."""
     def __init__(self, spi, cs):
         self.i2c_device = SPIDevice(spi, cs)
         super().__init__()
 
+    # Read one byte from address
     def read_u8(self, address):
         with self.i2c_device as spi:
             self._BUFFER[0] = (address | 0x80) & 0xFF
@@ -655,6 +639,7 @@ class BMX160_SPI(BMX160):
             spi.readinto(self._BUFFER, end=1)
         return self._BUFFER[0]
 
+    # Read number of bytes from address
     def read_bytes(self, address, count, buf):
         with self.i2c_device as spi:
             buf[0] = (address | 0x80) & 0xFF
@@ -662,6 +647,7 @@ class BMX160_SPI(BMX160):
             spi.readinto(buf, end=count)
         return buf
 
+    # Writes number of bytes to address
     def write_u8(self, address, val):
         with self.i2c_device as spi:
             self._BUFFER[0] = (address & 0x7F) & 0xFF
