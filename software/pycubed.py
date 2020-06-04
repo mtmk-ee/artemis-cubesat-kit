@@ -20,10 +20,8 @@ import adm1176
 import bmx160
 
 class Satellite:
+    # Initiates whole board
     def __init__(self):
-        """
-        Big init routine as the whole board is brought up. 
-        """
         self.hardware = {
                        'IMU':    False,
                        'Radio1': False,
@@ -137,29 +135,37 @@ class Satellite:
         # except Exception as e:
         #     print('[ERROR]',e)
         
+    # Gets acceleration from IMU
     @property
     def acceleration(self):
         return self.IMU.accel
 
+    # Gets magnetic from IMU
     @property
     def magnetic(self):
         return self.IMU.mag
 
+    # Gets gyroscope from IMU
     @property
     def gyro(self):
         return self.IMU.gyro
 
+    # Gets temperature from IMU in celsius
     @property
     def temperature(self):
-        return self.IMU.temperature # Celsius 
+        return self.IMU.temperature
 
+    # Gets microcontroller temperature in celsius
     @property
     def temperature_cpu(self):
-        return microcontroller.cpu.temperature # Celsius 
+        return microcontroller.cpu.temperature
 
+    # Gets RGB of neopixel
     @property
     def RGB(self):
         return self.neopixel[0]
+    
+    # Sets RGB of neopixel
     @RGB.setter
     def RGB(self,value):
         if self.hardware['Neopixel']:
@@ -168,21 +174,26 @@ class Satellite:
             except Exception as e:
                 print('[WARNING]',e)
     
+    # Gets charge of batteries
     @property
     def charge_batteries(self):
         return self.usb_charging
+    
+    # Sets charge of batteries
     @charge_batteries.setter
     def charge_batteries(self,value):
         self.usb_charging=value
         self.usb.led=value
         self.usb.charging=value
 
+    # Gets battery voltage
     @property
     def battery_voltage(self):
         _voltage = self._vbatt.value * 3.3 / (2 ** 16)
         _voltage = _voltage * (316/110) # 316/110 voltage divider
         return _voltage # volts
 
+    # Gets system voltage
     @property
     def system_voltage(self):
         if self.hardware['PWR']:
@@ -193,6 +204,7 @@ class Satellite:
         else:
             print('[WARNING] Power monitor not initialized')
 
+    # Get current draw
     @property
     def current_draw(self):
         if self.hardware['PWR']:
@@ -206,16 +218,19 @@ class Satellite:
         else:
             print('[WARNING] Power monitor not initialized')
 
+    # Get charge current
     @property
     def charge_current(self):
         _charge = self._ichrg.value * 3.3 / (2 ** 16)
         _charge = ((_charge*988)/6040)*1000 
         return _charge # mA
 
+    # Get reset boot count
     @property
     def reset_boot_count(self):
         microcontroller.nvm[0]=0
 
+    # Get file and set file name
     @property
     def unique_file(self):
         import os
@@ -237,6 +252,7 @@ class Satellite:
             self.RGB = (255,0,0)
             return False
 
+    # Save file
     def save(self, dataset, savefile=None):
         if savefile == None:
             savefile = self.filename
