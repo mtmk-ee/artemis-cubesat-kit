@@ -34,11 +34,28 @@
 #include "agent/agentclass.h"
 #include "support/configCosmos.h"
 #include "agent/agentclass.h"
+#include "support/jsonlib.h"
 #include "device/serial/serialclass.h"
+#include "device/ADT7311.h"
 #include <iostream>
 #include <fstream>
+#include <unordered_map>
 
 using namespace std;
+using namespace cubesat;
+
+using TempSensorDevice = ADT7311;
+
+
+struct TempSensor {
+	TempSensorDevice *device;
+	string name;
+	int index;
+	
+	float lower_extreme, upper_extreme;
+};
+
+
 
 // Some nasty global variables
 Agent *agent;
@@ -46,23 +63,21 @@ ofstream file;
 string nodename = "node-cubesat";
 string agentname = "thermal";
 
-enum TempSensorID {
-    TEMP_SENSOR_IMU,
-    TEMP_SENSOR_BATT,
-    TEMP_SENSOR_OBC,
-    TEMP_SENSOR_COUNT, // The number of temperature sensors
-};
+vector<TempSensor> temp_sensors;
+
 
 void init_agent();
 void init_sensors();
 void run_agent();
 void update_temps();
-bool handle_temp(TempSensorID sensor);
-float read_temp(TempSensorID sensor);
+bool handle_temp(TempSensor &sensor);
 
 
 int32_t request_heater(char *request, char* response, Agent *agent);
 int32_t request_sensor(char *request, char* response, Agent *agent);
+
+
+
 
 
 
@@ -96,21 +111,24 @@ void init_agent() {
     // Create the state of health string
     string soh = "{";
 
-    for (int i = 0; i < TEMP_SENSOR_COUNT; ++i) {
+    for (int i = 0; i < (int)temp_sensors.size(); ++i) {
         // Convert device number to string
         std::ostringstream ss;
         ss << std::setw(3) << std::setfill('0') << i;
 
         // Add to the SOH string
         soh.append("\"device_tsen_temp_" + ss.str() + "\", ");
-        soh.append("\"device_tsen_utc_" + ss.str());
+        soh.append("\"device_tsen_utc_" + ss.str() + "\"");
 
         // Add delimiter if necessary
-        if ( i != TEMP_SENSOR_COUNT - 1 )
+        if ( i != (int)temp_sensors.size() - 1 )
             soh.append(", ");
     }
+	
 
     soh.append("}");
+	
+	cout << soh << endl;
 
 
     // set the soh string
@@ -140,9 +158,9 @@ void run_agent() {
         // Check readings
         bool nominal = true;
         
-        for (int i = 0; i < TEMP_SENSOR_COUNT; ++i) {
+        for (TempSensor &sensor : temp_sensors) {
             
-            if ( !handle_temp((TempSensorID)i) ) {
+            if ( !handle_temp(sensor) ) {
                 nominal = false;
             }
         }
@@ -161,7 +179,36 @@ void run_agent() {
  * @brief init_sensors Sets up the sensors for reading
  */
 void init_sensors() {
-    // TODO
+	const int NUM_TEMP_SENSORS = 5;
+	
+	// Save space in memory for a set number of temperature sensor devices
+	temp_sensors.reserve(NUM_TEMP_SENSORS);
+	
+	for (int i = 0; i < NUM_TEMP_SENSORS; ++i) {
+		temp_sensors.push_back(TempSensor());
+	}
+	
+	// Populate the sensor definitions. This could probably be configured with a JSON file...
+	temp_sensors[0].name = "batt";
+	temp_sensors[0].device = new TempSensorDevice();
+	
+	temp_sensors[0].name = "eps";
+	temp_sensors[0].device = new TempSensorDevice();
+	
+	temp_sensors[0].name = "obc";
+	temp_sensors[0].device = new TempSensorDevice();
+	
+	temp_sensors[0].name = "pycubed";
+	temp_sensors[0].device = new TempSensorDevice();
+	temp_sensors[0].index = 0;
+	
+	temp_sensors[0].name = "payload";
+	temp_sensors[0].device = new TempSensorDevice();
+	temp_sensors[0].index = 0;
+	
+	
+	
+	// TODO: initialize devices and verify they are functioning
 }
 
 /**
@@ -170,31 +217,20 @@ void init_sensors() {
 void update_temps() {
     cout << "Updating temperature log... ";
     
-    for (int i = 0; i < TEMP_SENSOR_COUNT; ++i) {
-        float temp = read_temp((TempSensorID)i);
+	
+    for (int i = 0; i < (int)temp_sensors.size(); ++i) {
+		TempSensor &sensor = temp_sensors[i];
+		
+		float temp = sensor.device->GetTemperature();
 
-        agent->cinfo->devspec.tsen[i]->temp = temp;
-        agent->cinfo->devspec.tsen[i]->utc = currentmjd();
+		
+		
+		// Store device readings
+        agent->cinfo->devspec.tsen[sensor.index]->temp = temp;
+        agent->cinfo->devspec.tsen[sensor.index]->utc = currentmjd();
     }
     
     cout << "done." << endl;
-}
-
-/**
- * @brief read_temp Reads the temperature from a specific sensor.
- * @param sensor The ID of the sensor
- * @return The temperature reading in Kelvin
- */
-float read_temp(TempSensorID sensor) {
-
-    // TODO: Read sensors
-    switch ( sensor ) {
-    default:
-        break;
-    }
-
-    // For now, return a test temperature
-    return 276.0f + (float)sensor;
 }
 
 /**
@@ -202,10 +238,10 @@ float read_temp(TempSensorID sensor) {
  * @param sensor The sensor
  * @return True if the temperature is within the correct range.
  */
-bool handle_temp(TempSensorID sensor) {
+bool handle_temp(TempSensor &sensor) {
 
     // Pull the latest temperature reading
-    float temp = agent->cinfo->devspec.tsen[(int)sensor]->temp;
+    float temp = agent->cinfo->devspec.tsen[sensor.index]->temp;
 
     // TODO: fetch min and max temperatures. Currently using placeholder values.
     float min_temp = 273;
@@ -215,22 +251,22 @@ bool handle_temp(TempSensorID sensor) {
     bool within_range = true;
 
     if ( temp < min_temp ) { // Case: Temperature too low (critical)
-        cout << "Critical: Temperature sensor " << (int)sensor << " reads as too low (currently at " <<
+        cout << "Critical: Temperature sensor '" << sensor.name << "' reads as too low (currently at " <<
                 temp << " K, min is " << min_temp << " K)." << endl;
         within_range = false;
     }
     else if ( temp < min_temp + epsilon ) { // Case: Temperature too low (warning)
-        cout << "Warning: Temperature sensor " << (int)sensor << " is nearing lower boundary (currently at " <<
+        cout << "Warning: Temperature sensor '" << sensor.name << "' is nearing lower boundary (currently at " <<
                 temp << " K, min is " << min_temp << " K)." << endl;
         within_range = false;
     }
     else if ( temp > max_temp ) { // Case: Temperature too high (critical)
-        cout << "Critical: Temperature sensor " << (int)sensor << " reads as too high (currently at " <<
+        cout << "Critical: Temperature sensor '" << sensor.name << "' reads as too high (currently at " <<
                 temp << " K, max is " << max_temp << " K)." << endl;
         within_range = false;
     }
     else if ( temp > max_temp - epsilon ) { // Case: Temperature too high (warning)
-        cout << "Warning: Temperature sensor " << (int)sensor << " is nearing upper boundary (currently at " <<
+        cout << "Warning: Temperature sensor '" << sensor.name << "' is nearing upper boundary (currently at " <<
                 temp << " K, max is " << max_temp << " K)." << endl;
         within_range = false;
     }
@@ -275,28 +311,34 @@ int32_t request_heater(char *request, char* response, Agent *agent) {
 }
 
 /**
- * @brief request_sensor Request for sensor data. Usage: sensor ### 
+ * @brief request_sensor Request for sensor data. Usage: sensor name 
  * @return 
  */
 int32_t request_sensor(char *request, char* response, Agent *agent) {
-    // TODO: Add ability to reference sensor by name
-    int sensor_id;
-    int heater_id;
+    char sensor_name[128];
     
-    int status = sscanf(request, "%*s %d", &heater_id);
+    int status = sscanf(request, "%*s %s", sensor_name);
     
     
     // Check if the given request is invalid
     if ( status != 1 ) {
-        sprintf(response, "Usage: sensor ###");
+        sprintf(response, "Usage: sensor <name>");
         return 1;
     }
-    else {
-        sprintf(response, "%f", agent->cinfo->devspec.tsen[heater_id]->temp);
-    }
+	
+	// Check if a sensor with the given name is defined
+	for (TempSensor &sensor : temp_sensors) {
+		
+		if ( sensor.name == sensor_name ) {
+			sprintf(response, "%f", agent->cinfo->devspec.tsen[sensor.index]->temp);
+			return 0;
+		}
+	}
+	
+	// Error!
+	sprintf(response, "No sensor with the name '%s' was found.\n", sensor_name);
     
-    
-    return 0;
+    return 1;
 }
 
 

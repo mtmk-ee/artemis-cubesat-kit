@@ -57,12 +57,12 @@ void run_agent();
 int32_t request_write(char *request, char* response, Agent *agent);
 int32_t request_get(char *request, char* response, Agent *agent);
 
-
+void read_input();
 
 
 int main(int argc, char** argv) {
     cout << "Agent PyCubed" << endl;
-
+	
 
     init_agent();
 
@@ -108,7 +108,7 @@ void run_agent() {
     // Start executing the agent
     while ( agent->running() ) {
         
-
+		
         // Sleep for a second
         COSMOS_SLEEP(SLEEP_TIME);
     }

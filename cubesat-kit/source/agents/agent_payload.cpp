@@ -56,7 +56,7 @@ void run_agent();
 
 
 int main(int argc, char** argv) {
-    cout << "Agent Thermal" << endl;
+    cout << "Agent Payload" << endl;
 
 
     init_agent();
@@ -81,11 +81,13 @@ void init_agent() {
 
 
     // Create the state of health string
-    string soh = "{device_imu_mag_000, device_imu_bdot_000, device_imu_accel_000, device_imu_theta_000, "
-                 "device_imu_omega_000, device_imu_theta_000, device_imu_utc_000}";
+    string soh = "{}";
 
     // set the soh string
     agent->set_sohstring(soh);
+	
+	
+	run_agent();
     
 }
 
@@ -93,12 +95,14 @@ void init_agent() {
  * @brief run_agent Runs the main loop for this agent.
  */
 void run_agent() {
+	
+	init_payload();
 
     // Start executing the agent
     while ( agent->running() ) {
         
         
-
+		
         // Sleep for a second
         COSMOS_SLEEP(1);
     }

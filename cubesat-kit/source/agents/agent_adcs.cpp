@@ -35,11 +35,12 @@
 #include "support/configCosmos.h"
 #include "agent/agentclass.h"
 #include "device/serial/serialclass.h"
-#include "device/i2c/i2c.h"
+#include "device/OPT3001.h"
 #include <iostream>
 #include <fstream>
 
 using namespace std;
+using namespace cubesat;
 
 // Some nasty global variables
 Agent *agent;
@@ -47,20 +48,33 @@ ofstream file;
 string nodename = "node-cubesat";
 string agentname = "imu";
 
+using SunSensorDevice = OPT3001;
+
+
+struct SunSensor {
+	SunSensorDevice *device;
+	string name;
+	int index;
+};
+
+vector<SunSensor> sun_sensors;
+
 
 
 void init_agent();
 void init_sensors();
 void run_agent();
+
+void read_imu();
+void read_sun_sensors();
 void update_attitude();
 
 
 
 
 int main(int argc, char** argv) {
-    cout << "Agent Thermal" << endl;
+    cout << "Agent ADCS" << endl;
 	
-	//I2C *imu_device = new I2C("i2c-2")
 	
 
     init_agent();
@@ -92,18 +106,22 @@ void init_agent() {
     // set the soh string
     agent->set_sohstring(soh);
     
+	run_agent();
 }
 
 /**
  * @brief run_agent Runs the main loop for this agent.
  */
 void run_agent() {
+	
+	init_sensors();
 
     // Start executing the agent
     while ( agent->running() ) {
 
         // Update sensor readings
-        //update_attitude();
+        read_imu();
+		read_sun_sensors();
         
 
         // Sleep for a second
@@ -116,13 +134,43 @@ void run_agent() {
  * @brief init_sensors Sets up the sensors for reading
  */
 void init_sensors() {
-    // TODO
+	
+	const int NUM_SUN_SENSORS = 6;
+	
+	// Reserve space for sun sensors
+	sun_sensors.reserve(6);
+	for (int i = 0; i < NUM_SUN_SENSORS; ++i) {
+		sun_sensors.push_back(SunSensor());
+		sun_sensors[i].index = i;
+	}
+	
+	
+	// Set up sun sensors
+	sun_sensors[0].device = new SunSensorDevice();
+	sun_sensors[0].name = "plus_x";
+	
+	sun_sensors[1].device = new SunSensorDevice();
+	sun_sensors[1].name = "minus_x";
+	
+	sun_sensors[2].device = new SunSensorDevice();
+	sun_sensors[2].name = "plus_y";
+	
+	sun_sensors[3].device = new SunSensorDevice();
+	sun_sensors[3].name = "minus_y";
+	
+	sun_sensors[4].device = new SunSensorDevice();
+	sun_sensors[4].name = "plus_z";
+	
+	sun_sensors[5].device = new SunSensorDevice();
+	sun_sensors[5].name = "minus_z";
+	
+	// TODO: initialize devices and verify they are functioning
 }
 
 /**
  * @brief update_temps Updates the temperature sensor device specs with their latest readings.
  */
-void update_temps() {
+void read_imu() {
     cout << "Updating attitude readings... ";
     
     // TODO: get readings from PyCubed board
@@ -142,6 +190,18 @@ void update_temps() {
     agent->cinfo->devspec.imu[0]->utc = currentmjd();
     
     cout << "done." << endl;
+}
+
+
+void read_sun_sensors() {
+	
+	// TODO: add sun sensor device to COSMOS namespace?
+	
+	for (SunSensor &sensor : sun_sensors) {
+		
+	}
+	
+	
 }
 
 

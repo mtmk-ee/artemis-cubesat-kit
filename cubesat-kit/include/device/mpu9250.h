@@ -6,6 +6,8 @@
 
 namespace cubesat {
 	
+	
+	// https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU-9250-Register-Map.pdf
 	class MPU9250 : public I2CDevice {
 		static const uint8_t ACCEL_XOUT_H = 0x3b;
 		static const uint8_t ACCEL_XOUT_L = 0x3c;
