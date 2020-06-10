@@ -169,7 +169,6 @@ void init_sensors() {
 
 /**
  * @brief update_temps Updates the temperature sensor device specs with their latest readings.
- * https://learn.sparkfun.com/tutorials/lsm9ds1-breakout-hookup-guide/all
  */
 void read_imu() {
     cout << "Updating attitude readings... ";
