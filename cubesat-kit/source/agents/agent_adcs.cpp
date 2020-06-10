@@ -192,12 +192,54 @@ void read_imu() {
     cout << "done." << endl;
 }
 
-
+/*
+https://www.instructables.com/id/Arduino-Lux-Meter-Interfacing-OPT3001-With-Arduino/
+noteable changes needed to be done, change setup, they use one device and we have several,
+They printed values, needs to be changed to setting sunesensor # to current value
+*/
 void read_sun_sensors() {
 	
 	// TODO: add sun sensor device to COSMOS namespace?
-	
-	for (SunSensor &sensor : sun_sensors) {
+	void setup() 
+	{
+  		Serial.begin(9600);                            // Initialize serial communication at 9600
+  		Wire.begin();                                  // Initialize Arduino in I2C master.
+  		Wire.beginTransmission(0x44);                  // I2C address of OPT3001 = 0x44
+  		Wire.write(0x01);                              // Config register address 0x01
+  		Wire.write(0xCE);
+  		Wire.write(0x10);                              // Write 0xCE10 to turn on sensor
+  		Wire.endTransmission();
+  		// Serial.println("Data received \t\t Lux");
+	}
+	void loop() 
+
+  		Wire.beginTransmission(0x44);
+ 	 	Wire.write(0x00);                              // Send result register address
+  		Wire.endTransmission();
+  		delay(100);
+  
+  		Wire.requestFrom(0x44, 2);                     // Request 2 bytes data from OPT3001
+		uint16_t iData;
+  		uint8_t  iBuff[2];
+  		while (Wire.available()) 
+  			{ 
+    			Wire.readBytes(iBuff, 2);
+    			iData = (iBuff[0] << 8) | iBuff[1];
+    			//Serial.print(iData,BIN);                     // Print the received data
+    			//Serial.print("\t\t");
+    			float fLux = SensorOpt3001_convert(iData);   // Calculate LUX from sensor data
+    			//Serial.println(fLux);                        // Print it on serial terminal
+  			}
+  		delay(1000);
+		}
+	float SensorOpt3001_convert(uint16_t iRawData)
+	{
+		uint16_t iExponent, iMantissa;
+	  	iMantissa = iRawData & 0x0FFF;                 // Extract Mantissa
+  		iExponent = (iRawData & 0xF000) >> 12;         // Extract Exponent 
+  		return iMantissa * (0.01 * pow(2, iExponent)); // Calculate final LUX
+	}	
+	// for (SunSensor &sensor : sun_sensors) {
 		
 	}
 	
