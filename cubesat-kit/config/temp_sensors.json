@@ -1,0 +1,38 @@
+{
+	"batt": {
+		"bus": 0,
+		"device_address": "0x50",
+		"index": 0,
+		"lower_extreme": 0,
+		"upper_extreme": 40,
+	},
+	"eps": {
+		"bus": 0,
+		"device_address": "0x51",
+		"index": 1,
+		"lower_extreme": 0,
+		"upper_extreme": 40,
+	},
+	"obc": {
+		"bus": 0,
+		"device_address": "0x52",
+		"index": 2,
+		"lower_extreme": 0,
+		"upper_extreme": 40,
+	},
+	"pycubed": {
+		"bus": 0,
+		"device_address": "0x53",
+		"index": 3,
+		"lower_extreme": 0,
+		"upper_extreme": 40,
+	},
+	"payload": {
+		"bus": 0,
+		"device_address": "0x54",
+		"index": 4,
+		"lower_extreme": 0,
+		"upper_extreme": 40,
+	},
+	
+}
