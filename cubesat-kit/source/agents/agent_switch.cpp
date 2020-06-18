@@ -340,40 +340,26 @@ int32_t request_status(char *request, char* response, Agent *agent) {
 		sprintf(response, "No switch with the name '%s' exists.\n", switch_name);
 		return 1;
 	}
-	//Returns enabled if switch_id is true
-	if ( switch_id == true ){
-		return enabled
+	
+	if ( switches[switch_id].sw->IsEnabled() ) {
+		sprintf(response, "On\n");
+		return 0;	
 	}
-	//Returns disbles if switch_id is false
-	if ( switch_id == false ){
-		return disabled
+	else {
+		sprintf(response, "Off\n");
+		return 0;
 	}
-	return 0;
 }
 int32_t request_list(char *request, char* response, Agent *agent) {
-	// Strip out the switch name from the request string
-	char switch_name[128];
-    int status = sscanf(request, "%*s %s", switch_name);
-    
-    
-    // Check if the given request is invalid
-    if ( status != 1 ) {
-		// Print an error message
-        sprintf(response, "Usage: disable <name>");
-        return 1;
-    }
 	
-	// Check if 'name' is 'all'
-	if ( strcmp(switch_name, "all") == 0 ) {
+	
+	// list all available switches and states
+	for (int i = 0; i < SWITCH_COUNT; ++i) {
+		string switch_name = GetSwitchName(i);
+		string status = switches[i].sw->IsEnabled() ? "On" : "Off"; // "Ternary operator"
 		
-		// list all available switches and states
-		for (int i = 0; i < SWITCH_COUNT; ++i) {
-		    //if( switches[i] == true ){
-			//need to return name
-			switches[i].stat = request_status(switches[i]) //supposed to be returning switch status
-		}
-
-	}	
-	
+		// Print the switch name and its status to the response string
+		sprintf(response, "'%s': %s\n", switch_name.c_str(), status.c_str());
+	}
 	return 0;
 }
