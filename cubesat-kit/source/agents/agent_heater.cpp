@@ -250,3 +250,13 @@ void set_heater_state(bool enabled) {
 }
 
 
+int32_t request_list(){
+	//list all available heaters and their states
+	for ( i = 0; i < TEMPSENSOR_COUNT; ++i){
+		cout << GetTempSensorName(i) << "Temperature: " << temp_info[i].tmp << '\n';
+	}
+}	
+
+
+int32_t request_status(char *request, char* response, Agent *agent) {
+	
