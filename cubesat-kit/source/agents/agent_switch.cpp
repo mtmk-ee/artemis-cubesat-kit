@@ -319,12 +319,60 @@ int32_t request_disable(char *request, char* response, Agent *agent) {
 }
 
 int32_t request_status(char *request, char* response, Agent *agent) {
-	// TODO
+	// Strip out the switch name from the request string
+	char switch_name[128];
+    int status = sscanf(request, "%*s %s", switch_name);
+    
+    
+    // Check if the given request is invalid
+    if ( status != 1 ) {
+	// Print an error message
+        sprintf(response, "Usage: disable <name>");
+        return 1;
+    }
+   
+	// Convert the switch name to its corresponding ID
+	int switch_id = GetSwitchID(switch_name);
 	
+	// Check if a switch with the given name exists
+	if ( switch_id < 0 ) {
+		// Print an error message
+		sprintf(response, "No switch with the name '%s' exists.\n", switch_name);
+		return 1;
+	}
+	//Returns enabled if switch_id is true
+	if ( switch_id == true ){
+		return enabled
+	}
+	//Returns disbles if switch_id is false
+	if ( switch_id == false ){
+		return disabled
+	}
 	return 0;
 }
 int32_t request_list(char *request, char* response, Agent *agent) {
-	// TODO
+	// Strip out the switch name from the request string
+	char switch_name[128];
+    int status = sscanf(request, "%*s %s", switch_name);
+    
+    
+    // Check if the given request is invalid
+    if ( status != 1 ) {
+		// Print an error message
+        sprintf(response, "Usage: disable <name>");
+        return 1;
+    }
+	
+	// Check if 'name' is 'all'
+	if ( strcmp(switch_name, "all") == 0 ) {
+		
+		// list all available switches and states
+		for (int i = 0; i < SWITCH_COUNT; ++i) {
+		    //if( switches[i] == true ){
+			switches[i].stat = request_status(switches[i])
+		}
+
+	}	
 	
 	return 0;
 }
