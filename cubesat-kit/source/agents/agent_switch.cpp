@@ -369,7 +369,8 @@ int32_t request_list(char *request, char* response, Agent *agent) {
 		// list all available switches and states
 		for (int i = 0; i < SWITCH_COUNT; ++i) {
 		    //if( switches[i] == true ){
-			switches[i].stat = request_status(switches[i])
+			//need to return name
+			switches[i].stat = request_status(switches[i]) //supposed to be returning switch status
 		}
 
 	}	
