@@ -4,6 +4,8 @@
 #include "support/configCosmos.h"
 #include "agent/agentclass.h"
 #include "support/jsonlib.h"
+#include "support/jsonclass.h"
+
 
 // Internal headers
 #include "cubesat_defs.h"
@@ -30,6 +32,8 @@ struct TempSensor {
 	int dindex; // COSMOS device index
 	int cindex; // COSMOS component index
 	int pindex; // COSMOS piece index
+	
+	float temp;
 } temp_sensors[TEMPSENSOR_COUNT]; // Temperature sensor info, ordered according to "temp_sensors.h"
 
 
@@ -84,44 +88,44 @@ int32_t request_list(char *request, char* response, Agent *agent);
 
 
 int main(int argc, char** argv) {
-
+	
 	// Initialize the agent
-    init_agent();
+	init_agent();
 	
 	// Initialize the sun sensors
 	init_sensors();
 	
 	// Set the state of health string for this agent
 	set_soh();
-
+	
 	// Run the main loop for this agent
-    run_agent();
-
-
-    return 0;
+	run_agent();
+	
+	
+	return 0;
 }
 
 
 void init_agent() {
 	
-    // Create the agent
-    agent = new Agent(CUBESAT_NODE_NAME, CUBESAT_AGENT_TEMP_NAME);
+	// Create the agent
+	agent = new Agent(CUBESAT_NODE_NAME, CUBESAT_AGENT_TEMP_NAME);
 	
 	// Make sure the agent initialized successfully
-    if ( agent->cinfo == nullptr || !agent->running() ) {
+	if ( agent->cinfo == nullptr || !agent->running() ) {
 		
 		// Notify that an error occurred and exit
-        printf("Failed to open [%s:%s]\n", CUBESAT_NODE_NAME, CUBESAT_AGENT_TEMP_NAME);
-        exit (1);
-    }
-    
-    // Add request callbacks
-    int status;
-    if ( (status = agent->add_request("gettemp", request_gettemp)) )
-        exit (status);
+		printf("Failed to open [%s:%s]\n", CUBESAT_NODE_NAME, CUBESAT_AGENT_TEMP_NAME);
+		exit (1);
+	}
+	
+	// Add request callbacks
+	int status;
+	if ( (status = agent->add_request("gettemp", request_gettemp)) )
+		exit(status);
 	
 	if ( (status = agent->add_request("list", request_list)) )
-        exit (status);
+		exit(status);
 	
 	
 	cout << "Successfully initialized agent" << endl;
@@ -130,40 +134,40 @@ void init_agent() {
 void set_soh() {
 	
 	// Create the state of health string
-    string soh = "{";
-
-    for (int i = 0; i < TEMPSENSOR_COUNT; ++i) {
-        // Add to the SOH string
-        soh += "\"device_tsen_temp_00" + std::to_string(i) + "\", ";
-        soh += "\"device_tsen_utc_00" + std::to_string(i) + "\"";
-
-        // Add delimiter if necessary
-        if ( i == TEMPSENSOR_COUNT - 1 )
-            soh += "}";
+	string soh = "{";
+	
+	for (int i = 0; i < TEMPSENSOR_COUNT; ++i) {
+		// Add to the SOH string
+		soh += "\"device_tsen_temp_00" + std::to_string(i) + "\", ";
+		soh += "\"device_tsen_utc_00" + std::to_string(i) + "\"";
+		
+		// Add delimiter if necessary
+		if ( i == TEMPSENSOR_COUNT - 1 )
+			soh += "}";
 		else
 			soh += ", ";
-    }
+	}
 	
 	
 	// Set the SOH string
-    agent->set_sohstring(soh);
+	agent->set_sohstring(soh);
 	
 }
 
 
 void run_agent() {
-
-    // Start executing the agent
-    while ( agent->running() ) {
-
-        // Update sensor readings
-        update_temps();
-        
-        
-        // Sleep for a bit
-        COSMOS_SLEEP(SLEEP_TIME);
-    }
-
+	
+	// Start executing the agent
+	while ( agent->running() ) {
+		
+		// Update sensor readings
+		update_temps();
+		
+		
+		// Sleep for a bit
+		COSMOS_SLEEP(SLEEP_TIME);
+	}
+	
 }
 
 void add_sensor_piece(int sensor_id) {
@@ -214,10 +218,6 @@ void init_sensors() {
 	// The temperature sensor
 	ADT7311 *device;
 	
-	// Set up battery sensor
-	device = new ADT7311(); // Create the sensor device handler
-	device->SetConfiguration(sensor_config); // Configure the device
-	temp_sensors[TEMPSENSOR_BATT_ID].device = device;
 	
 	// Set up EPS sensor
 	device = new ADT7311(); // Create the sensor device handler
@@ -235,11 +235,15 @@ void init_sensors() {
 	temp_sensors[TEMPSENSOR_PAYLOAD_ID].device = device;
 	
 	// Special case for pycubed sensor. Temperatures are taken from agent_pycubed SOH
+	temp_sensors[TEMPSENSOR_PYCUBED_ID].device = nullptr;
+	
+	// Special case for battery sensor. Temperatures are taken from agent_pycubed SOH
 	temp_sensors[TEMPSENSOR_BATT_ID].device = nullptr;
 	
 }
 
 void destroy_sensors() {
+	
 	
 	// Destroy all temperature sensors
 	for (int i = 0; i < TEMPSENSOR_COUNT; ++i) {
@@ -262,37 +266,71 @@ void update_regular_temp(TempSensor &sensor) {
 	agent->cinfo->device[sensor.cindex].tsen.temp = temp; // Temperature value
 }
 
-void update_pycubed_temp(TempSensor &sensor) {
-	// TODO: read agent_pycubed SOH
+void update_pycubed_temp() {
+	static beatstruc pycubed_beat;
+	
+	
+	// Locate agent_pycubed if not present
+	if ( pycubed_beat.utc == 0. ) {
+		pycubed_beat = agent->find_server(CUBESAT_NODE_NAME, CUBESAT_AGENT_PYCUBED_NAME, 5.);
+		if ( pycubed_beat.utc == 0. ) {
+			return;
+		}
+	}
+	
+	
+	Json jresult;
+	string response;
+	
+	
+	agent->send_request(pycubed_beat, "getvalue {\"device_tsen_temp000\", \"device_cpu_temp000\"}", response);
+	int status = jresult.extract_object(response);
+	
+	if ( status > 0 ) {
+		float obc_temp = 0;
+		float batt_temp = 0;
+		
+		// Search the response JSON for corresponding data
+		for (Json::Member member : jresult.Members) {
+			if ( member.value.name.find("tsen_temp") != string::npos ) {
+				batt_temp = member.value.nvalue;
+			}
+			else if ( member.value.name.find("cpu_temp") != string::npos ) {
+				obc_temp = member.value.nvalue;
+			}
+		}
+		
+		temp_sensors[TEMPSENSOR_BATT_ID].temp = batt_temp;
+		temp_sensors[TEMPSENSOR_OBC_ID].temp = obc_temp;
+	}
+	
 }
 
 void update_temps() {
-    cout << "Updating temperature log... ";
-    
-	// Update non-pycubed temperatures
-    for (int i = 0; i < TEMPSENSOR_COUNT - 1; ++i) {
-		update_regular_temp(temp_sensors[i]);
-    }
 	
-	// Update pycubed temperature
-	update_pycubed_temp(temp_sensors[TEMPSENSOR_COUNT - 2]);
-    
-    cout << "done." << endl;
+	// Update non-pycubed temperatures
+	for (int i = 0; i < TEMPSENSOR_COUNT - 2; ++i) {
+		update_regular_temp(temp_sensors[i]);
+	}
+	
+	// Update pycubed and battery temperatures
+	update_pycubed_temp();
+	
 }
 
 int32_t request_gettemp(char *request, char* response, Agent *agent) {
 	
 	// Strip the sensor name from the request string
-    char sensor_name[128];
-    int status = sscanf(request, "%*s %s", sensor_name);
-    
-    
-    // Check if the given request is invalid
-    if ( status != 1 ) {
+	char sensor_name[128];
+	int status = sscanf(request, "%*s %s", sensor_name);
+	
+	
+	// Check if the given request is invalid
+	if ( status != 1 ) {
 		// Print an error message
-        sprintf(response, "Usage: gettemp <name>. ");
-        return 1;
-    }
+		sprintf(response, "Usage: gettemp <name>. ");
+		return 1;
+	}
 	
 	// Find the sensor ID from the name given
 	int device_index = GetTempSensorID(sensor_name);
@@ -310,8 +348,8 @@ int32_t request_gettemp(char *request, char* response, Agent *agent) {
 	// Print the latest temperature
 	sprintf(response, "%f", temp); // Print UTC as well?
 	
-    // Inidicate success
-    return 0;
+	// Inidicate success
+	return 0;
 }
 
 /**
@@ -331,9 +369,9 @@ int32_t request_list(char *request, char* response, Agent *agent) {
 	
 	// Print the names to the response string
 	sprintf(response, "%s", name_list.c_str());
-    
+	
 	// Inidicate success
-    return 0;
+	return 0;
 }
 
 

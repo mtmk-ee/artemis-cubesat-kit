@@ -4,11 +4,13 @@
 
 #include "device/UARTDevice.h"
 #include "device/PyCubedMessage.h"
+#include "support/datalib.h"
 
 namespace cubesat {
 	
-	
+	typedef void (*PyCubedShutdownCallback)();
 	typedef void (*PyCubedReceiveFileCallback)(const std::string &file_name);
+	
 	
 	
 	/**
@@ -16,7 +18,7 @@ namespace cubesat {
 	 */
 	class PyCubed : protected UARTDevice {
 	public:
-		PyCubed();
+		PyCubed() {}
 		
 		/**
 		 * @brief Constructs a PyCubed object using the given bus and device numbers
@@ -29,6 +31,18 @@ namespace cubesat {
 		 */
 		virtual ~PyCubed();
 		
+		/**
+		 * @brief Sends a message that startup was successful
+		 * @return The status of the operation
+		 */
+		int StartupConfirmation();
+		
+		
+		/**
+		 * @brief Sends a handoff confirmation message
+		 * @return The status of the operation
+		 */
+		int Handoff();
 		/**
 		 * @brief Sends a message to kill the radio
 		 * @return The status of the operation
@@ -61,31 +75,53 @@ namespace cubesat {
 		 * @brief Sets the callback function for when files are received
 		 * @param callback The function to call
 		 */
-		void SetReceiveFileCallback(PyCubedReceiveFileCallback callback);
+		inline void SetReceiveFileCallback(PyCubedReceiveFileCallback callback) {
+			this->receive_file_callback = callback;
+		}
+		
+		/**
+		 * @brief Sets the callback function for when shutdown is requested
+		 * @param callback The function to call
+		 */
+		inline void SetShutdownCallback(PyCubedShutdownCallback callback) {
+			this->shutdown_callback = callback;
+		}
+		
+		
+		inline PyCubedIMUInfo GetIMUInfo() const {
+			return imu_info;
+		}
+		
+		inline PyCubedGPSInfo GetGPSInfo() const {
+			return gps_info;
+		}
+		
+		inline PyCubedBattInfo GetBattInfo() const {
+			return batt_info;
+		}
+		
 		
 		/**
 		 * @brief Polls the PyCubed device for received messages
 		 * @return The number of messages received
 		 */
-		int Receive();
+		int ReceiveMessages();
 		
 	private:
+		// Callback functions
+		PyCubedShutdownCallback shutdown_callback;
 		PyCubedReceiveFileCallback receive_file_callback;
+		
+		PyCubedIMUInfo imu_info; // Latest IMU information
+		PyCubedGPSInfo gps_info; // Latest GPS information
+		PyCubedBattInfo batt_info; // Latest battery information
 		
 		/**
 		 * @brief Receives the next message available.
 		 * @return 'true' if there are more messages
 		 */
 		bool ReceiveNextMessage();
-		
-		void ReceiveSOH();
 		void ReceiveFile();
-		
-		template <detail::pycubed::TxHeaderType T>
-		void WriteHeader(const detail::pycubed::TxHeader<T> &header) {
-			using namespace detail::pycubed;
-			Write(GetHeaderAsBytes(&header), GetHeaderLength(&header));
-		}
 		
 	};
 	

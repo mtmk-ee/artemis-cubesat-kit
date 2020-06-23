@@ -9,7 +9,7 @@ namespace cubesat {
 	
 	
 	/**
-	 * @brief Provides access to the ADT7311 sun sensor.
+	 * @brief Provides access to the ADT7311 temperature sensor.
 	 */
 	class ADT7311 : protected SPIDevice {
 	public:

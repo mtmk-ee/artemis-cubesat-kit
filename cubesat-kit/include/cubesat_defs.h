@@ -12,7 +12,7 @@
 #define CUBESAT_AGENT_SWITCH_NAME "switch"
 #define CUBESAT_AGENT_PYCUBED_NAME "pycubed"
 #define CUBESAT_AGENT_PYTHON_NAME "python"
-#define CUBESAT_AGENT_PAYLOAD_NAME "payload"
+#define CUBESAT_AGENT_RASPI_NAME "raspi"
 
 namespace cubesat {
 	

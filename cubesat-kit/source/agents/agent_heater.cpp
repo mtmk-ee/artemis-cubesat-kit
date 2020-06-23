@@ -4,6 +4,7 @@
 #include "support/configCosmos.h"
 #include "agent/agentclass.h"
 #include "support/jsonlib.h"
+#include "support/jsonclass.h"
 
 // Internal headers
 #include "device/temp_sensors.h"
@@ -26,10 +27,8 @@ using namespace cubesat;
 
 // The agent object which allows for communication with COSMOS
 Agent *agent;
+int heater_cindex;
 
-// Heartbeats of other agents
-beatstruc beat_agent_temp;
-beatstruc beat_agent_switch;
 
 // Other settings
 float heater_enable_temp = 5; // Enable heater when temperatures are below this value (celcius)
@@ -85,54 +84,44 @@ void set_heater_state(bool enabled);
 int main(int argc, char** argv) {
 	
 	// Initialize the agent
-    init_agent();
+	init_agent();
 	
 	// Initialize the heaters
-    init_heaters();
+	init_heaters();
 	
 	// Set the state of health string for this agent
 	set_soh();
-
+	
 	// Run the main loop for this agent
-    run_agent();
-
-
-    return 0;
+	run_agent();
+	
+	
+	return 0;
 }
 
 void init_agent() {
-    // Create the agent
-    agent = new Agent(CUBESAT_NODE_NAME, CUBESAT_AGENT_HEATER_NAME);
+	// Create the agent
+	agent = new Agent(CUBESAT_NODE_NAME, CUBESAT_AGENT_HEATER_NAME);
 	
 	// Make sure the agent initialized successfully
-    if ( agent->cinfo == nullptr || !agent->running() ) {
+	if ( agent->cinfo == nullptr || !agent->running() ) {
 		
 		// Notify that an error occurred and exit
-        printf("Failed to open [%s:%s]\n", CUBESAT_NODE_NAME, CUBESAT_AGENT_HEATER_NAME);
-        exit(1);
-    }
-    
-    
-	
-	// Retrieve the heartbeat from agents
-	beat_agent_temp = agent->find_server(CUBESAT_NODE_NAME, CUBESAT_AGENT_TEMP_NAME, 2.0);
-	beat_agent_switch = agent->find_server(CUBESAT_NODE_NAME, CUBESAT_AGENT_SWITCH_NAME, 2.0);
-	
-	// Make sure agent_temp has a heartbeat
-	if ( !beat_agent_temp.exists ) {
-		// Print an error and exit if no heartbeat was detected
-		fprintf(agent->get_debug_fd(), "Failed to find agent_temp\n");
-		agent->shutdown();
+		printf("Failed to open [%s:%s]\n", CUBESAT_NODE_NAME, CUBESAT_AGENT_HEATER_NAME);
 		exit(1);
 	}
 	
-	// Make sure agent_switch has a heartbeat
-	if ( !beat_agent_switch.exists ) {
-		// Print an error and exit if no heartbeat was detected
-		fprintf(agent->get_debug_fd(), "Failed to find agent_switch\n");
+	
+	// Add heater
+	int status = json_addpiece(agent->cinfo, "htr", (uint16_t)DeviceType::HTR);
+	if ( status < 0 ) {
+		fprintf(agent->get_debug_fd(), "Failed to add heater %s\n", cosmos_error_string(status).c_str());
 		agent->shutdown();
 		exit(1);
 	}
+	heater_cindex = agent->cinfo->pieces[status].cidx;
+	agent->cinfo->device[heater_cindex].htr.enabled = false;
+	
 	
 	
 	// Add request callbacks (TODO)
@@ -144,29 +133,27 @@ void init_agent() {
 
 void set_soh() {
 	// TODO: Create the state of health string
-    string soh = "{";
-    soh += "}";
+	string soh = "{\"device_htr_enabled_000\"}";
 	
-
-    // Set the SOH string
-    agent->set_sohstring(soh);
+	// Set the SOH string
+	agent->set_sohstring(soh);
 }
 
 void run_agent() {
-
-    // Start executing the agent
-    while ( agent->running() ) {
-
-        // Update sensor readings
-        get_temps();
+	
+	// Start executing the agent
+	while ( agent->running() ) {
+		
+		// Update sensor readings
+		get_temps();
 		
 		// Act on temperature readings
 		handle_temps();
-
-        // Pause thread execution for a bit
-        COSMOS_SLEEP(SLEEP_TIME);
-    }
-
+		
+		// Pause thread execution for a bit
+		COSMOS_SLEEP(SLEEP_TIME);
+	}
+	
 }
 
 void init_heaters() {
@@ -175,32 +162,52 @@ void init_heaters() {
 
 
 void get_temps() {
-	// Time to wait for response from agent_temp
-	const float kWaitSec = 2;
+	static beatstruc temp_beat;
 	
-	string response;
-	string request;
 	
-	// Update temperature readings for all sensors
-	for (int i = 0; i < TEMPSENSOR_COUNT; ++i) {
-		// Format the request to send
-		request = "gettemp " + GetTempSensorName(i);
+	// Locate agent_temp if not present
+	if ( temp_beat.utc == 0. ) {
+		temp_beat = agent->find_server(CUBESAT_NODE_NAME, CUBESAT_AGENT_TEMP_NAME, 5.);
 		
-		// Request latest temperature for sensor with ID 'i'
-		int ret = agent->send_request(beat_agent_temp, request, response, kWaitSec);
-		
-		// Check if an error occurred
-		if ( ret < 0 ) {
-			fprintf(agent->get_debug_fd(), "Failed to update temperature for sensor with name '%s': %s\n",
-					GetTempSensorName(i).c_str(), cosmos_error_string(ret).c_str());
-			continue;
+		if ( temp_beat.utc == 0. ) {
+			return;
 		}
-		
-		// Store the temperature info for this sensor
-		temp_info[i].temp = stof(response); // Convert reponse temperature from a string to a float
-		temp_info[i].utc  = currentmjd(); // Probably should be timestamp for when temperature was originally read
 	}
 	
+	
+	Json jresult;
+	string response;
+	
+	
+	agent->send_request(temp_beat, "getvalue {\"device_tsen_temp000\", \"device_tsen_temp001\", \"device_tsen_temp002\"}, \"device_tsen_temp003\", \"device_tsen_temp004\"", response);
+	int status = jresult.extract_object(response);
+	
+	if ( status > 0 ) {
+		
+		// Search the response JSON for corresponding data
+		for (Json::Member member : jresult.Members) {
+			if ( member.value.name.find("tsen_temp000") != string::npos ) {
+				temp_info[0].temp = member.value.nvalue;
+				temp_info[0].utc  = currentmjd();
+			}
+			else if ( member.value.name.find("tsen_temp001") != string::npos ) {
+				temp_info[1].temp = member.value.nvalue;
+				temp_info[1].utc  = currentmjd();
+			}
+			else if ( member.value.name.find("tsen_temp002") != string::npos ) {
+				temp_info[2].temp = member.value.nvalue;
+				temp_info[2].utc  = currentmjd();
+			}
+			else if ( member.value.name.find("tsen_temp003") != string::npos ) {
+				temp_info[3].temp = member.value.nvalue;
+				temp_info[3].utc  = currentmjd();
+			}
+			else if ( member.value.name.find("tsen_temp004") != string::npos ) {
+				temp_info[4].temp = member.value.nvalue;
+				temp_info[4].utc  = currentmjd();
+			}
+		}
+	}
 }
 
 
@@ -230,33 +237,36 @@ void handle_temps() {
 
 
 void set_heater_state(bool enabled) {
+	static beatstruc switch_beat;
+	
+	
 	cout << "Attempting to " << (enabled ? "enable " : "disable ") << "heater" << endl;
 	
-	// Time to wait for agent_switch response
-	const float kWaitSec = 2;
+	
+	
+	// Locate agent_switch if not present
+	if ( switch_beat.utc == 0. ) {
+		switch_beat = agent->find_server(CUBESAT_NODE_NAME, CUBESAT_AGENT_SWITCH_NAME, 5.);
+		if ( switch_beat.utc == 0. ) {
+			fprintf(agent->get_debug_fd(), "Failed to find agent_switch\n");
+			return;
+		}
+	}
 	
 	// Create request string
-	string request = std::string(enabled ? "enable " : "disable ") + SWITCH_HEATER_NAME;
+	string request = std::string(enabled ? "enable " : "disable ") + "heater";
 	string response;
 	
-	// Request that agent_switch enables/disables the heater
-	int ret = agent->send_request(beat_agent_switch, request, response, kWaitSec);
+	// Send request
+	int status = agent->send_request(switch_beat, request, response);
 	
 	// Check if an error occurred
-	if ( ret < 0 ) {
-		fprintf(agent->get_debug_fd(), "Failed to send enable/disable request to agent_switch: %s\n", cosmos_error_string(ret).c_str());
+	if ( status < 0 ) {
+		fprintf(agent->get_debug_fd(), "Failed to send enable/disable request to agent_switch: %s\n", cosmos_error_string(status).c_str());
 	}
+	
+	agent->cinfo->device[heater_cindex].htr.enabled = enabled;
 	
 }
 
 
-int32_t request_list(){
-	//list all available heaters and their states
-	for ( i = 0; i < TEMPSENSOR_COUNT; ++i){
-		cout << GetTempSensorName(i) << "Temperature: " << temp_info[i].tmp << '\n';
-	}
-}	
-
-
-int32_t request_status(char *request, char* response, Agent *agent) {
-	

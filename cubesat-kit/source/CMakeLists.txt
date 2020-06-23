@@ -60,12 +60,14 @@ set(CUBESAT_DEVICE_SRC	device/I2CDevice.cpp
 						device/UARTDevice.cpp
 						device/OPT3001.cpp
 						device/ADT7311.cpp
-						device/PyCubed.cpp)
-#add_library(CubesatDevices STATIC ${CUBESAT_DEVICE_SRC})
+						device/PyCubed.cpp
+						device/switch.cpp
+						device/GPIO.cpp)
+add_library(CubesatDevices STATIC ${CUBESAT_DEVICE_SRC})
 
-add_subdirectory(pybind11)
+#add_subdirectory(pybind11)
 
-#set(CUBESAT_LIBS CubesatDevices)
+set(CUBESAT_LIBS CubesatDevices)
 
 
 
@@ -90,18 +92,17 @@ target_link_libraries(agent_sunsensor ${COSMOS_LIBS} ${CUBESAT_LIBS})
 add_executable(agent_pycubed agents/agent_pycubed.cpp)
 target_link_libraries(agent_pycubed ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
-# Payload Agent
-add_executable(agent_payload agents/agent_payload.cpp)
-target_link_libraries(agent_payload ${COSMOS_LIBS} ${CUBESAT_LIBS})
-
-# Python Agent
-add_executable(agent_python agents/agent_python.cpp)
-target_link_libraries(agent_python ${COSMOS_LIBS} ${CUBESAT_LIBS} pybind11::embed)
+# Payload (Raspberry Pi) Agent
+add_executable(agent_raspi agents/agent_raspi.cpp)
+target_link_libraries(agent_raspi ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
 
 # Tests
 #add_executable(device_test tests/device_test.cpp device/I2CDevice.cpp)
 #target_link_libraries(device_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(gpio_test tests/gpio_test.cpp)
+target_link_libraries(gpio_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
  
  
 # ===================================================================

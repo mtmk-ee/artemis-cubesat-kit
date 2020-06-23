@@ -86,40 +86,40 @@ int32_t request_list(char *request, char* response, Agent *agent);
 int main(int argc, char** argv) {
 	
 	// Initialize the agent
-    init_agent();
+	init_agent();
 	
 	// Initialize the sun sensors
 	init_sensors();
 	
 	// Set the state of health string for this agent
 	set_soh();
-
+	
 	// Run the main loop for this agent
-    run_agent();
-
-
-    return 0;
+	run_agent();
+	
+	
+	return 0;
 }
 
 void init_agent() {
-    // Create the agent
-    agent = new Agent(CUBESAT_NODE_NAME, CUBESAT_AGENT_SUNSENSOR_NAME);
+	// Create the agent
+	agent = new Agent(CUBESAT_NODE_NAME, CUBESAT_AGENT_SUNSENSOR_NAME);
 	
 	// Make sure the agent initialized successfully
-    if ( agent->cinfo == nullptr || !agent->running() ) {
+	if ( agent->cinfo == nullptr || !agent->running() ) {
 		
 		// Notify that an error occurred and exit
-        printf("Failed to open [%s:%s]\n", CUBESAT_NODE_NAME, CUBESAT_AGENT_SUNSENSOR_NAME);
-        exit (1);
-    }
-    
-    // Add request callbacks
-    int status;
-    if ( (status = agent->add_request("gettemp", request_gettemp)) )
-        exit (status);
+		printf("Failed to open [%s:%s]\n", CUBESAT_NODE_NAME, CUBESAT_AGENT_SUNSENSOR_NAME);
+		exit (1);
+	}
+	
+	// Add request callbacks
+	int status;
+	//    if ( (status = agent->add_request("gettemp", request_gettemp)) )
+	//        exit (status);
 	
 	if ( (status = agent->add_request("list", request_list)) )
-        exit (status);
+		exit (status);
 	
 	cout << "Successfully initialized agent" << endl;
 }
@@ -127,47 +127,47 @@ void init_agent() {
 void set_soh() {
 	
 	// Create the state of health string
-    string soh = "{";
+	string soh = "{";
 	
-
-    for (int i = 0; i < SUNSENSOR_COUNT; ++i) {
-        // Add to the SOH string
-        soh += "\"device_tsen_qva_00" + std::to_string(i) + "\", ";
-		soh += "\"device_tsen_qvb_00" + std::to_string(i) + "\", ";
-		soh += "\"device_tsen_qvc_00" + std::to_string(i) + "\", ";
-		soh += "\"device_tsen_qvd_00" + std::to_string(i) + "\", ";
-		soh += "\"device_tsen_azimuth_00" + std::to_string(i) + "\", ";
-		soh += "\"device_tsen_elevation_00" + std::to_string(i) + "\", ";
-        soh += "\"device_tsen_utc_00" + std::to_string(i) + "\"";
-
-        // Add delimiter if necessary
-        if ( i == SUNSENSOR_COUNT - 1 )
-            soh += "}";
+	
+	for (int i = 0; i < SUNSENSOR_COUNT; ++i) {
+		// Add to the SOH string
+		soh += "\"device_ssen_qva_00" + std::to_string(i) + "\", ";
+		soh += "\"device_ssen_qvb_00" + std::to_string(i) + "\", ";
+		soh += "\"device_ssen_qvc_00" + std::to_string(i) + "\", ";
+		soh += "\"device_ssen_qvd_00" + std::to_string(i) + "\", ";
+		soh += "\"device_ssen_azimuth_00" + std::to_string(i) + "\", ";
+		soh += "\"device_ssen_elevation_00" + std::to_string(i) + "\", ";
+		soh += "\"device_ssen_utc_00" + std::to_string(i) + "\"";
+		
+		// Add delimiter if necessary
+		if ( i == SUNSENSOR_COUNT - 1 )
+			soh += "}";
 		else
 			soh += ", ";
-    }
+	}
 	
 	
 	// Set the SOH string
-    agent->set_sohstring(soh);
+	agent->set_sohstring(soh);
 	
 }
 
 void run_agent() {
 	
-
-    // Start executing the agent
-    while ( agent->running() ) {
-
+	
+	// Start executing the agent
+	while ( agent->running() ) {
 		
-        // Update sensor readings
-        update_readings();
-        
-        
-        // Sleep for a bit
-        COSMOS_SLEEP(SLEEP_TIME);
-    }
-
+		
+		// Update sensor readings
+		update_readings();
+		
+		
+		// Sleep for a bit
+		COSMOS_SLEEP(SLEEP_TIME);
+	}
+	
 }
 
 void add_sensor_piece(int sensor_id) {
@@ -181,7 +181,7 @@ void add_sensor_piece(int sensor_id) {
 	// Check if an error occurred
 	if ( pindex < 0 ) {
 		// Print an error message and exit
-		fprintf(agent->get_debug_fd(), "Failed to add temperature sensor '%s': %s\n", name.c_str(), cosmos_error_string(pindex).c_str());
+		fprintf(agent->get_debug_fd(), "Failed to add sun sensor '%s': %s\n", name.c_str(), cosmos_error_string(pindex).c_str());
 		agent->shutdown();
 		exit(1);
 	}
@@ -206,7 +206,7 @@ void init_sensors() {
 	
 	// Add the +X sun sensor
 	sun_sensors[SUNSENSOR_PLUSX_ID].device = new OPT3001();
-
+	
 	// Add the -X sun sensor
 	sun_sensors[SUNSENSOR_MINUSX_ID].device = new OPT3001();
 	
@@ -242,14 +242,12 @@ void update_reading(SunSensor &sensor) {
 
 
 void update_readings() {
-    cout << "Updating sun sensor log... ";
-    
+	
 	// Update all the sun sensor readings
-    for (int i = 0; i < SUNSENSOR_COUNT; ++i) {
+	for (int i = 0; i < SUNSENSOR_COUNT; ++i) {
 		update_reading(sun_sensors[i]);
-    }
-    
-    cout << "done." << endl;
+	}
+	
 }
 
 
@@ -266,9 +264,9 @@ int32_t request_list(char *request, char* response, Agent *agent) {
 	
 	// Print the names to the response string
 	sprintf(response, "%s", name_list.c_str());
-    
+	
 	// Indicate success
-    return 0;
+	return 0;
 }
 
 
