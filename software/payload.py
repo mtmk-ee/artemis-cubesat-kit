@@ -10,24 +10,24 @@ class raspberrypi():
         i = 0
         pictures = []
 
-    #infinite loop picture every 1 second
-    def take_pic():
+    #infinite loop picture every specified amount of time
+    def take_pic(time):
         while True:
-            newpic = camera.capture('foo[%d].jpg' % i, resize=(320,240))
+            newpic = camera.capture('foo{counter:03d}.jpg', resize=(320,240))
             pictures.append(newpic)
-            sleep(1)
+            sleep(time)
 
-    #makes 60 second long video in h264
-    def take_vid():
+    #makes video in h264 for certain amount of time
+    def take_vid(time)):
         camera.start_recording('video.h264')
         camera.wait_recording(60) #waits for 60 seconds
-        camera.stop_recording()
+        camera.stop_recording(time)
 
-    #timelapse with picture taken every five seconds    
-    def timelapse():
+    #timelapse with picture taken once per allotted amount fo time   
+    def timelapse(time):
         for filename in camera.capture_continuous('img{counter:03d}.jpg'):
-            sleep(5)
+            sleep(time)
 
-    #Shut down camera
+    #stops all functions and releases all resources
     def off():
         close()
