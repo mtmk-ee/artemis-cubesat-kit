@@ -15,7 +15,7 @@ class raspberrypi():
     #makes 60 second long video in h264
     def take_vid():
         camera.start_recording('video.h264')
-        camera.wait_recording(60)
+        camera.wait_recording(60) #waits for 60 seconds
         camera.stop_recording()
 
     #timelapse with picture taken every five seconds    
