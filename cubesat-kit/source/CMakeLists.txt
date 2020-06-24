@@ -103,6 +103,15 @@ target_link_libraries(agent_raspi ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
 add_executable(gpio_test tests/gpio_test.cpp)
 target_link_libraries(gpio_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(switch_test tests/switch_test.cpp)
+target_link_libraries(switch_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(temp_test tests/temp_test.cpp)
+target_link_libraries(temp_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(sun_test tests/sun_test.cpp)
+target_link_libraries(sun_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
  
  
 # ===================================================================

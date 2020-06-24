@@ -29,7 +29,7 @@ namespace cubesat {
 				uint8_t ConversionReady : 1;
 				uint8_t OverflowFlag : 1;
 				uint8_t ModeOfConversionOperation : 2;
-				uint8_t ConvertionTime : 1;
+				uint8_t ConversionTime : 1;
 				uint8_t RangeNumber : 4;
 			};
 			uint16_t raw_data;

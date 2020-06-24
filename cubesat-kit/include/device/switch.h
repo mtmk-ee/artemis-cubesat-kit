@@ -50,6 +50,10 @@ namespace cubesat {
 		Switch(const char *name);
 		virtual ~Switch();
 		
+		bool IsValid() const {
+			return (int)switch_id >= 0 && (int)switch_id < SWITCH_COUNT;
+		}
+		
 		/**
 		 * @brief Sets the state of the switch
 		 * @param state The state of the switch
