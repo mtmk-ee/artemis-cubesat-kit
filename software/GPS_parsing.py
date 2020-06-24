@@ -56,3 +56,34 @@ def _parse_zda(self,args)
 
 		#sets antenna mode
 		self.antenna_mode = data[1]
+
+
+def _parse_gpgns(self, args)
+    data = args.split(,)
+    if data is None
+        return 
+
+    #set latitude and longitude
+    self.latitude = _parse_degrees(data[1])
+    if self.latitude is not None and \
+       data[2] is not None and data[2].lower() == 's':
+        self.latitude *= -1.0
+    self.longitude = _parse_degrees(data[3])
+    if self.longitude is not None and \
+       data[4] is not None and data[4].lower() == 'w':
+        self.longitude *= -1.0
+
+    #mode indicator
+    self.mode = data[5]
+
+    #number of svs in use/number of satellites?
+    self.svs = data[6]
+
+    # Parse HDOP, horizontal dilution of precision
+    self.hdop = _parse_float(data[7])
+
+    #orthometric hieght in meters
+    self.height_ortho = data[8]
+
+    #geoidal seperation in meters
+    self.height_geoid = data[9]
