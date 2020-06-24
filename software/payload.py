@@ -7,10 +7,15 @@ class raspberrypi():
         camera.resolution(1024, 768)
         camera.start_preview()
         sleep(2)
+        i = 0
+        pictures = []
 
-    #take picture in jpg and resize
+    #infinite loop picture every 1 second
     def take_pic():
-        camera.capture('foo.jpg', resize=(320,240))
+        while True:
+            camera.capture('foo[i].jpg', resize=(320,240))
+            pictures.append('foo[i].jpg')
+            sleep(1)
 
     #makes 60 second long video in h264
     def take_vid():
