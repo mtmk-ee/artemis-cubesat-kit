@@ -3,8 +3,8 @@ def _parse_gpvgt (self, args)
     if data is None:
         return
     
-    self.truetrack = (data[0])
-    self.tracknorth = data[1] #shpuld be 'T'-relative to true north
+    self.truetrack = data[0]
+    self.tracknorth = data[1] #sh0uld be 'T'-relative to true north
     self.magnetictrack = data[2]
     self.magneticnorth = data[3] #should be 'M'-relative to magnetic north
     self.groundspeedn = data[4]
