@@ -12,19 +12,38 @@ class raspberrypi():
         pictures = []
         close = False
         camera = {}
+        images = [] if images is None
+        i = 0 if i is None
 
-    #infinite loop picture every specified amount of time
-    def take_pic():
-        while True:
-            newpic = camera.capture('foo{counter:03d}.jpg')
-            Add_Json(picture, newpic)
-            sleep(time)
+
 
     #set soh
-    def SetSOHString(soh_string):
+    def Return_soh(soh):
         soh_string = ('Camera SOH\n\t"State: %d"\n\t"iso: %s"\n\t"resolution: %s, %s"\n\t"interval time: %s"\n',
             % (state, iso, width, height, time))
         cubesat.SetSOHString(soh_string)
+    
+    
+    #infinite loop picture every specified amount of time
+    def take_pic():
+        while True:
+            newpic = camera.capture('foo%s.jpg' % i)
+            _file_('foo%s.jpg' % i)
+            images.append('foo%s.jpg' % i)
+            tansmit
+            i += 1
+            sleep(time)
+
+
+    #transmit and clears file
+    def _file_(file)
+        #transmit
+        if transmit file
+            cubesat.TransmitFile(images)
+            images.clear()
+
+
+            
 
 
     #set resolution, if either are invalid entries, sets to 0
@@ -40,7 +59,7 @@ class raspberrypi():
         else:
             res_width = width
             res_height = height
-        res = (res_height, res_width)
+        res = ('%s, %s' % res_width, res_height
         camera.resolution(res_width, res_height)
     
 
@@ -69,3 +88,9 @@ class raspberrypi():
     def off():
         close = True
         close()
+
+
+while True:
+    update()
+    sleep (1)
+
