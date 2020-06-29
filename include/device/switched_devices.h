@@ -1,9 +1,0 @@
-
-#ifndef CUBESAT_DEVICE_SWITCHED_DEVICES
-#define CUBESAT_DEVICE_SWITCHED_DEVICES
-
-#include <string>
-
-
-
-#endif
