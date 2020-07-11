@@ -33,7 +33,7 @@ struct TempSensor {
 	int cindex; // COSMOS component index
 	int pindex; // COSMOS piece index
 	
-	float temp;
+	float temp = 0;
 } temp_sensors[TEMPSENSOR_COUNT]; // Temperature sensor info, ordered according to "temp_sensors.h"
 
 
@@ -176,7 +176,7 @@ void add_sensor_piece(int sensor_id) {
 	const std::string &name = GetTempSensorName(sensor_id);
 	
 	// Try adding a COSMOS piece
-	int pindex = json_addpiece(agent->cinfo, name, (uint16_t)DeviceType::TSEN);
+	int pindex = json_createpiece(agent->cinfo, name, DeviceType::TSEN);
 	
 	// Check if an error occurred
 	if ( pindex < 0 ) {

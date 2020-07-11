@@ -137,7 +137,7 @@ while True:
     if debug_mode:
         print('Attempting to transmit file to BeagleBone...')
 
-    status = cubesat.beaglebone.send_file(image_file)
+    status = cubesat.beaglebone.copy_to(image_file)
 
     # TODO Check if an error occurred
     

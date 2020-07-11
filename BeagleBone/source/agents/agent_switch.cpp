@@ -46,15 +46,17 @@ Agent *agent;
  * @brief Sets up the agent. Prints a message and exits with code 1 if an error occurs during setup.
  */
 void init_agent();
-/**
- * @brief Sets the SOH string for the agent.
- */
-void set_soh();
+
 /**
  * @brief Main loop for this agent.
  */
 void run_agent();
 
+/**
+ * @brief Adds a switch piece to the COSMOS namespace.
+ * @param switch_id The switch ID
+ */
+void add_switch_piece(int switch_id);
 /**
  * @brief Initializes all the switches needed
  */
@@ -86,9 +88,6 @@ int main(int argc, char** argv) {
 	// Initialize the agent
 	init_agent();
 	
-	// Set the state of health string for this agent
-	set_soh();
-	
 	// Initialize the switches
 	init_switches();
 	
@@ -111,6 +110,17 @@ void init_agent() {
 		exit (1);
 	}
 	
+	// Add all the switch pieces to the COSMOS namespace
+	for (int i = 0; i < SWITCH_COUNT; ++i)
+		add_switch_piece(i);
+	
+	
+	// TODO: Create the state of health string
+	string soh = "{\"device_swch_enabled_000\", \"device_swch_enabled_001\", \"device_swch_enabled_002\", \"device_swch_enabled_003\"}";
+	
+	// set the soh string
+	agent->set_sohstring(soh);
+	
 	
 	
 	// Add request callbacks
@@ -128,19 +138,8 @@ void init_agent() {
 	if ( (status = agent->add_request("list", request_list)) )
 		exit (status);
 	
-	
-	cout << "Successfully initialized agent" << endl;
 }
 
-void set_soh() {
-	
-	// TODO: Create the state of health string
-	string soh = "{";
-	soh.append("}");
-	
-	// set the soh string
-	agent->set_sohstring(soh);
-}
 
 /**
  * @brief run_agent Runs the main loop for this agent.
@@ -164,7 +163,7 @@ void add_switch_piece(int switch_id) {
 	const std::string &name = Switch::GetSwitchName((SwitchID)switch_id);
 	
 	// Try adding a piece to the COSMOS namespace
-	int pindex = json_addpiece(agent->cinfo, name, (uint16_t)DeviceType::SWCH);
+	int pindex = json_createpiece(agent->cinfo, name, DeviceType::SWCH);
 	
 	// Check if an error occurred
 	if ( pindex < 0 ) {
@@ -188,9 +187,7 @@ void add_switch_piece(int switch_id) {
  */
 void init_switches() {
 	
-	// Add all the switch pieces to the COSMOS namespace
-	for (int i = 0; i < SWITCH_COUNT; ++i)
-		add_switch_piece(i);
+	
 	
 	
 	// Add heater switch

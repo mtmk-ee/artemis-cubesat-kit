@@ -96,10 +96,24 @@ namespace cubesat {
 			return gps_info;
 		}
 		
-		inline PyCubedBattInfo GetBattInfo() const {
-			return batt_info;
+		inline PyCubedTempInfo GetTempInfo() const {
+			return temp_info;
 		}
 		
+		inline PyCubedPowerInfo GetPowerInfo() const {
+			return power_info;
+		}
+		
+		inline int PopIncoming(PyCubedPacket &packet) {
+			if ( incoming_packets.size() == 0 )
+				return 0;
+			
+			packet = incoming_packets.front();
+			incoming_packets.pop();
+			return packet.content.data.size();
+		}
+		
+		void TelecommandOutboundPacket(PyCubedDataPacket packet);
 		
 		/**
 		 * @brief Polls the PyCubed device for received messages
@@ -114,7 +128,10 @@ namespace cubesat {
 		
 		PyCubedIMUInfo imu_info; // Latest IMU information
 		PyCubedGPSInfo gps_info; // Latest GPS information
-		PyCubedBattInfo batt_info; // Latest battery information
+		PyCubedTempInfo temp_info;
+		PyCubedPowerInfo power_info;
+		
+		std::queue<PyCubedPacket> incoming_packets;
 		
 		/**
 		 * @brief Receives the next message available.

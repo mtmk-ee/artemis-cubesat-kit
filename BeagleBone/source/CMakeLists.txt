@@ -112,6 +112,14 @@ target_link_libraries(temp_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
 add_executable(sun_test tests/sun_test.cpp)
 target_link_libraries(sun_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(soh1_test tests/soh1_test.cpp)
+target_link_libraries(soh1_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(soh2_test tests/soh2_test.cpp)
+target_link_libraries(soh2_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+
  
  
 # ===================================================================

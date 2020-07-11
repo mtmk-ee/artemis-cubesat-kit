@@ -67,6 +67,8 @@ void add_sensor_piece(int sensor_id);
  */
 void init_sensors();
 
+void reconnect_devices();
+
 /**
  * @brief Grabs the latest readings from the sensor devices
  */
@@ -129,7 +131,6 @@ void set_soh() {
 	// Create the state of health string
 	string soh = "{";
 	
-	
 	for (int i = 0; i < SUNSENSOR_COUNT; ++i) {
 		// Add to the SOH string
 		soh += "\"device_ssen_qva_00" + std::to_string(i) + "\", ";
@@ -176,7 +177,7 @@ void add_sensor_piece(int sensor_id) {
 	const std::string &name = GetSunSensorName(sensor_id);
 	
 	// Try adding a COSMOS piece
-	int pindex = json_addpiece(agent->cinfo, name, (uint16_t)DeviceType::SSEN);
+	int pindex = json_createpiece(agent->cinfo, name, DeviceType::SSEN);
 	
 	// Check if an error occurred
 	if ( pindex < 0 ) {

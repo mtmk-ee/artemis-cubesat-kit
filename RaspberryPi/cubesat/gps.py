@@ -4,9 +4,12 @@
 class GPS:
 
     def __init__(self):
-        pass
+        self.latitude = 0
+        self.longitude = 0
+        self.satellites = 0
+        self.speed = 0
 
-    def parse_soh_string(self, soh_str):
-        """Parses the SOH string for relevant sensor data."""
+    def load_json(self, data_json):
+        """Loads the agent_raspi data JSON"""
         pass
 

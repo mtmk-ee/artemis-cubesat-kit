@@ -52,6 +52,10 @@ namespace cubesat {
 		virtual int Open();
 		virtual void Close();
 		
+		inline bool IsOpen() const {
+			return file > 0;
+		}
+		
 		virtual unsigned char ReadRegister(unsigned int registerAddress);
 		virtual int ReadRegisters(unsigned char *out, unsigned int number, unsigned int fromAddress=0);
 		virtual int WriteRegister(unsigned int registerAddress, unsigned char value);
@@ -65,7 +69,7 @@ namespace cubesat {
 		virtual int Transfer(unsigned char send[], unsigned char receive[], int length);
 		
 		
-	private:
+	protected:
 		std::string filename;
 		int file;
 		unsigned int bus;

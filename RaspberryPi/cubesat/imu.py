@@ -1,6 +1,3 @@
-from collections import namedtuple
-
-Vec3 = namedtuple('Vec3', 'x', 'y', 'z')
 
 
 class IMU:
@@ -12,9 +9,16 @@ class IMU:
         self._utc = 0
         pass
 
-    def parse_soh_string(self, soh_str):
-        """Parses the PyCubed SOH string for relevant sensor data."""
-        pass
+    def load_json(self, data_json):
+        """Loads the agent_raspi data JSON"""
+        imu_data = data_json['output']['agent_pycubed']['imu']
+        mag = imu_data['mag']
+        accel = imu_data['accel']
+        gyro = imu_data['gyro']
+        
+        self.magnetic = (mag[0], mag[1], mag[2])
+        self.acceleration = (accel[0], accel[1], accel[2])
+        self.gyro = (gyro[0], gyro[1], gyro[2])
     
     @property
     def utc(self):

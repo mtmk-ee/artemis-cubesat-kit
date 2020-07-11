@@ -4,8 +4,10 @@
 
 #include <string>
 
-#define RASPI_INCOMING_FOLDER "/home/debian/raspi/incoming"
-#define RASPI_DESTINATION_FOLDER "/home/pi/incoming"
+#define RASPI_INCOMING_FOLDER "/home/pi/outgoing"
+#define RASPI_OUTGOING_FOLDER "/home/pi/incoming"
+#define BEAGLEBONE_INCOMING_FOLDER "/home/debian/raspi/incoming"
+#define BEAGLEBONE_OUTCOMING_FOLDER "/home/debian/raspi/outgoing"
 
 namespace cubesat {
 	

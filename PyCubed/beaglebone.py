@@ -5,153 +5,261 @@ import digitalio
 
 # Standard modules
 import enum
+import os
+from datetime import datetime
 
 # Internal modules
+import power
 import radio
 import switch
+import imu
+import gps
+import temp
+import file
+
+from pycubed import cubesat
 
 
-# BeagleBone to PyCubed message types
-class RXMessageType(enum.Enum): 
-	Handoff = 0
-	Startup = 1
-	KillRadio = 2
-	Enable = 3
-	Disable = 4
-	ReceiveFile = 5
+# Used to sync messages
+PREAMBLE = '$--'
 
-# PyCubed to BeagleBone message types
-class TXMessageType(enum.Enum):
-	Shutdown = 0
-	SendFile = 1
-	IMUData = 2
-	GPSData = 3
-	TempData = 4
-	PowerData = 5
+# Message type strings
+BEAGLEBONE_STATUS_TYPESTR = 'BST'
+PYCUBED_STATUS_TYPESTR    = 'PST'
+FILE_TRANSFER_TYPESTR     = 'FTR'
+IMU_DATA_TYPESTR          = 'IMU'
+GPS_DATA_TYPESTR          = 'GPS'
+TEMP_DATA_TYPESTR         = 'TMP'
+POWER_DATA_TYPESTR        = 'PWR'
+PACKET_DATA_TYPESTR       = 'PKT'
+
+# Message format strings
+BEAGLEBONE_STATUS_FORMAT = '{},{},{},{},{:n}'
+
+
 
 
 class BeagleBone:
 	
+	
+	
 	def __init__(self):
 		# Set up the UART connection to the BeagleBone
 		self.uart = busio.UART(board.TX, board.RX, baudrate=9600)
-		self.handoff_callback = None
-		self.startup_callback = None
-		self.kill_radio_callback = None
-	
-	def Shutdown(self):
-		self.__WriteMessageType(TXMessageType.Shutdown)
-	
-	
-	def SendIMUData(self, bytes):
-		self.__WriteMessageType(TXMessageType.IMUData)
-		self.uart.write(bytes)
-	
-	def SendGPSData(self, bytes):
-		self.__WriteMessageType(TXMessageType.GPSData)
-		self.uart.write(bytes)
+		self.startup_flag = False
+		self.handoff_flag = False
+		self.kill_radio_flag = False
 		
-	def SendTempData(self, bytes):
-		self.__WriteMessageType(TXMessageType.TempData)
-		self.uart.write(bytes)
 	
-	def SendPowerData(self, bytes):
-		self.__WriteMessageType(TXMessageType.PowerData)
-		self.uart.write(bytes)
-	
-	def PollMessages(self):
+	def Update(self):
+		# Reset flags
+		self.startup_flag = False
+		self.handoff_flag = False
+		self.kill_radio_flag = False
 		
+		# Clear the UART line by reading messages
 		while ( self.uart.in_waiting() != 0 ):
 			self.__ReadNextMessage()
+			
+	def Reconnect(self):
+		pass
+	
+	def Shutdown(self):
+		self.__WriteMessage('PST,y')
+	
+	def SendIMUData(self):
+		# Create timestamp
+		timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
 		
+		# Get IMU readings
+		accel = imu.GetAccel()
+		mag = imu.GetMag()
+		omega = imu.GetOmega()
+		
+		# Write message
+		self.__WriteMessage('IMU,{},{:f},{:f},{:f},{:f},{:f},{:f},{:f},{:f},{:f}'.format(timestamp, accel[0], accel[1], accel[2], mag[0], mag[1], mag[2], omega[0], omega[1], omega[2]))
+	
+	def SendGPSData(self, bytes):
+		# Create timestamp
+		timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+		
+		# Write message
+		self.__WriteMessage('GPS,{},{},{:f},{:f},{:d},{:d},{:f},{:f},{:f},{:f}'.format(timestamp, 'y' if gps.has_fix else 'n', gps.latitude, gps.longitude, gps.fix_quality, gps.satellites, gps.altitude, gps.speed, gps.azimuth, gps.horizontal_dilution))
+		
+	def SendTempData(self, bytes):
+		# Create timestamp
+		timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+		
+		# Write message
+		self.__WriteMessage('TMP,{},{:f},{:f}'.format(timestamp, temp.GetMainboardTemp(), temp.getBattboardTemp()))
+	
+	def SendPowerData(self, bytes):
+		# Create timestamp
+		timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+		
+		# Write message
+		self.__WriteMessage('PWR,{},{:f},{:f},{:f},{:f}'.format(timestamp, power.GetBattVoltage(), power.GetChargeCurrent(), power.GetSystemVoltage(), power.GetSystemCurrent()))
+	
 	
 	def SendFile(self, src, dest):
+		''' Transfers a file to the BeagleBone. Returns True if successful '''
+		try:
+			file_len = os.path.getsize(src)
+		except:
+			return False
 		
-		self.__WriteMessageType(TXMessageType.SendFile)
+		file_checksum = file.GetFileChecksum(src)
 		
-		#TODO
-		# Write destination path (128 bytes)
-		# Write file length (64-bit uint)
-		# Write file contents
+		# Read file
+		file_contents = file.ReadString(src)
+		if file_contents is None:
+			return False
+		
+		# Write the file transfer message
+		self.__WriteMessage('FTR,{},{:d},{:x}'.format(dest, file_len, file_checksum))
+		
+		# Write the file
+		self.uart.write(file_contents.encode('ascii'))
+		
+		return True
+		
 	
-	def __WriteMessageType(self, message_type):
-		# Create the message buffer
-		buf = [message_type]
+	def __WriteMessage(self, sentence):
+		''' Writes a message to the UART line. The 'sentence' parameter does not
+		include the preamble or checksum'''
 		
-		# Write the message to the UART line
-		self.uart.write(buf)
+		# Write the preamble
+		self.uart.write('$--'.encode('ascii'))
+		
+		# Write the message
+		self.uart.write(sentence.encode('ascii'))
+		
+		# Write the checksum
+		checksum = self.__GetSentenceChecksum(sentence)
+		self.uart.write(',{:x}\n'.format(checksum).encode('ascii'))
 	
-	def __ReadString(self, length):
-		buf = self.uart.read(length)
+	
+	def __ReadSentence(self):
+		''' Reads and returns the next sentence as a string, not including the preamble '''
 		
-		# Convert byte array to string
-		data_string = ''.join([chr(b) for b in data])
+		# Make sure there is data in the UART line
+		if self.uart.in_waiting() == 0:
+			return None
 		
-		return data_string
+		# ============ Search for the preamble ============
+		buff = self.uart.read(len(PREAMBLE)) # Read the first 3 characters
+		
+		while self.uart.in_waiting() > 0:
+			
+			# Check if the data read corresponds to the correct preamble
+			if buff.decode() == PREAMBLE:
+				break
+			# Otherwise, shift in the next byte
+			else:
+				buff[0] = buff[1]
+				buff[1] = buff[2]
+				buff[2] = self.uart.read(1)[0]
+		
+		# At this point, the remaining data in the UART line should correspond to the message
+		# Decode and return the message string
+		return self.uart.readline().decode()
+	
+	def __GetSentenceChecksum(self, sentence):
+		'''Calculates the checksum for the given sentence'''
+		# TODO
+		return 0
+		
 	
 	def __ReadNextMessage(self):
-		### Reads messages from the BeagleBone and acts on them
-		# Read the message header
-		message_type = self.uart.read(1)[0]
+		''' Reads a message from the UART line and acts on it.
+		Returns True if a message was successfully parsed. '''
 		
-		# Handoff Confirmation message
-		if ( message_type == RXMessageType.Handoff ):
-			
-			if ( self.handoff_callback != None ):
-				self.handoff_callback()
-			else:
-				print("Handoff message received, but no callback is set")
+		# Read in a sentence from the UART line
+		sentence = self.__ReadSentence
 		
-		# Startup Confirmation message
-		if ( message_type == RXMessageType.Startup ):
+		# Exit if no sentence was read
+		if sentence is None:
+			return False
+		
+		# Get the first three characters of the sentence corresponding to the message type
+		msg_type = sentence[:3]
+		
+		if msg_type == BEAGLEBONE_STATUS_TYPESTR:
 			
-			if ( self.startup_callback != None ):
-				self.startup_callback()
-			else:
-				print("Startup message received, but no callback is set")
+			# Split the sentence by the comma delimiter
+			elements = sentence.split(',')
 			
-		# Kill Radio message
-		elif ( message_type == RXMessageType.KillRadio ):
-			if ( self.kill_radio_callback != None ):
-				self.kill_radio_callback()
-			else:
-				print("Kill radio message received, but no callback is set")
-		elif ( message_type == RXMessageType.Enable ):
-			# Read device name
-			device_name = self.__ReadString(64)
+			# Make sure the number of elements is correct
+			if elements != 5:
+				return False
 			
-			# Enable device
-			switch.Enable(device_name)
-		elif ( message_type == RXMessageType.Disable ):
-			# Read device name
-			device_name = self.__ReadString(64)
+			# Make sure the checksum is correct
+			read_checksum = int(elements[4], 16)
+			calc_checksum = self.__GetSentenceChecksum(sentence)
+			if read_checksum != calc_checksum:
+				return False
 			
-			# Enable device
-			switch.Disable(device_name)
-		elif ( message_type == RXMessageType.ReceiveFile ):
-			# Read file name
-			file_name = self.__ReadString(128)
+			# Parse the elements and store flags
+			self.startup_flag = True if elements[1] == 'y' else False
+			self.handoff_flag = True if elements[2] == 'y' else False
+			self.kill_radio_flag = True if elements[3] == 'y' else False
 			
-			# Read file length
-			file_len = int.from_bytes(self.uart.read(4), "big")
+			return True
+		elif msg_type == PACKET_DATA_TYPESTR:
 			
-			# TODO: Read and write file by chunks to save RAM
-			# Read file
+			# Split the sentence by the comma delimiter
+			head_split = sentence.split(',', 1)
+			tail_split = head_split[1].rsplit(',', 1)
+			
+			checksum = tail_split[1]
+			packet = tail_split[0]
+				
+			# Make sure the checksum is correct
+			read_checksum = int(checksum, 16)
+			calc_checksum = self.__GetSentenceChecksum(sentence)
+			if read_checksum != calc_checksum:
+				return False
+			
+			# Transmit the packet
+			b = bytearray()
+			b.extend(packet)
+			cubesat.radio1.send(b)
+		elif msg_type == FILE_TRANSFER_TYPESTR:
+			# Split the sentence by the comma delimiter
+			elements = sentence.split(',')
+			
+			# Make sure the number of elements is correct
+			if elements != 5:
+				return False
+			
+			# Make sure the checksum is correct
+			read_checksum = int(elements[4], 16)
+			calc_checksum = self.__GetSentenceChecksum(sentence)
+			if read_checksum != calc_checksum:
+				return False
+			
+			# Parse the elements
+			dest_path = elements[1]
+			file_len = int(elements[2])
+			file_checksum = int(elements[3], 16)
+			
+			# Read the file from the UART line
 			file_contents = self.uart.read(file_len)
 			
-			# Open file
-			f = open(file_name, 'wb')
+			# Write to the destination file
+			try:
+				f = open(dest_path, 'w')
+				try:
+					f.write(file_contents)
+					return True
+				finally:
+					f.close()
+			except:
+				return False
 			
-			# Write to  the file
-			f.write(bytearray(int(i, 8) for i in file_contents))
-			
-			# Close the file
-			f.close()
 		else:
-			print("Invalid message type '" + str(message_type) + "' received")
-		
-		
-		
+			# If this case occurs, the message is not valid
+			return False
 	
 	
 

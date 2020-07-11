@@ -1,6 +1,9 @@
 # CircuitPython modules
 
 # PyCubed modules
+import enum as enum
+
+import switch
 from pycubed import cubesat
 
 # Standard modules
@@ -13,6 +16,8 @@ import imu
 import gps
 import temp
 import power
+
+import tests
 
 class PowerMode(enum.Enum): 
 	Nominal = 0
@@ -29,25 +34,7 @@ ENTERING_LOW_POWER_MODE_WAIT = 0.5
 LOW_POWER_MODE_WAIT = 0.5
 EXITING_LOW_POWER_MODE_WAIT = 0.5
 
-# ============== Callback Functions ==============
-
-def KillRadioCallback():
-	radio.Kill()
-
-def HandoffCallback():
-	global power_mode
-	
-	# Switch to low power mode
-	power_mode = PowerMode.LowPower
-	
-	# Turn off BeagleBone
-	switch.Disable("beaglebone")
-
-def StartupCallback():
-	global power_mode
-	
-	# Switch to nominal power mode
-	power_mode = PowerMode.Nominal
+BEAGLEBONE_STARTUP_WAIT = 60 # The time to wait for the BeagleBone to boot. If not booted, power off and try again
 
 # ============== Initialization ==============
 
@@ -64,33 +51,65 @@ power_mode = PowerMode.Nominal
 
 # Create BeagleBone object
 bbb = beaglebone.BeagleBone()
+beaglebone_startup_time = 0 # Marks the time that the BeagleBone power was enabled
 
-# Set callback functions
-bbb.kill_radio_callback = KillRadioCallback
-bbb.handoff_callback = HandoffCallback
-bbb.startup_callback = StartupCallback
-
-
+# ============== Other stuff ==============
+def EnsureBeagleBoneStartup():
+	''' Cycles power to the BeagleBone until it boots successfully '''
+	global bbb
+	
+	bbb.Update()
+	
+	while not bbb.startup_flag:
+		
+		# Enable the BeagleBone
+		switch.Enable("beaglebone")
+		
+		# Store the time the BeagleBone switch was enabled
+		beaglebone_startup_time = time.perf_counter()
+		
+		# Wait for the BeagleBone to issue the startup flag
+		while not bbb.startup_flag and (time.perf_counter() - beaglebone_startup_time) < BEAGLEBONE_STARTUP_WAIT:
+			bbb.Update()
+			time.sleep(1)
+		
+		# Exit if the BeagleBone booted successfully
+		if bbb.startup_flag:
+			break
+		
+		# At this point the BeagleBone did not boot.
+		# Disable the BeagleBone
+		switch.Disable("beaglebone")
+		
+		# Wait a few seconds
+		time.sleep(5)
 
 # ============== Main Loop ==============
+
+# Make sure the BeagleBone has power before continuing
+EnsureBeagleBoneStartup()
+
 while True:
 	
 	# Nominal power mode
-	if ( power_mode == PowerMode.Nominal ):
+	if power_mode == PowerMode.Nominal:
+		
 		# Read messages from the BeagleBone
-		bbb.PollMessages()
+		bbb.Update()
 		
-		# Send IMU data
-		bbb.SendIMUData(imu.GetTXBytes())
+		# Check if the radio should be disabled
+		if bbb.kill_radio_flag:
+			radio.KillRadio()
+			bbb.kill_radio_flag = False
 		
-		# Send GPS data
-		bbb.SendGPSData(gps.GetTXBytes())
+		# Update sensors
+		gps.Update()
 		
-		# Send temperature data
-		bbb.SendTempData(temp.GetTXBytes())
-		
-		# Send power data
-		bbb.SendPowerData(power.GetTXBytes())
+		# Send data from sensors
+		bbb.SendIMUData()
+		bbb.SendGPSData()
+		bbb.SendTempData()
+		bbb.SendPowerData()
 		
 		# Check battery health
 		batt_charge = power.GetChargePercent()
@@ -111,38 +130,43 @@ while True:
 		time.sleep(NOMINAL_MODE_WAIT)
 		
 	# Entering low power mode
-	elif ( power_mode == PowerMode.EnteringLowPower ):
+	elif power_mode == PowerMode.EnteringLowPower:
 		# Read messages from the BeagleBone
-		bbb.PollMessages()
+		bbb.Update()
+		
+		# Check if the BeagleBone is ready for power loss
+		if bbb.handoff_flag:
+			# Turn off BeagleBone
+			switch.Disable("beaglebone")
+			
+			# Switch power mode
+			power_mode = PowerMode.LowPower
 		
 		# Wait for a bit
 		time.sleep(ENTERING_LOW_POWER_MODE_WAIT)
 	
 	# Low power mode
-	elif ( power_mode == PowerMode.LowPower ):
+	elif power_mode == PowerMode.LowPower:
+		
 		# Check battery health
 		batt_charge = power.GetChargePercent()
 		
 		# Check if power is sufficient to exit low power mode
-		if ( batt_charge > LOW_POWER_EXIT_CHARGE ):
+		if batt_charge > LOW_POWER_EXIT_CHARGE:
 			power_mode = PowerMode.ExitingLowPower
 			
 			# Enable PyCubed devices
 			switch.Enable("imu")
 			switch.Enable("gps")
 			switch.Enable("radio")
-			switch.Enable("beaglebone")
+			
+			# Start up the BeagleBone
+			EnsureBeagleBoneStartup()
+			power_mode = PowerMode.Nominal
 		
 		# Wait for a bit
 		time.sleep(LOW_POWER_MODE_WAIT)
 	
-	# Exiting low power mode
-	elif ( power_mode == PowerMode.ExitingLowPower ):
-		# Read messages from the BeagleBone
-		bbb.PollMessages()
-		
-		# Wait for a bit
-		time.sleep(EXITING_LOW_POWER_MODE_WAIT)
 		
 	
 	

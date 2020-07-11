@@ -113,7 +113,7 @@ void init_agent() {
 	
 	
 	// Add heater
-	int status = json_addpiece(agent->cinfo, "htr", (uint16_t)DeviceType::HTR);
+	int status = json_createpiece(agent->cinfo, "htr", DeviceType::HTR);
 	if ( status < 0 ) {
 		fprintf(agent->get_debug_fd(), "Failed to add heater %s\n", cosmos_error_string(status).c_str());
 		agent->shutdown();

@@ -8,10 +8,11 @@ class TempSensor:
         self._temp = 0
         self._utc = 0
         pass
-
-    def parse_soh_string(self, soh_str):
-        """Parses the SOH string for relevant sensor data."""
-        pass
+    
+    def load_json(self, data_json):
+        """Loads the agent_raspi data JSON"""
+        
+        self.temp = data_json['output']['agent_temp'][self.name]
     
     @property
     def name(self):

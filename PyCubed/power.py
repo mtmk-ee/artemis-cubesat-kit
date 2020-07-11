@@ -1,9 +1,20 @@
 import struct
 from pycubed import cubesat
 
+def GetBattVoltage():
+	return cubesat.battery_voltage
+
+def GetChargeCurrent():
+	return cubesat.charge_current # mA
+
+def GetSystemVoltage():
+	return cubesat.system_voltage
+
+def GetSystemCurrent():
+	return cubesat.current_draw # mA
 
 def GetChargePercent():
-	return vbatt
+	return 0 # TODO
 
 
 def GetTXBytes():

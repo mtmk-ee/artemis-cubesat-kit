@@ -6,7 +6,7 @@ from pycubed import cubesat
 
 
 # Check if the radio was found
-if ( !cubesat.hardware['Radio1'] ):
+if not cubesat.hardware['Radio1']:
 	print("No radio found onboard")
 	exit()
 
@@ -19,6 +19,8 @@ def SetTXPower(power):
 def SetFrequencyMHz(freq):
 	cubesat.radio1.frequency_mhz = freq;
 
+def KillRadio():
+	pass
 
 
 # Configure radio (TODO: check values)

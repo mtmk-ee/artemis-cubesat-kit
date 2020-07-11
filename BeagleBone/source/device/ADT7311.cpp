@@ -14,11 +14,14 @@ using namespace cubesat;
 
 
 ADT7311::ADT7311(unsigned int bus, unsigned int device) : SPIDevice(bus, device) {
-	// Set the IO mode
-	SetMode(SPIMODE::MODE2); // Need to verify the mode
 	
-	// Set the maximum data transfer speed
-	SetSpeed(MAX_SPEED);
+	if ( IsOpen() ) {
+		// Set the IO mode
+		SetMode(SPIMODE::MODE2); // Need to verify the mode
+		
+		// Set the maximum data transfer speed
+		SetSpeed(MAX_SPEED);
+	}
 }
 ADT7311::~ADT7311() {
 	
@@ -26,6 +29,10 @@ ADT7311::~ADT7311() {
 
 
 void ADT7311::ReadState() {
+	
+	// Make sure the device is initialized
+	if ( !IsOpen() )
+		return;
 	
 	// Read configuration register
 	config.raw_data = Read8Bit(Register::Config);
@@ -50,11 +57,18 @@ void ADT7311::ReadState() {
 }
 
 void ADT7311::SetConfiguration(Configuration &config) {
+	
+	if ( !IsOpen() )
+		return;
+	
 	// Write to the configuration register
 	Write8Bit(Register::Config, config.raw_data);
 }
 
 float ADT7311::GetTemperature() const {
+	if ( !IsOpen() ) {
+		return -1;
+	}
 	
 	// 13-bit resolution
 	if ( config.resolution == 0 ) {
