@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cubesat;
 
-SwitchedDeviceInfo Switch::switch_info[] = {
+SwitchedDeviceInfo PDUSwitch::switch_info[] = {
 	{SWITCH_HEATER_NAME, SWITCH_HEATER_KEY},
 	{SWITCH_TEMPSENSOR_NAME, SWITCH_TEMPSENSOR_KEY},
 	{SWITCH_SUNSENSOR_NAME, SWITCH_SUNSENSOR_KEY},
@@ -16,7 +16,7 @@ SwitchedDeviceInfo Switch::switch_info[] = {
 	{NULL, NULL}
 };
 
-Switch::Switch(const char *name) : GPIO(GetSwitchPin(name)), name(name) {
+PDUSwitch::PDUSwitch(const char *name) : GPIO(GetSwitchPin(name)), name(name) {
 	
 	switch_id = GetSwitchID(name);
 	
@@ -25,30 +25,37 @@ Switch::Switch(const char *name) : GPIO(GetSwitchPin(name)), name(name) {
 	if ( IsValid() ) {
 		GPIO::SetMode(GPIOMode::Output);
 	}
+	
 }
-Switch::~Switch() {
+PDUSwitch::~PDUSwitch() {
 	
 }
 
 
 
-SwitchState Switch::SetState(SwitchState state) {
+SwitchState PDUSwitch::SetState(SwitchState state) {
+	if ( !IsValid() )
+		return SwitchState::Invalid;
+	
 	return (SwitchState)GPIO::DigitalWrite((GPIOValue)state);
 }
 
-SwitchState Switch::GetState() {
+SwitchState PDUSwitch::GetState() {
+	if ( !IsValid() )
+		return SwitchState::Invalid;
+	
 	return (SwitchState)GPIO::DigitalRead();
 }
 
 
-const char* Switch::GetSwitchName(SwitchID switch_id) {
+const char* PDUSwitch::GetSwitchName(SwitchID switch_id) {
 	
 	if ( (int)switch_id < 0 || (int)switch_id >= SWITCH_COUNT )
 		return NULL;
 	else
 		return switch_info[(int)switch_id].name;
 }
-SwitchID Switch::GetSwitchID(const char *switch_name) {
+SwitchID PDUSwitch::GetSwitchID(const char *switch_name) {
 	if ( switch_name == NULL )
 		return (SwitchID)-1;
 	
@@ -60,18 +67,18 @@ SwitchID Switch::GetSwitchID(const char *switch_name) {
 	
 	return (SwitchID)-1;
 }
-const char* Switch::GetSwitchPinKey(SwitchID switch_id) {
+const char* PDUSwitch::GetSwitchPinKey(SwitchID switch_id) {
 	if ( (int)switch_id < 0 || (int)switch_id >= SWITCH_COUNT )
 		return NULL;
 	else
 		return switch_info[(int)switch_id].key;
 }
-int Switch::GetSwitchPin(SwitchID switch_id) {
+int PDUSwitch::GetSwitchPin(SwitchID switch_id) {
 	if ( (int)switch_id < 0 || (int)switch_id >= SWITCH_COUNT )
 		return -1;
 	else
 		return GetPinByKey(switch_info[(int)switch_id].key);
 }
-int Switch::GetSwitchPin(const char *switch_name) {
+int PDUSwitch::GetSwitchPin(const char *switch_name) {
 	return GetSwitchPin(GetSwitchID(switch_name));
 }

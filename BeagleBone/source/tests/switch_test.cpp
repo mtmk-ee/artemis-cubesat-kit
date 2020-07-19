@@ -13,7 +13,7 @@ using namespace cubesat;
 
 void TestSwitch(const char *device_name, int blink_count = 5) {
 	cout << "Blinking switch '" << device_name << "' for " << blink_count << " times" << endl;
-	Switch sw(device_name);
+	PDUSwitch sw(device_name);
 	
 	// Blink the output a few times
 	for (int i = 0; i < blink_count * 2; ++i) {
@@ -37,7 +37,7 @@ int main(int argc, char ** argv) {
 			printf("Ex: switch_test heater 5\n");
 			printf("\tdevice_name: the device name, one of:\n");
 			for (int i = 0; i < SWITCH_COUNT; ++i) {
-				printf("\t\t%s\n", Switch::GetSwitchName((SwitchID)i));
+				printf("\t\t%s\n", PDUSwitch::GetSwitchName((SwitchID)i));
 			}
 			break;
 	}

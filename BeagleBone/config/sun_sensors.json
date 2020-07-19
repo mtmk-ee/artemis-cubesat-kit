@@ -22,5 +22,5 @@
 	"minus_z": {
 		"device_protocol": "i2c",
 		"device_address": "0x55",
-	},
+	}
 }

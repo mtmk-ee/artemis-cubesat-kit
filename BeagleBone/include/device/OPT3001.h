@@ -73,6 +73,12 @@ namespace cubesat {
 		
 		
 	public:
+		using I2CDevice::Open;
+		using I2CDevice::Close;
+		using I2CDevice::IsOpen;
+		using I2CDevice::GetBusAddr;
+		using I2CDevice::GetDeviceAddr;
+		
 		OPT3001();
 		/**
 		 * @brief Constructs a new OPT3001 with the given bus and device numbers.

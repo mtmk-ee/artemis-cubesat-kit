@@ -18,18 +18,25 @@ namespace cubesat {
 	 */
 	class PyCubed : protected UARTDevice {
 	public:
-		PyCubed() {}
+		using UARTDevice::GetDevicePath;
+		using UARTDevice::GetDeviceNumber;
+		using UARTDevice::IsOpen;
+		using UARTDevice::Open;
+		using UARTDevice::Close;
 		
 		/**
 		 * @brief Constructs a PyCubed object using the given bus and device numbers
 		 * @param bus The UART bus number to use
 		 * @param device The device number to use
 		 */
-		PyCubed(uint8_t bus, uint8_t device);
+		PyCubed(uint8_t bus, unsigned int baud);
 		/**
 		 * @brief Destructor
 		 */
 		virtual ~PyCubed();
+		
+		
+		
 		
 		/**
 		 * @brief Sends a message that startup was successful
@@ -113,13 +120,27 @@ namespace cubesat {
 			return packet.content.data.size();
 		}
 		
-		void TelecommandOutboundPacket(PyCubedDataPacket packet);
+		int TelecommandOutboundPacket(PyCubedDataPacket packet);
+		
+		/**
+		 * @brief Receives the next message available.
+		 * @return 'true' if there are more messages
+		 */
+		bool ReceiveNextMessage();
 		
 		/**
 		 * @brief Polls the PyCubed device for received messages
 		 * @return The number of messages received
 		 */
 		int ReceiveMessages();
+		
+		/**
+		 * @brief Returns the last message received
+		 * @return The message string
+		 */
+		inline const char* GetLastMessage() const {
+			return last_message;
+		}
 		
 	private:
 		// Callback functions
@@ -133,11 +154,9 @@ namespace cubesat {
 		
 		std::queue<PyCubedPacket> incoming_packets;
 		
-		/**
-		 * @brief Receives the next message available.
-		 * @return 'true' if there are more messages
-		 */
-		bool ReceiveNextMessage();
+		char last_message[256];
+		
+		
 		void ReceiveFile();
 		
 	};

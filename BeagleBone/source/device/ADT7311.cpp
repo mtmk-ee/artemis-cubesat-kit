@@ -15,6 +15,15 @@ using namespace cubesat;
 
 ADT7311::ADT7311(unsigned int bus, unsigned int device) : SPIDevice(bus, device) {
 	
+}
+ADT7311::~ADT7311() {
+	
+}
+
+int ADT7311::Open() {
+	
+	int status = SPIDevice::Open();
+	
 	if ( IsOpen() ) {
 		// Set the IO mode
 		SetMode(SPIMODE::MODE2); // Need to verify the mode
@@ -22,9 +31,8 @@ ADT7311::ADT7311(unsigned int bus, unsigned int device) : SPIDevice(bus, device)
 		// Set the maximum data transfer speed
 		SetSpeed(MAX_SPEED);
 	}
-}
-ADT7311::~ADT7311() {
 	
+	return status;
 }
 
 

@@ -88,6 +88,12 @@ namespace cubesat {
 		
 		
 	public:
+		using SPIDevice::Open;
+		using SPIDevice::Close;
+		using SPIDevice::IsOpen;
+		using SPIDevice::GetBus;
+		using SPIDevice::GetDeviceAddr;
+		
 				
 		ADT7311() : SPIDevice(0, 0) {} // TODO: remove this
 		/**
@@ -96,11 +102,13 @@ namespace cubesat {
 		 * @param device The device address
 		 */
 		ADT7311(unsigned int bus, unsigned int device);
-		ADT7311(const ADT7311 &other) = delete; // Forbid copy construction for safety
 		/**
 		 * @brief Destructor
 		 */
 		virtual ~ADT7311();
+		
+		
+		virtual int Open() override;
 		
 		/**
 		 * @brief Reads and stores information from the device.

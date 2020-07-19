@@ -62,10 +62,9 @@ set(CUBESAT_DEVICE_SRC	device/I2CDevice.cpp
 						device/ADT7311.cpp
 						device/PyCubed.cpp
 						device/switch.cpp
-						device/GPIO.cpp)
+						device/GPIO.cpp
+						utility/SimpleAgent.cpp)
 add_library(CubesatDevices STATIC ${CUBESAT_DEVICE_SRC})
-
-#add_subdirectory(pybind11)
 
 set(CUBESAT_LIBS CubesatDevices)
 
@@ -118,6 +117,12 @@ target_link_libraries(soh1_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
 add_executable(soh2_test tests/soh2_test.cpp)
 target_link_libraries(soh2_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(pycubed_test tests/pycubed_test.cpp)
+target_link_libraries(pycubed_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
+
+add_executable(simpleagent_test tests/simpleagent_test.cpp)
+target_link_libraries(simpleagent_test ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
 
  

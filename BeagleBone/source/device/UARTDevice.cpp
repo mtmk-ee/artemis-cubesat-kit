@@ -27,8 +27,6 @@ using namespace cubesat;
 
 UARTDevice::UARTDevice(unsigned int device, unsigned int baud_rate) : device(device), baud_rate(baud_rate), file(-1) {
 	filename = UART_PATH + to_string(device);
-	
-	Open();
 }
 
 
@@ -58,8 +56,9 @@ int UARTDevice::Open(){
 
 	//  Open uart port for UART tx/rx
 	file = open(buf, O_RDWR | O_NOCTTY);
-	if ( file < 0){
+	if ( file < 0 ){
 		printf("port failed to open\n");
+		return -1;
 	}
 	
 	//save current attributes

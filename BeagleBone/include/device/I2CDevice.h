@@ -3,6 +3,7 @@
 #define CUBESAT_DEVICE_I2CDEVICE
 
 #include <stdint.h>
+#include <string>
 
 
 namespace cubesat {
@@ -17,6 +18,17 @@ namespace cubesat {
 		virtual int Open();
 		virtual void Close();
 		
+		inline bool IsOpen() const {
+			return is_open;
+		}
+		inline int GetBusAddr() const {
+			return bus;
+		}
+		inline int GetDeviceAddr() const {
+			return device;
+		}
+		std::string GetDevicePath() const;
+		
 		
 		virtual int Write(uint8_t value);
 		virtual int WriteRegister(uint8_t register_addr, uint16_t value);
@@ -28,6 +40,7 @@ namespace cubesat {
 		int bus;
 		int device;
 		int file;
+		bool is_open = false;
 	};
 
 }

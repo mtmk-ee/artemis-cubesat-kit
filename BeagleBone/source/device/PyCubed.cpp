@@ -7,7 +7,7 @@ using namespace std;
 using namespace cubesat;
 using namespace cubesat::detail::pycubed;
 
-PyCubed::PyCubed(uint8_t bus, uint8_t device) {
+PyCubed::PyCubed(uint8_t bus, unsigned int baud) : UARTDevice(bus, baud) {
 	
 }
 PyCubed::~PyCubed() {
@@ -15,6 +15,10 @@ PyCubed::~PyCubed() {
 }
 
 int PyCubed::StartupConfirmation() {
+	
+	if ( !IsOpen() )
+		return -1;
+	
 	
 	char msg[64];
 	int checksum = 0; // TODO
@@ -26,6 +30,9 @@ int PyCubed::StartupConfirmation() {
 	return 0;
 }
 int PyCubed::Handoff() {
+	if ( !IsOpen() )
+		return -1;
+	
 	char msg[64];
 	int checksum = 0; // TODO
 	
@@ -36,6 +43,9 @@ int PyCubed::Handoff() {
 	return 0;
 }
 int PyCubed::KillRadio() {
+	if ( !IsOpen() )
+		return -1;
+	
 	char msg[64];
 	int checksum = 0; // TODO
 	
@@ -46,6 +56,8 @@ int PyCubed::KillRadio() {
 }
 
 int PyCubed::ReceiveMessages() {
+	if ( !IsOpen() )
+		return -1;
 	
 	// Counts the number of received messages
 	int i = 0;
@@ -56,7 +68,10 @@ int PyCubed::ReceiveMessages() {
 	return i;
 }
 
-void PyCubed::TelecommandOutboundPacket(PyCubedDataPacket packet) {
+int PyCubed::TelecommandOutboundPacket(PyCubedDataPacket packet) {
+	if ( !IsOpen() )
+		return -1;
+	
 	uint8_t *msg = new uint8_t[32];
 	
 	int checksum = 0; // TODO
@@ -69,12 +84,16 @@ void PyCubed::TelecommandOutboundPacket(PyCubedDataPacket packet) {
 	// Write the packet data
 	Write(packet.data.data(), packet.data.size());
 	
-	// Write the checksum
-	num_written = sprintf((char*)msg, ",%02x\n", checksum);
 	
+	// Write the checksum
+	num_written += sprintf((char*)msg, ",%02x\n", checksum);
+	
+	return num_written;
 }
 
 bool PyCubed::ReceiveNextMessage() {
+	if ( !IsOpen() )
+		return false;
 	
 	uint8_t buff[256];
 	
@@ -105,6 +124,10 @@ bool PyCubed::ReceiveNextMessage() {
 		
 		length_buff[4] = '\0';
 		int packet_len = atoi((char*)length_buff);
+		
+		char last_message_buff[32];
+		sprintf(last_message_buff, "PKT of length %d", packet_len);
+		strcpy(last_message, last_message_buff);
 		
 		// Read the packet length
 		Read(buff, packet_len);
@@ -138,8 +161,12 @@ bool PyCubed::ReceiveNextMessage() {
 		// Replace the newline with a terminating character
 		*(p - 1) = (uint8_t)'\0';
 		
+		// Store the message
+		strncpy(last_message, (char*)buff, 255);
+		
 		
 		if ( strncmp((char*)buff, PYCUBED_PYCUBED_STATUS_MSGTYPE, 3) == 0 ) {
+			
 			char shutdown_flag;
 			int checksum;
 			sscanf((char*)buff, "%*s,%c,%x", &shutdown_flag, &checksum);
@@ -152,6 +179,7 @@ bool PyCubed::ReceiveNextMessage() {
 			}
 		}
 		else if ( strncmp((char*)buff, PYCUBED_IMU_DATA_MSGTYPE, 3) == 0 ) {
+			
 			int utc_yyyy;
 			int utc_MM;
 			int utc_dd;
@@ -191,6 +219,7 @@ bool PyCubed::ReceiveNextMessage() {
 			imu_info.omega.col[2] = gyro_z;
 		}
 		else if ( strncmp((char*)buff, PYCUBED_GPS_DATA_MSGTYPE, 3) == 0 ) {
+			
 			int utc_yyyy;
 			int utc_MM;
 			int utc_dd;
@@ -226,6 +255,7 @@ bool PyCubed::ReceiveNextMessage() {
 			
 		}
 		else if ( strncmp((char*)buff, PYCUBED_TEMP_DATA_MSGTYPE, 3) == 0 ) {
+			
 			int utc_yyyy;
 			int utc_MM;
 			int utc_dd;
@@ -245,6 +275,8 @@ bool PyCubed::ReceiveNextMessage() {
 			temp_info.batt_temp = batt_temp;
 		}
 		else if ( strncmp((char*)buff, PYCUBED_POWER_DATA_MSGTYPE, 3) == 0 ) {
+			
+			
 			int utc_yyyy;
 			int utc_MM;
 			int utc_dd;

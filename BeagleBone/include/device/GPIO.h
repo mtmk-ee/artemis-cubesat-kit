@@ -44,6 +44,13 @@ namespace cubesat {
 		GPIOValue DigitalWrite(GPIOValue value);
 		GPIOValue DigitalRead();
 		
+		inline const char* GetPinKey() const {
+			return GetKeyByPin(pin);
+		}
+		inline int GetPinNumber() const {
+			return pin;
+		}
+		
 		
 		static Pin GetPinByKey(const char *key);
 		static Pin GetPinByName(const char *name);

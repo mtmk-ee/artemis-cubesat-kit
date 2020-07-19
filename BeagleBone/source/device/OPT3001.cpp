@@ -19,6 +19,9 @@ OPT3001::~OPT3001() {
 }
 
 void OPT3001::ReadState() {
+	if ( !IsOpen() )
+		return;
+	
 	
 	// Read result register
 	result.raw_data = ReadRegister((uint8_t)Register::Result);
@@ -41,6 +44,9 @@ void OPT3001::ReadState() {
 }
 
 bool OPT3001::SetConfiguration(Configuration config) {
+	if ( !IsOpen() )
+		return false;
+	
 	// Should we do 'this->config = config'? Maybe, but maybe the state of the device
 	// since the last call to ReadState() should be kept instead
 	return WriteRegister((uint8_t)Register::Config, config.raw_data) == 0;

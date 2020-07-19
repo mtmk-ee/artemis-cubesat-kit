@@ -53,7 +53,13 @@ namespace cubesat {
 		virtual void Close();
 		
 		inline bool IsOpen() const {
-			return file > 0;
+			return is_open;
+		}
+		inline int GetBus() const {
+			return bus;
+		}
+		inline int GetDeviceAddr() const {
+			return device;
 		}
 		
 		virtual unsigned char ReadRegister(unsigned int registerAddress);
@@ -79,6 +85,8 @@ namespace cubesat {
 		uint8_t bits;
 		uint32_t speed;
 		uint16_t delay;
+		
+		bool is_open;
 		
 	};
 

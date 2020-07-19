@@ -4,18 +4,9 @@
  * Agent which handles switching of power lines
  */ 
 
-
-// COSMOS headers
-#include "agent/agentclass.h"
-#include "support/configCosmos.h"
-#include "agent/agentclass.h"
-#include "support/jsonlib.h"
-
-// Internal headers
-#include "cubesat_defs.h"
+#include "utility/SimpleAgent.h"
 #include "device/switch.h"
 
-// Standard headers
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -30,6 +21,7 @@ using namespace cubesat;
 // A convenient struct for storing switch information
 struct SwitchInfo {
 	Switch *sw; // The switch device
+	const char *gpio_key;
 	
 	int dindex; // COSMOS device index
 	int cindex; // COSMOS component index
@@ -38,14 +30,15 @@ struct SwitchInfo {
 
 
 // The agent object which allows for communication with COSMOS
-Agent *agent;
+SimpleAgent *agent;
+Device *switch_temp, *switch_sunsensor, *switch_heater;
 
 // =========== Function Prototypes ===========
 
 /**
  * @brief Sets up the agent. Prints a message and exits with code 1 if an error occurs during setup.
  */
-void init_agent();
+void InitAgent();
 
 /**
  * @brief Main loop for this agent.
@@ -57,10 +50,17 @@ void run_agent();
  * @param switch_id The switch ID
  */
 void add_switch_piece(int switch_id);
+
 /**
- * @brief Initializes all the switches needed
+ * @brief Initializes a PDU switch
+ * @param device The switch device
  */
-void init_switches();
+void InitSwitch(Device *device);
+/**
+ * @brief UpdateSwitch Updates a switch
+ * @param device The switch device
+ */
+void UpdateSwitch(Device *device);
 
 
 /**
@@ -68,14 +68,13 @@ void init_switches();
  * @param switch_id The switch ID number. See the file device/switched_devices.h for more info
  * @param enabled True for on, false for off
  */
-void set_switch_state(int switch_id, bool enabled);
+void SetSwitchState(int switch_id, bool enabled);
 
 
 // Request callbacks
-int32_t request_enable(char *request, char* response, Agent *agent);
-int32_t request_disable(char *request, char* response, Agent *agent);
-int32_t request_status(char *request, char* response, Agent *agent);
-int32_t request_list(char *request, char* response, Agent *agent);
+
+string Request_Switch(vector<string> args);
+string Request_List();
 // ===========================================
 
 
@@ -85,283 +84,162 @@ int32_t request_list(char *request, char* response, Agent *agent);
 
 int main(int argc, char** argv) {
 	
-	// Initialize the agent
-	init_agent();
+	agent = new SimpleAgent(CUBESAT_AGENT_SWITCH_NAME);
+	agent->SetLoopPeriod(SLEEP_TIME);
+	
+	switch_temp = agent->NewDevice<Switch>(SWITCH_TEMPSENSOR_NAME);
+	switch_sunsensor = agent->NewDevice<Switch>(SWITCH_SUNSENSOR_NAME);
+	switch_heater = agent->NewDevice<Switch>(SWITCH_HEATER_NAME);
+	
+	switch_temp->AddProperty<Switch::Enabled>(false);
+	switch_sunsensor->AddProperty<Switch::Enabled>(false);
+	switch_heater->AddProperty<Switch::Enabled>(false);
+	
+	switch_temp->AddProperty<Switch::Voltage>(0);
+	switch_sunsensor->AddProperty<Switch::Voltage>(0);
+	switch_heater->AddProperty<Switch::Voltage>(0);
+	
+	agent->FinalizeDevices();
+	
+	agent->AddRequest({"switch", "state", "set", "get"}, Request_Switch, "Gets or sets the status of a switch", "Usage: switch switch_name [on | off]");
+	agent->AddRequest("list", Request_List, "Lists available switches");
+	
+	agent->DebugPrint();
+	
 	
 	// Initialize the switches
-	init_switches();
+	InitSwitch(switch_temp);
+	InitSwitch(switch_sunsensor);
+	InitSwitch(switch_heater);
 	
 	// Run the main loop for this agent
-	run_agent();
+	while ( agent->StartLoop() ) {
+		UpdateSwitch(switch_temp);
+		UpdateSwitch(switch_sunsensor);
+		UpdateSwitch(switch_heater);
+	}
+	
+	
+	delete agent;
 	
 	
 	return 0;
 }
 
-/**
- * @brief init_agent Sets up the agent. Prints a message and exits with code 1 if an error occurs.
- */
-void init_agent() {
-	// Create the agent
-	agent = new Agent(CUBESAT_NODE_NAME, CUBESAT_AGENT_SWITCH_NAME);
+
+void UpdateSwitch(Device *device) {
+	PDUSwitch *pdu_switch = device->GetProperty<PDUSwitch*>("handler");
 	
-	if ( agent->cinfo == nullptr || !agent->running() ) {
-		printf("Failed to open [%s:%s]\n", CUBESAT_NODE_NAME, CUBESAT_AGENT_SWITCH_NAME);
-		exit (1);
-	}
-	
-	// Add all the switch pieces to the COSMOS namespace
-	for (int i = 0; i < SWITCH_COUNT; ++i)
-		add_switch_piece(i);
-	
-	
-	// TODO: Create the state of health string
-	string soh = "{\"device_swch_enabled_000\", \"device_swch_enabled_001\", \"device_swch_enabled_002\", \"device_swch_enabled_003\"}";
-	
-	// set the soh string
-	agent->set_sohstring(soh);
-	
-	
-	
-	// Add request callbacks
-	int status;
-	
-	if ( (status = agent->add_request("enable", request_enable)) )
-		exit (status);
-	
-	if ( (status = agent->add_request("disable", request_disable)) )
-		exit (status);
-	
-	if ( (status = agent->add_request("status", request_status)) )
-		exit (status);
-	
-	if ( (status = agent->add_request("list", request_list)) )
-		exit (status);
-	
+	device->Timestamp<Switch>();
+	device->SetProperty<Switch::Enabled>(pdu_switch->GetState() == SwitchState::On);
+	device->SetProperty<Switch::Voltage>(pdu_switch->GetState() == SwitchState::On ? 3.3 : 0);
 }
 
-
-/**
- * @brief run_agent Runs the main loop for this agent.
- */
-void run_agent() {
+void InitSwitch(Device *device) {
 	
-	// Start executing the agent
-	while ( agent->running() ) {
-		
-		
-		
-		// Sleep for a bit
-		COSMOS_SLEEP(SLEEP_TIME);
-	}
+	PDUSwitch *pdu_switch = new PDUSwitch(device->GetName().c_str());
+	if ( !pdu_switch->IsValid() )
+		printf("Failed to add switch '%s'\n", device->GetName().c_str());
+	else
+		printf("Added switch '%s'\n", device->GetName().c_str());
 	
+	device->SetProperty<PDUSwitch*>("handler", pdu_switch);
 }
 
-void add_switch_piece(int switch_id) {
+void SetSwitchState(Device *device, bool enabled) {
 	
-	// Convert the switch ID to its name
-	const std::string &name = Switch::GetSwitchName((SwitchID)switch_id);
-	
-	// Try adding a piece to the COSMOS namespace
-	int pindex = json_createpiece(agent->cinfo, name, DeviceType::SWCH);
-	
-	// Check if an error occurred
-	if ( pindex < 0 ) {
-		// Print error message and exit
-		fprintf(agent->get_debug_fd(), "Failed to add switch '%s': %s\n", name.c_str(), cosmos_error_string(pindex).c_str());
-		agent->shutdown();
-		exit(1);
-	}
-	
-	// Store the COSMOS namespace indices for future reference
-	int cindex = agent->cinfo->pieces[pindex].cidx;
-	int dindex = agent->cinfo->device[cindex].all.didx;
-	
-	switches[switch_id].pindex = pindex;
-	switches[switch_id].cindex = cindex;
-	switches[switch_id].dindex = dindex;
-}
-
-/**
- * @brief init_sensors Sets up the sensors for reading
- */
-void init_switches() {
-	
-	
-	
-	
-	// Add heater switch
-	switches[(int)SwitchID::Heater].sw = new Switch("heater");
-	
-	// Add temperature sensor switch
-	switches[(int)SwitchID::TempSensor].sw = new Switch("temp");
-	
-	// Add sun sensor switch
-	switches[(int)SwitchID::SunSensor].sw = new Switch("ss");
-	
-	// Add payload switch
-	switches[(int)SwitchID::Payload].sw = new Switch("payload");
-	
-}
-
-void set_switch_state(int switch_id, bool enabled) {
-	
-	// Make sure the switch ID is valid
-	if ( switch_id < 0 || switch_id >= SWITCH_COUNT ) {
-		// TODO: handle error
-		return;
-	}
-	
-	// Pull the corresponding SwitchInfo object according the given ID
-	SwitchInfo &swinfo = switches[switch_id];
+	PDUSwitch *pdu_switch = device->GetProperty<PDUSwitch*>("handler");
 	
 	// Turn the switch on or off
-	swinfo.sw->SetState(enabled ? SwitchState::On : SwitchState::Off);
+	bool old_state = pdu_switch->GetState() == SwitchState::On;
+	bool new_state = pdu_switch->SetState(enabled ? SwitchState::On : SwitchState::Off) == SwitchState::On;
+	
+	if ( new_state != enabled )
+		printf("Failed to set switch '%s' to '%s'\n",
+			   device->GetName().c_str(), enabled ? "ON" : "OFF");
+	else if ( new_state != old_state )
+		printf("Set switch '%s' to '%s'\n",
+			   device->GetName().c_str(), enabled ? "ON" : "OFF");
 	
 	// Update switch state
-	agent->cinfo->device[swinfo.cindex].swch.enabled = enabled;
+	device->Timestamp<Switch>();
+	device->SetProperty<Switch::Enabled>(new_state);
+	device->SetProperty<Switch::Voltage>(new_state ? 3.3 : 0);
 }
 
-
-
-/**
- * @brief Enable device request
- * @return 
- */
-int32_t request_enable(char *request, char* response, Agent *agent) {
+string ToLowercase(std::string input) {
+	for (size_t i = 0; i < input.length(); ++i)
+		input[i] = tolower(input[i]);
 	
-	// Strip out the switch name from the request string
-	char switch_name[128];
-	int status = sscanf(request, "%*s %s", switch_name);
-	
-	
-	// Check if the given request is invalid
-	if ( status != 1 ) {
-		
-		// Print an error message
-		sprintf(response, "Usage: enable <name>");
-		return 1;
-	}
-	
-	// Check if 'name' is 'all', in which case all switches should be turned on
-	if ( strcmp(switch_name, "all") == 0 ) {
-		
-		// Enable all switches
-		for (int i = 0; i < SWITCH_COUNT; ++i) {
-			set_switch_state(i, true);
-		}
-		
-		// Print success message
-		sprintf(response, "OK");
-		return 0;
-	}
-	
-	// Convert the switch name to its corresponding ID
-	int switch_id = (int)Switch::GetSwitchID(switch_name);
-	
-	// Check if a switch with the given name exists
-	if ( switch_id < 0 ) {
-		// Print an error message
-		sprintf(response, "No switch with the name '%s' exists.\n", switch_name);
-		return 1;
-	}
-	
-	// Enable the switch
-	set_switch_state(switch_id, true);
-	
-	// Indicate success
-	sprintf(response, "OK");
-	return 0;
+	return input;
 }
 
-int32_t request_disable(char *request, char* response, Agent *agent) {
-	// Strip out the switch name from the request string
-	char switch_name[128];
-	int status = sscanf(request, "%*s %s", switch_name);
+string Request_Switch(vector<string> args) {
 	
+	bool change_state = false;
+	bool state = true;
 	
-	// Check if the given request is invalid
-	if ( status != 1 ) {
-		// Print an error message
-		sprintf(response, "Usage: disable <name>");
-		return 1;
-	}
-	
-	// Check if 'name' is 'all', in which case all switches should be disabled
-	if ( strcmp(switch_name, "all") == 0 ) {
+	if ( args.size() == 1 );
+	else if ( args.size() == 2 ) {
+		change_state = true;
+		args[1] = ToLowercase(args[1]);
 		
-		// Disable all switches
-		for (int i = 0; i < SWITCH_COUNT; ++i) {
-			set_switch_state(i, false);
-		}
+		if ( args[1] == "on" || args[1] == "yes" )
+			state = true;
+		else if ( args[1] == "off" || args[1] == "no" )
+			state = false;
+		else
+			return "Usage: switch switch_name [on | off]";
+	}
+	else
+		return "Usage: switch switch_name [on | off]";
+	
+	// Check if all switches should be set
+	if ( args[0] == "all" ) {
+		SetSwitchState(switch_temp, state);
+		SetSwitchState(switch_sunsensor, state);
+		SetSwitchState(switch_heater, state);
+		return "OK";
+	}
+	
+	Device *device;
+	if ( (device = agent->GetDevice(args[0])) == nullptr )
+		return "No matching switch";
+	
+	if ( change_state ) {
+		SetSwitchState(device, state);
+		return "OK";
+	}
+	else {
+		PDUSwitch *pdu_switch = device->GetProperty<PDUSwitch*>("handler");
 		
-		// Print success message
-		sprintf(response, "OK");
-		return 0;
+		stringstream ss;
+		ss <<	"{";
+		ss <<		"\"enabled\": " << (device->GetProperty<Switch::Voltage>() == 0 ? "false" : "true") << ", ";
+		ss <<		"\"gpio_pin_key\": \"" << pdu_switch->GetPinKey() << "\", ";
+		ss <<		"\"gpio_pin_number\": " << pdu_switch->GetPinNumber();
+		ss <<	"}";
+		
+		return ss.str();
 	}
-	
-	// Convert the switch name to its corresponding ID
-	int switch_id = (int)Switch::GetSwitchID(switch_name);
-	
-	// Check if a switch with the given name exists
-	if ( switch_id < 0 ) {
-		// Print an error message
-		sprintf(response, "No switch with the name '%s' exists.\n", switch_name);
-		return 1;
-	}
-	
-	// Disable the switch
-	set_switch_state(switch_id, false);
-	
-	// Indicate success
-	sprintf(response, "OK");
-	return 0;
 }
 
-int32_t request_status(char *request, char* response, Agent *agent) {
-	// Strip out the switch name from the request string
-	char switch_name[128];
-	int status = sscanf(request, "%*s %s", switch_name);
-	
-	
-	// Check if the given request is invalid
-	if ( status != 1 ) {
-		// Print an error message
-		sprintf(response, "Usage: disable <name>");
-		return 1;
-	}
-	
-	// Convert the switch name to its corresponding ID
-	int switch_id = (int)Switch::GetSwitchID(switch_name);
-	
-	// Check if a switch with the given name exists
-	if ( switch_id < 0 ) {
-		// Print an error message
-		sprintf(response, "No switch with the name '%s' exists.\n", switch_name);
-		return 1;
-	}
-	
-	sprintf(response, "%s", switches[switch_id].sw->GetState() == SwitchState::On ? "On" : "Off");
-	return 0;
-}
-int32_t request_list(char *request, char* response, Agent *agent) {
+string Request_List() {
 	stringstream ss;
 	
+	auto add_switch_info = [&ss](Device *device) {
+		PDUSwitch *pdu_switch = device->GetProperty<PDUSwitch*>("handler");
+		ss <<	"\"" << device->GetName() << "\": {";
+		ss <<		"\"enabled\": " << (device->GetProperty<Switch::Voltage>() == 0 ? "false" : "true") << ", ";
+		ss <<		"\"gpio_pin_key\": \"" << pdu_switch->GetPinKey() << "\", ";
+		ss <<		"\"gpio_pin_number\": " << pdu_switch->GetPinNumber();
+		ss <<	"}, ";
+	};
+	ss << "{";
+	add_switch_info(switch_temp);
+	add_switch_info(switch_sunsensor);
+	add_switch_info(switch_heater);
+	ss << "}";
 	
-	// list all available switches and states
-	for (int i = 0; i < SWITCH_COUNT; ++i) {
-		string switch_name = Switch::GetSwitchName((SwitchID)i);
-		string status = switches[i].sw->GetState() == SwitchState::On? "On" : "Off"; // "Ternary operator"
-		
-		// Add info to string
-		ss << switch_name << ": " << status.c_str();
-		if ( i != SWITCH_COUNT - 1 )
-			ss << ", ";
-	}
-	
-	
-	// Print the switch info to response string
-	sprintf(response, "%s", ss.str().c_str());
-	
-	return 0;
+	return ss.str();
 }

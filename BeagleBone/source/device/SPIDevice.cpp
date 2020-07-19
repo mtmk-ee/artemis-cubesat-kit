@@ -54,14 +54,12 @@ using namespace cubesat;
  * @param bus The SPI bus number X (first digit after spidevX.Y)
  * @param device The device on the bus Y (second digit after spidevX.Y)
  */
-SPIDevice::SPIDevice(unsigned int bus, unsigned int device) : file(-1), bus(bus), device(device) {
+SPIDevice::SPIDevice(unsigned int bus, unsigned int device) : file(-1), bus(bus), device(device), is_open(false) {
 	filename = SPI_PATH + to_string(bus) + "." + to_string(device);
-	mode = SPIDevice::MODE3;
+	mode = SPIDevice::MODE2;
 	this->bits = 8;
 	this->speed = 500000;
 	this->delay = 0;
-	
-	Open();
 }
 
 /**
@@ -75,16 +73,13 @@ int SPIDevice::Open(){
 		return -1;
 	}
 	
-	if ( SetMode(this->mode) == -1 )
+	
+	if ( SetMode(this->mode) < 0 || SetSpeed(this->speed) < 0 || SetBitsPerWord(this->bits) < 0 ) {
+		close(file);
 		return -1;
+	}
 	
-	if ( SetSpeed(this->speed) == -1 )
-		return -1;
-	
-	if ( SetBitsPerWord(this->bits) == -1 )
-		return -1;
-	
-	
+	is_open = true;
 	return 0;
 }
 
@@ -228,11 +223,11 @@ void SPIDevice::DebugDumpRegisters(unsigned int number){
  */
 int SPIDevice::SetSpeed(uint32_t speed){
 	this->speed = speed;
-	if (ioctl(this->file, SPI_IOC_WR_MAX_SPEED_HZ, &this->speed)==-1){
+	if (ioctl(this->file, SPI_IOC_WR_MAX_SPEED_HZ, &this->speed) < 0){
 		perror("SPI: Can't set max speed HZ");
 		return -1;
 	}
-	if (ioctl(this->file, SPI_IOC_RD_MAX_SPEED_HZ, &this->speed)==-1){
+	if (ioctl(this->file, SPI_IOC_RD_MAX_SPEED_HZ, &this->speed) < 0){
 		perror("SPI: Can't get max speed HZ.");
 		return -1;
 	}
@@ -245,12 +240,12 @@ int SPIDevice::SetSpeed(uint32_t speed){
  */
 int SPIDevice::SetMode(SPIDevice::SPIMODE mode){
 	this->mode = mode;
-	if ( ioctl(this->file, SPI_IOC_WR_MODE, &this->mode) == -1 ) {
+	if ( ioctl(this->file, SPI_IOC_WR_MODE, &this->mode) < 0 ) {
 		perror("SPI: Can't set SPI mode.");
 		return -1;
 	}
 	
-	if ( ioctl(this->file, SPI_IOC_RD_MODE, &this->mode) == -1 ) {
+	if ( ioctl(this->file, SPI_IOC_RD_MODE, &this->mode) < 0 ) {
 		perror("SPI: Can't get SPI mode.");
 		return -1;
 	}
@@ -281,10 +276,13 @@ int SPIDevice::SetBitsPerWord(uint8_t bits){
 /**
  *   Close the SPI device
  */
-void SPIDevice::Close(){
+void SPIDevice::Close() {
 	
-	close(file);
-	file = -1;
+	if ( is_open || file > 0 ) {
+		close(file);
+		file = -1;
+		is_open = false;
+	}
 }
 
 /**

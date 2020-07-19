@@ -22,6 +22,16 @@ namespace cubesat {
 		virtual int Open();
 		virtual void Close();
 		
+		inline bool IsOpen() const {
+			return file > 0;
+		}
+		inline unsigned int GetDeviceNumber() const {
+			return device;
+		}
+		inline std::string GetDevicePath() const {
+			return "/dev/ttyO" + std::to_string(device);
+		}
+		
 		
 		virtual void WriteByte(uint8_t byte);
 		virtual void Write(uint8_t byte[], unsigned int len);

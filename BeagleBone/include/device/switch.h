@@ -4,19 +4,16 @@
 
 #define SWITCH_COUNT 4
 
-#define SWITCH_HEATER_NAME "heater"
-#define SWITCH_TEMPSENSOR_NAME "temp"
-#define SWITCH_SUNSENSOR_NAME "ss"
-#define SWITCH_PAYLOAD_NAME "payload"
+#define SWITCH_HEATER_NAME "sw_heater"
+#define SWITCH_TEMPSENSOR_NAME "sw_temp"
+#define SWITCH_SUNSENSOR_NAME "sw_ss"
+#define SWITCH_PAYLOAD_NAME "sw_raspi"
 
 #warning Determine the correct pins
 #define SWITCH_HEATER_KEY "P9_14"
 #define SWITCH_TEMPSENSOR_KEY "P9_14"
 #define SWITCH_SUNSENSOR_KEY "P9_14"
 #define SWITCH_PAYLOAD_KEY "P9_14"
-
-
-
 
 #include "device/GPIO.h"
 
@@ -45,10 +42,13 @@ namespace cubesat {
 	 * @brief A class for controlling the switched lines to the EPS.
 	 * Inherits from the GPIO class
 	 */
-	class Switch : protected GPIO {
+	class PDUSwitch : protected GPIO {
 	public:
-		Switch(const char *name);
-		virtual ~Switch();
+		using GPIO::GetPinKey;
+		using GPIO::GetPinNumber;
+		
+		PDUSwitch(const char *name);
+		virtual ~PDUSwitch();
 		
 		bool IsValid() const {
 			return (int)switch_id >= 0 && (int)switch_id < SWITCH_COUNT;
@@ -66,7 +66,6 @@ namespace cubesat {
 		 * @return The state of the switch
 		 */
 		SwitchState GetState();
-		
 		
 		static const char* GetSwitchName(SwitchID switch_id);
 		static SwitchID GetSwitchID(const char *switch_name);

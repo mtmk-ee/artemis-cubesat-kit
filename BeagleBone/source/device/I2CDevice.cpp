@@ -25,6 +25,7 @@ I2CDevice::I2CDevice() {
 	file = -1;
 	bus = -1;
 	device = -1;
+	is_open = false;
 }
 
 /**
@@ -33,43 +34,65 @@ I2CDevice::I2CDevice() {
  * @param bus The bus number. Usually 0 or 1 on the BBB
  * @param device The device ID on the bus.
  */
-I2CDevice::I2CDevice(uint8_t bus, uint8_t device) : bus(bus), device(device), file(-1) {
-	Open();
+I2CDevice::I2CDevice(uint8_t bus, uint8_t device) : bus(bus), device(device), file(-1), is_open(false) {
+	
+}
+
+std::string I2CDevice::GetDevicePath() const {
+	switch ( bus ) {
+		case 0:
+			return BBB_I2C_0;
+			break;
+		case 1:
+			return BBB_I2C_1;
+			break;
+		case 2:
+			return BBB_I2C_2;
+			break;
+		default:
+			return "";
+	}
 }
 
 /**
  * Open a connection to an I2C device
- * @return 1 on failure to open to the bus or device, 0 on success.
+ * @return -1 on failure to open to the bus or device, 0 on success.
  */
-int I2CDevice::Open(){
-	string name;
+int I2CDevice::Open() {
+	if ( IsOpen() )
+		return -1;
 	
-	switch ( bus ) {
-		case 0:
-			name = BBB_I2C_0;
-			break;
-		case 1:
-			name = BBB_I2C_1;
-			break;
-		case 2:
-			name = BBB_I2C_2;
-			break;
-		default:
-			return 1;
-	}
+	string name = GetDevicePath();
+	
+	if ( name.empty() )
+		return -1;
 	
 	file = open(name.c_str(), O_RDWR);
 	
 	if ( file < 0 ) {
 		perror("Failed to open I2C bus\n");
-		return 1;
+		file = -1;
+		return -1;
 	}
 	
-	if ( ioctl(file, I2C_SLAVE, device) < 0 ) {
+	if ( ioctl(file, I2C_SLAVE, device) != 0 ) {
 		perror("Failed to connect to I2C device\n");
-		return 1;
+		close(file);
+		return -1;
 	}
 	
+	// Try writing to the device to see if it is actually available
+	unsigned char buffer[3];
+	buffer[0] = 0x00;
+	buffer[1] = 0;
+	buffer[2] = 0;
+	
+	if ( write(file, buffer, 3) != 3 ) {
+		close(file);
+		return -1;
+	}
+	
+	is_open = true;
 	return 0;
 }
 
@@ -77,10 +100,13 @@ int I2CDevice::Open(){
  * Write a single byte value to a single register.
  * @param registerAddress The register address
  * @param value The value to be written to the register
- * @return 1 on failure to write, 0 on success.
+ * @return -1 on failure to write, 0 on success.
  */
 
 int I2CDevice::WriteRegister(uint8_t registerAddress, uint16_t value){
+	if ( !IsOpen() )
+		return -1;
+	
 	unsigned char buffer[3];
 	buffer[0] = registerAddress;
 	buffer[1] = value >> 8;
@@ -88,7 +114,7 @@ int I2CDevice::WriteRegister(uint8_t registerAddress, uint16_t value){
    
 	if ( write(file, buffer, 3) != 3 ) {
 	  perror("Failed write to the I2C device\n");
-	  return 1;
+	  return -1;
 	}
 	
 	return 0;
@@ -98,14 +124,17 @@ int I2CDevice::WriteRegister(uint8_t registerAddress, uint16_t value){
  * Write a single value to the I2C device. Used to set up the device to read from a
  * particular address.
  * @param value the value to write to the device
- * @return 1 on failure to write, 0 on success.
+ * @return -1 on failure to write, 0 on success.
  */
 int I2CDevice::Write(uint8_t value){
+	if ( !IsOpen() )
+		return -1;
+	
 	unsigned char buffer[1] = {value};
 	
 	if ( write(file, buffer, 1) != 1 ) {
 		perror("Failed write to the I2C device\n");
-		return 1;
+		return -1;
 	}
 	
 	return 0;
@@ -117,6 +146,8 @@ int I2CDevice::Write(uint8_t value){
  * @return the byte value at the register address.
  */
 uint16_t I2CDevice::ReadRegister(uint8_t registerAddress) {
+	if ( !IsOpen() )
+		return -1;
 	
 	Write(registerAddress);
 	
@@ -124,7 +155,7 @@ uint16_t I2CDevice::ReadRegister(uint8_t registerAddress) {
 	
 	if ( read(this->file, buffer, 2) != 2 ) {
 		perror("Failed to read from I2C device\n");
-		return 1;
+		return -1;
 	}
 	
 	return buffer[0] | (buffer[1] << 8);
@@ -139,6 +170,9 @@ uint16_t I2CDevice::ReadRegister(uint8_t registerAddress) {
  * @return a pointer of type unsigned char* that points to the first element in the block of registers
  */
 int I2CDevice::ReadRegisters(uint8_t *out, uint8_t first_addr, uint8_t len) {
+	if ( !IsOpen() )
+		return -1;
+	
 	this->Write(first_addr);
 	
 	int bytes_read;
@@ -155,15 +189,16 @@ int I2CDevice::ReadRegisters(uint8_t *out, uint8_t first_addr, uint8_t len) {
  * Close the file handles and sets a temporary state to -1.
  */
 void I2CDevice::Close(){
-	close(file);
-	file = -1;
+	if ( IsOpen() ) {
+		close(file);
+		file = -1;
+	}
 }
 
 /**
  * Closes the file on destruction, provided that it has not already been closed.
  */
 I2CDevice::~I2CDevice() {
-	if ( file != -1 )
-		Close();
+	Close();
 }
 
