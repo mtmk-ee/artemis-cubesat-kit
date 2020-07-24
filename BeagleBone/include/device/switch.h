@@ -2,7 +2,7 @@
 #ifndef CUBESAT_DEVICE_SWITCH
 #define CUBESAT_DEVICE_SWITCH
 
-#define SWITCH_COUNT 4
+#define SWITCH_COUNT 3
 
 #define SWITCH_HEATER_NAME "sw_heater"
 #define SWITCH_TEMPSENSOR_NAME "sw_temp"

@@ -116,6 +116,12 @@ GPIO::GPIO(Pin pin) : pin(pin) {
 		printf("GPIO initialized with invalid pin\n");
 	}
 }
+GPIO::GPIO(const char *pin_key) {
+	pin = GetPinByKey(pin_key);
+	if ( pin < 0 ) {
+		printf("GPIO initialized with invalid pin\n");
+	}
+}
 GPIO::~GPIO() {
 	
 }

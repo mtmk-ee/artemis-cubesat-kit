@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <linux/types.h>
+#include <sys/ioctl.h>
 
 
 #define UART_PATH "/dev/ttyO"
@@ -40,10 +41,10 @@ int UARTDevice::Open(){
 	// Try for bone_capemgr.9 first
 	uart = fopen(BONEPATH_9, "w");
 	if(uart == NULL){
-		printf("bone_capemgr.9 doesn't exist. Trying bone_capemgr.8");
+		//printf("bone_capemgr.9 doesn't exist. Trying bone_capemgr.8");
 		uart = fopen(BONEPATH_8, "w");
 		if(uart == NULL){
-			printf("slots didn't open\n");
+			//printf("slots didn't open\n");
 			return -1;
 		}
 	}
@@ -170,6 +171,12 @@ void UARTDevice::Close() {
 
 UARTDevice::~UARTDevice() {
 	Close();
+}
+
+size_t UARTDevice::InWaiting() const {
+	int bytes_available;
+	ioctl(file, FIONREAD, &bytes_available);
+	return bytes_available;
 }
 
 void UARTDevice::WriteByte(uint8_t byte) {

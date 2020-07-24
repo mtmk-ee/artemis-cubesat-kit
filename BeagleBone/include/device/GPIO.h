@@ -35,7 +35,9 @@ namespace cubesat {
 	
 	class GPIO {
 	public:
+		GPIO() : pin(-1) {}
 		GPIO(Pin pin);
+		GPIO(const char *pin_key);
 		virtual ~GPIO();
 		
 		GPIOMode SetMode(GPIOMode mode);
@@ -61,7 +63,6 @@ namespace cubesat {
 		static PinInfo pin_table[97];
 		
 		Pin pin;
-		GPIOValue latest_value;
 	};
 	
 

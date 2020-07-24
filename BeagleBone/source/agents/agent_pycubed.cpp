@@ -1,5 +1,5 @@
 
-#include "utility/SimpleAgent.h"
+#include "CubeSat.h"
 #include "device/PyCubed.h"
 
 #include <iostream>
@@ -23,7 +23,14 @@ using namespace cubesat;
 
 // The agent object which allows for communication with COSMOS
 SimpleAgent *agent;
-Device *imu, *gps, *battery, *radio, *pycubed;
+CPU *pycubed;
+IMU *imu;
+GPS *gps;
+Battery *battery;
+RadioTransceiver *radio;
+Timer connection_timer;
+
+PyCubed *handler = nullptr;
 
 // Tunnel stuff
 static queue<vector<uint8_t> > tun_fifo;
@@ -41,91 +48,21 @@ static uint16_t tunnel_mtu = 512;
 int tun_out, tun_in, gl_in, gl_out = 0;
 
 
-// The PyCubed device handler
-struct {
-	PyCubed *device;
-	uint8_t uart_device;
-	int baud_rate = 9600;
-	
-	bool sent_startup_confirmation = false;
-} pycubed2;
-
-struct {
-	struct {
-		int cindex;
-		int dindex;
-	} obc;
-	
-	struct {
-		int cindex;
-		int dindex;
-	} imu;
-	
-	
-	struct {
-		int cindex;
-		int dindex;
-	} gps;
-	
-	struct {
-		int cindex;
-		int dindex;
-	} radio;
-	
-	struct {
-		int cindex;
-		int dindex;
-	} batt;
-	
-	PyCubedIMUInfo imu_info;
-	PyCubedGPSInfo gps_info;
-	PyCubedPowerInfo power_info;
-	PyCubedTempInfo temp_info;
-} pycubed_info;
-
-// =========== Function Prototypes ===========
-
-/**
- * @brief Sets up the agent. Prints a message and exits with code 1 if an error occurs during setup.
- */
-void InitAgent();
-
-/**
- * @brief Main loop for this agent.
- */
-void run_agent();
-
-
-/**
- * @brief Sets up the pycubed.
- */
-void init_pycubed();
-/**
- * @brief Handles operations of the PyCubed
- */
-void handle_pycubed();
-
-
-void update_namespace();
-
-bool reconnect_pycubed();
-
-
-
-
-/**
- * @brief Callback function for received files from PyCubed.
- * @param name The file location
- */
-void file_received(const std::string &name);
+//! Sets up the PyCubed
+void InitPyCubed();
+//! Tries to connect to the PyCubed
+bool ConnectPyCubed();
+//! Handles operations with the PyCubed
+void UpdatePyCubed();
 
 /**
  * @brief Shutdown callback function
  */
-void shutdown();
+void Shutdown();
 
 
 // Tunnel stuff
+void StartTunnel(const std::string &tunnel_ip);
 void tcv_read_loop();
 void tcv_write_loop();
 void tun_read_loop();
@@ -143,39 +80,233 @@ int32_t request_serial_queue_size(char *request, char *response, Agent *);
 
 
 
-
 int main(int argc, char** argv) {
-	char tunnel_ip[20];
+	std::string tunnel_ip;
 	vector<uint8_t> buffer;
-	std::string dev;
-	int32_t iretn;
 	bool do_tunnel = true;
 	
 	switch ( argc ) {
-		case 3: {
-			dev = argv[2];
+		case 2: {
 			// Get address for tunnel
-			strcpy(tunnel_ip,argv[1]);
+			tunnel_ip = argv[1];
 		} break;
 		default:
-			printf("To establish tunnel: agent_pycubed ip_address device\n");
+			printf("To establish tunnel: agent_pycubed ip_address\n");
 			do_tunnel = false;
 			break;
 	}
 	
 	// Initialize the Agent
-	InitAgent();
+	agent = new SimpleAgent(CUBESAT_AGENT_PYCUBED_NAME);
+	agent->SetLoopPeriod(SLEEP_TIME);
+	
+	agent->AddNodeProperty<Node::PowerUse>(0);
+	agent->AddNodeProperty<Node::PowerGeneration>(0);
+	agent->AddNodeProperty<Node::BatteryCapacity>(3.5f * 4);
+	agent->AddNodeProperty<Node::BatteryPercentage>(0);
 	
 	// Initialize the PyCubed
-	init_pycubed();
+	InitPyCubed();
 	
-	if ( !do_tunnel ) {
-		// Run the main loop for this agent
-		run_agent();
+	// Finish adding properties
+	agent->Finalize();
+	
+	// Debug print
+	agent->DebugPrint(true);
+	
+	// Initialize the network tunnel
+	if ( do_tunnel ) {
+		StartTunnel(tunnel_ip);
 		
-		exit(0);
+		// Start tunnel threads
+		thread tun_read_thread(tun_read_loop);
+		thread tun_write_thread(tun_write_loop);
 	}
 	
+	
+	// Run the main loop for this agent
+	while ( agent->StartLoop() ) {
+		
+		// Try to connect to the PyCubed
+		ConnectPyCubed();
+		
+		// Update the PyCubed
+		UpdatePyCubed();
+	}
+	
+	// Tidy up
+	delete handler;
+	delete agent;
+	
+	
+	return 0;
+}
+
+
+void InitPyCubed() {
+	
+	// Create a new PyCubed device
+	handler = new PyCubed(PYCUBED_UART, PYCUBED_BAUD);
+	handler->SetShutdownCallback(Shutdown);
+	
+	// Add the PyCubed CPU device
+	pycubed = agent->NewDevice<CPU>("pycubed");
+	pycubed->Post(pycubed->utc = Time::Now());
+	pycubed->Post(pycubed->memory_usage = 0);
+	pycubed->Post(pycubed->max_memory = 0.0037252903); // MR25H40MDF RAM
+	pycubed->Post(pycubed->voltage = 0);
+	pycubed->Post(pycubed->current = 0);
+	pycubed->Post(pycubed->up_time = 0);
+	pycubed->Post(pycubed->temperature = 273.15);
+	pycubed->SetCustomProperty<bool>("sent_startup_confirmation", false);
+	pycubed->SetCustomProperty<PyCubed*>("handler", handler);
+	
+	// Add the battery pack
+	battery = agent->NewDevice<Battery>("battery");
+	battery->Post(battery->utc = Time::Now());
+	battery->Post(battery->temperature = 273.15);
+	battery->Post(battery->capacity = 3.5f * 4);
+	battery->Post(battery->efficiency = 0.85f);
+	battery->Post(battery->percentage = 100);
+	battery->Post(battery->voltage = 0);
+	battery->Post(battery->current = 0);
+	
+	// Add the IMU
+	imu = agent->NewDevice<IMU>("imu");
+	imu->Post(imu->utc = Time::Now());
+	imu->Post(imu->temperature = 273.15);
+	imu->Post(imu->acceleration = Vec3());
+	imu->Post(imu->magnetic_field = Vec3());
+	imu->Post(imu->angular_acceleration	= Vec3());
+	
+	// Add the GPS
+	gps = agent->NewDevice<GPS>("gps");
+	gps->Post(gps->utc = Time::Now());
+	gps->Post(gps->location = Location());
+	gps->Post(gps->velocity = Vec3());
+	gps->Post(gps->satellites_used = 0);
+	gps->utc = Time::Now();
+}
+
+bool ConnectPyCubed() {
+	
+	// It's all good if we're already connected
+	if ( handler->IsOpen() )
+		return true;
+	
+	// Try to open the PyCubed device
+	if ( handler->Open() >= 0 ) {
+		
+		// Mark the time the PyCubed was connected to
+		connection_timer.Start();
+		
+		printf("Successfully opened PyCubed device at %s\n", handler->GetDevicePath().c_str());
+		return true;
+	}
+	else {
+		printf("Failed to open PyCubed device at %s\n", handler->GetDevicePath().c_str());
+		
+		// Close the device just in case
+		handler->Close();
+		return false;
+	}
+}
+
+void UpdatePyCubed() {
+	
+	pycubed->enabled = handler->IsOpen();
+	
+	
+	// Make sure the PyCubed is connected
+	if ( !handler->IsOpen() ) {
+		
+		// Set the PyCubed connection status
+		pycubed->enabled = false;
+		pycubed->up_time = 0;
+		
+		// Update timestamps
+		pycubed->utc = Time::Now();
+		battery->utc = Time::Now();
+		imu->utc = Time::Now();
+		gps->utc = Time::Now();
+		
+		return;
+	}
+	
+	// Send startup confirmation
+	if ( !pycubed->GetCustomProperty<bool>("sent_startup_confirmation") ) {
+		handler->StartupConfirmation();
+		pycubed->SetCustomProperty<bool>("sent_startup_confirmation", true);
+	}
+	
+	// Receive messages from pycubed
+	handler->ReceiveMessages();
+	
+	// Get the latest device information
+	PyCubedIMUInfo imu_info = handler->GetIMUInfo();
+	PyCubedGPSInfo gps_info = handler->GetGPSInfo();
+	PyCubedPowerInfo power_info = handler->GetPowerInfo();
+	PyCubedTempInfo temp_info = handler->GetTempInfo();
+	
+	// Store CPU info
+	pycubed->utc = Time::Now();
+	pycubed->voltage = power_info.sys_voltage;
+	pycubed->current = power_info.sys_current;
+	pycubed->temperature = temp_info.cpu_temp;
+	pycubed->up_time = (int)connection_timer.Seconds();
+	
+	// Store battery info
+	battery->utc = Time::Now();
+	battery->voltage = power_info.batt_voltage;
+	battery->current = power_info.batt_current;
+	battery->temperature = temp_info.batt_temp;
+	
+	// Store IMU info
+	imu->utc = Time::Now();
+	imu->temperature = temp_info.cpu_temp;
+	imu->magnetic_field = imu_info.magnetometer;
+	imu->acceleration = imu_info.acceleration;
+	imu->angular_acceleration = imu_info.gyroscope;
+	
+	// Store GPS info
+	gps->utc = Time::Now();
+	gps->location = Location(gps_info.latitude, gps_info.longitude, gps_info.altitude);
+	gps->velocity = Vec3(gps_info.speed, 0, 0);
+	gps->satellites_used = gps_info.sats_used;
+	
+	// Store node info
+	agent->SetNodeProperty<Node::PowerUse>(power_info.batt_current * power_info.batt_voltage);
+	agent->SetNodeProperty<Node::BatteryPercentage>(0); // ?
+}
+
+
+void Shutdown() {
+	
+	// 1. Shut down agents (not agent_switch)
+	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_TEMP_NAME " shutdown");
+	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_SUNSENSOR_NAME " shutdown");
+	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_HEATER_NAME " shutdown");
+	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_RASPI_NAME " shutdown");
+	
+	// 2. Turn off hardware components (agent_switch)
+	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_SWITCH_NAME " disable all");
+	
+	// 3. Give PyCubed permission to take over
+	handler->Handoff();
+	agent->Shutdown();
+	
+	// 4. Shut down the BeagleBone
+	system("shutdown -h now");
+	
+	exit(0);
+}
+
+//===============================================================
+//=========================== TUNNEL ============================
+//===============================================================
+
+
+void StartTunnel(const std::string &tunnel_ip) {
 	// Initialize Gamalink
 	//	gamalink = new GamaLink();
 	//	gamalink->set_debug_level(GamaLink::debugLevel::OFF);
@@ -221,7 +352,7 @@ int main(int argc, char** argv) {
 	
 	// Set interface address
 	
-	inet_pton(AF_INET, tunnel_ip, &addr->sin_addr);
+	inet_pton(AF_INET, tunnel_ip.c_str(), &addr->sin_addr);
 	if (ioctl(tunnel_sock, SIOCSIFADDR, &ifr2) < 0 )
 	{
 		perror("Error setting tunnel address");
@@ -260,165 +391,6 @@ int main(int argc, char** argv) {
 	
 	
 	close(tunnel_sock);
-	
-	// Start tunnel threads
-	thread tun_read_thread(tun_read_loop);
-	thread tun_write_thread(tun_write_loop);
-	
-	
-	// Run the main loop for this agent
-	run_agent();
-	
-	
-	return 0;
-}
-
-
-void InitAgent() {
-	// Create the agent
-	agent = new SimpleAgent(CUBESAT_AGENT_PYCUBED_NAME);
-	agent->SetLoopPeriod(SLEEP_TIME);
-	
-	pycubed = agent->NewDevice<CPU>("pycubed");
-	pycubed->AddProperty<CPU::UTC>(0);
-	pycubed->SetProperty<bool>("sent_startup_confirmation", false);
-	
-	battery = agent->NewDevice<Battery>("battery");
-	battery->AddProperty<Battery::Temperature>(273.15);
-	battery->AddProperty<Battery::UTC>(0);
-	battery->AddProperty<Battery::Capacity>(3.5f * 4);
-	battery->AddProperty<Battery::Efficiency>(0.85f);
-	
-	imu = agent->NewDevice<IMU>("imu");
-	imu->AddProperty<IMU::UTC>(0);
-	imu->AddProperty<IMU::Temperature>(273.15);
-	imu->AddProperty<IMU::Acceleration>(Vec3(0, 0, 0));
-	imu->AddProperty<IMU::Magnetometer>(Vec3(0, 0, 0));
-	imu->AddProperty<IMU::Gyroscope>(Vec3(0, 0, 0));
-	
-	gps = agent->NewDevice<GPS>("gps");
-	gps->AddProperty<GPS::UTC>(0);
-	gps->AddProperty<GPS::Location>(Location(0, 0, 0));
-	gps->AddProperty<GPS::SatellitesUsed>(0);
-}
-
-void run_agent() {
-	
-	// Start executing the agent
-	while ( agent->StartLoop() ) {
-		
-		// Try to connect to the PyCubed if not already connected
-		//reconnect_pycubed();
-		
-		// Update PyCubed communication
-		handle_pycubed();
-		
-		// Update the COSMOS namespace
-		update_namespace();
-	}
-}
-
-
-void init_pycubed() {
-	
-	// Create a new PyCubed device
-	PyCubed *handler = new PyCubed(PYCUBED_UART, PYCUBED_BAUD);
-	handler->SetShutdownCallback(shutdown);
-	
-	pycubed->SetProperty<PyCubed*>("handler", handler);
-}
-
-bool connect_pycubed() {
-	
-	PyCubed *handler = pycubed->GetProperty<PyCubed*>("handler");
-	
-	if ( handler->IsOpen() )
-		return true;
-	
-	if ( handler->Open() >= 0 ) {
-		printf("Successfully opened PyCubed device at %s\n", handler->GetDevicePath().c_str());
-		return true;
-	}
-	else {
-		printf("Failed to open PyCubed device at %s\n", handler->GetDevicePath().c_str());
-		handler->Close();
-		
-		return false;
-	}
-}
-
-void handle_pycubed() {
-	PyCubed *handler = pycubed->GetProperty<PyCubed*>("handler");
-	
-	// Make sure the PyCubed is connected
-	if ( !handler->IsOpen() ) {
-		return;
-	}
-	
-	
-	
-	// Send startup confirmation
-	if ( !pycubed->GetProperty<bool>("sent_startup_confirmation") ) {
-		handler->StartupConfirmation();
-		pycubed->SetProperty<bool>("sent_startup_confirmation", true);
-	}
-	
-	
-	
-	// Receive messages from pycubed
-	handler->ReceiveMessages();
-	
-	// Update information
-	pycubed_info.imu_info = handler->GetIMUInfo();
-	pycubed_info.gps_info = handler->GetGPSInfo();
-	pycubed_info.power_info = handler->GetPowerInfo();
-	pycubed_info.temp_info = handler->GetTempInfo();
-}
-
-void update_namespace() {
-	
-	pycubed->Timestamp<CPU>();
-	pycubed->SetProperty<CPU::Voltage>(pycubed_info.power_info.sys_voltage);
-	pycubed->SetProperty<CPU::Current>(pycubed_info.power_info.sys_current);
-	pycubed->SetProperty<CPU::Temperature>(pycubed_info.temp_info.cpu_temp);
-	
-	battery->Timestamp<Battery>();
-	battery->SetProperty<Battery::Voltage>(pycubed_info.power_info.batt_voltage);
-	battery->SetProperty<Battery::Current>(pycubed_info.power_info.batt_current);
-	battery->SetProperty<Battery::Temperature>(pycubed_info.temp_info.batt_temp);
-	
-	imu->Timestamp<IMU>();
-	imu->SetProperty<IMU::Temperature>(pycubed_info.temp_info.cpu_temp);
-	imu->SetProperty<IMU::Magnetometer>(pycubed_info.imu_info.mag);
-	imu->SetProperty<IMU::Acceleration>(pycubed_info.imu_info.accel);
-	imu->SetProperty<IMU::Gyroscope>(pycubed_info.imu_info.omega);
-	
-	
-	gps->Timestamp<GPS>();
-	gps->SetProperty<GPS::Location>(Location(pycubed_info.gps_info.latitude, pycubed_info.gps_info.longitude, pycubed_info.gps_info.altitude));
-	gps->SetProperty<GPS::SatellitesUsed>(pycubed_info.gps_info.sats_used);
-	
-}
-
-
-void shutdown() {
-	
-	PyCubed *handler = pycubed->GetProperty<PyCubed*>("handler");
-	
-	// 1. Shut down agents (not agent_switch)
-	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_TEMP_NAME " shutdown");
-	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_SUNSENSOR_NAME " shutdown");
-	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_HEATER_NAME " shutdown");
-	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_RASPI_NAME " shutdown");
-	
-	// 2. Turn off hardware components (agent_switch)
-	system("agent " CUBESAT_NODE_NAME " " CUBESAT_AGENT_SWITCH_NAME " disable all");
-	
-	// 3. Give PyCubed permission to take over
-	handler->Handoff();
-	agent->Shutdown();
-	
-	exit(0);
 }
 
 void tun_read_loop() {
@@ -474,7 +446,7 @@ void tcv_read_loop() { // reading from gamalink packet buffer (incoming)
 	while ( agent->IsRunning() ) {
 		
 		if ( handler == nullptr )
-			handler = pycubed->GetProperty<PyCubed*>("handler");
+			handler = pycubed->GetCustomProperty<PyCubed*>("handler");
 		
 		// Read data from receiver port
 		buffer.resize(TUN_BUF_SIZE);
@@ -482,7 +454,7 @@ void tcv_read_loop() { // reading from gamalink packet buffer (incoming)
 		if ( handler == nullptr )
 			nbytes = 0;
 		else
-			nbytes = handler->IsOpen() ? handler->PopIncoming(packet) : 0;
+			nbytes = handler->IsOpen() ? handler->PopIncomingPacket(packet) : 0;
 		
 		if ( nbytes > 0 ) { // Start of mutex for tun FIFO
 			gl_in ++;
@@ -510,7 +482,7 @@ void tcv_write_loop() { // telecommand send gamalink packet (outgoing)
 		tcv_fifo_check.wait(locker);
 		
 		if ( handler == nullptr )
-			handler = pycubed->GetProperty<PyCubed*>("handler");
+			handler = pycubed->GetCustomProperty<PyCubed*>("handler");
 		
 		while ( !tcv_fifo.empty() ) {
 			// Get next packet from transceiver FIFO

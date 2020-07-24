@@ -2,70 +2,88 @@
 #include "device/PyCubed.h"
 
 #include <string>
+#include <sstream>
 
 using namespace std;
 using namespace cubesat;
-using namespace cubesat::detail::pycubed;
 
 PyCubed::PyCubed(uint8_t bus, unsigned int baud) : UARTDevice(bus, baud) {
+	
+	// Add default message parsers
+	AddMessageParser(PYCUBED_PACKET_MSGTYPE, Parser_PKT);
+	
+	// Add default message handlers
+	AddMessageHandler(PYCUBED_PYCUBED_STATUS_MSGTYPE, Handler_PST, 1);
+	AddMessageHandler(PYCUBED_IMU_DATA_MSGTYPE, Handler_IMU, 10);
+	AddMessageHandler(PYCUBED_GPS_DATA_MSGTYPE, Handler_GPS, 10);
+	AddMessageHandler(PYCUBED_TEMP_DATA_MSGTYPE, Handler_TMP, 3);
 	
 }
 PyCubed::~PyCubed() {
 	
 }
 
-int PyCubed::StartupConfirmation() {
-	
+
+bool PyCubed::SendMessage(const std::string &message_type_str, const std::vector<std::string> &args) {
 	if ( !IsOpen() )
-		return -1;
+		return false;
 	
 	
-	char msg[64];
-	int checksum = 0; // TODO
+	stringstream message;
 	
-	int nbytes = sprintf(msg, "$%s,y,n,n,%c", PYCUBED_BEAGLEBONE_STATUS_MSGTYPE, checksum);
+	// Write the syncword
+	message << '$';
 	
-	Write((uint8_t*)msg, nbytes);
+	// Write the type string
+	message << message_type_str;
 	
-	return 0;
-}
-int PyCubed::Handoff() {
-	if ( !IsOpen() )
-		return -1;
+	// Write the arguments
+	for (const string &arg : args)
+		message << ',' << arg;
 	
-	char msg[64];
-	int checksum = 0; // TODO
+	// Compute the checksum (TODO)
+	int checksum = 0;
 	
-	int nbytes = sprintf(msg, "$%s,n,y,n,%c", PYCUBED_BEAGLEBONE_STATUS_MSGTYPE, checksum);
+	// Write the checksum
+	message << ',' << std::setfill('0') << std::setw(2) << checksum;
 	
-	Write((uint8_t*)msg, nbytes);
+	// Write the newline character
+	message << '\n';
 	
-	return 0;
-}
-int PyCubed::KillRadio() {
-	if ( !IsOpen() )
-		return -1;
+	// Write the entire message
+	const char *message_cstr = message.str().c_str();
+	Write((uint8_t*)message_cstr, message.str().length());
 	
-	char msg[64];
-	int checksum = 0; // TODO
-	
-	int nbytes = sprintf(msg, "$%s,n,n,y,%c", PYCUBED_BEAGLEBONE_STATUS_MSGTYPE, checksum);
-	
-	Write((uint8_t*)msg, nbytes);
-	return 0;
+	// Indicate success
+	return true;
 }
 
 int PyCubed::ReceiveMessages() {
+	
+	// Make sure the PyCubed device is open
 	if ( !IsOpen() )
 		return -1;
 	
 	// Counts the number of received messages
-	int i = 0;
+	int num_messages = 0;
 	
 	// Receive messages
-	for (; ReceiveNextMessage(); ++i);
 	
-	return i;
+	while ( InWaiting() != 0 ) {
+		ReceiveNextMessage();
+		++num_messages;
+	}
+	
+	return num_messages;
+}
+
+int PyCubed::PopIncomingPacket(PyCubedPacket &packet) {
+	if ( incoming_packets.size() == 0 )
+		return 0;
+	
+	packet = incoming_packets.front();
+	incoming_packets.pop();
+	return packet.content.data.size();
 }
 
 int PyCubed::TelecommandOutboundPacket(PyCubedDataPacket packet) {
@@ -84,14 +102,15 @@ int PyCubed::TelecommandOutboundPacket(PyCubedDataPacket packet) {
 	// Write the packet data
 	Write(packet.data.data(), packet.data.size());
 	
-	
 	// Write the checksum
 	num_written += sprintf((char*)msg, ",%02x\n", checksum);
 	
+	// Return the total number of bytes written
 	return num_written;
 }
 
 bool PyCubed::ReceiveNextMessage() {
+	// Make sure the PyCubed device is open
 	if ( !IsOpen() )
 		return false;
 	
@@ -105,54 +124,22 @@ bool PyCubed::ReceiveNextMessage() {
 	} while ( (char)buff[0] != '$' );
 	
 		
-	// Read message type and the trailiing comma
+	// Read message type and the trailing comma
 	status = Read(buff, 4);
 	if ( status != 4 ) {
 		return false;
 	}
 	
+	// Get the message type string
+	std::string message_type_str((char*)buff, 0, 3);
 	
-	if ( strncmp((char*)buff, PYCUBED_PACKET_MSGTYPE, 3) == 0 ) {
+	// Check if there is a message handler for this message type
+	if ( handlers.find(message_type_str) != handlers.end() ) {
 		
-		// Read the length of the packet
-		uint8_t length_buff[5];
-		uint8_t *p = length_buff;
-		
-		do {
-			Read(p++, 1);
-		} while ( (char)*(p - 1) != ',' && (p - length_buff) < 4 );
-		
-		length_buff[4] = '\0';
-		int packet_len = atoi((char*)length_buff);
-		
-		char last_message_buff[32];
-		sprintf(last_message_buff, "PKT of length %d", packet_len);
-		strcpy(last_message, last_message_buff);
-		
-		// Read the packet length
-		Read(buff, packet_len);
-		
-		// Add the packet to the queue
-		PyCubedPacket packet;
-		packet.content.data = vector<uint8_t>(buff, buff + packet_len);
-		incoming_packets.push(packet);
-		
-		
-		// Read the checksum
-		uint8_t checksum_buff[4];
-		Read(checksum_buff, 4);
-		checksum_buff[3] = '\0'; // Change newline to null
-		
-		int checksum = atoi((char*)checksum_buff);
-		
-		// TODO: do something with the checksum
-		
-		
-	}
-	else {
+		MessageHandler &handler = handlers[message_type_str];
 		
 		// Read until a newline character is reached
-		uint8_t *p = buff + 4;
+		uint8_t *p = buff;
 		int read_count;
 		do {
 			read_count = Read(p++, 1);
@@ -161,152 +148,165 @@ bool PyCubed::ReceiveNextMessage() {
 		// Replace the newline with a terminating character
 		*(p - 1) = (uint8_t)'\0';
 		
-		// Store the message
-		strncpy(last_message, (char*)buff, 255);
+		// This vector holds the argument strings
+		std::vector<std::string> argument_strings;
+		argument_strings.reserve(handler.num_args);
 		
+		// Split the message by the comma delimiter
+		std::string input((char*)buff, 0, read_count);
+		std::istringstream ss(input);
+		std::string token;
 		
-		if ( strncmp((char*)buff, PYCUBED_PYCUBED_STATUS_MSGTYPE, 3) == 0 ) {
+		while(std::getline(ss, token, ','))
+			argument_strings.push_back(token);
+		
+		// Make sure the number of arguments is correct
+		if ( argument_strings.size() != handler.num_args + 1 ) {
+			printf("Number of arguments received for message type '%s' is incorrect (got %d, expected %d)\n",
+				   message_type_str.c_str(), argument_strings.size() - 1, handler.num_args);
 			
-			char shutdown_flag;
-			int checksum;
-			sscanf((char*)buff, "%*s,%c,%x", &shutdown_flag, &checksum);
-			
-			if ( shutdown_flag == 'y' ) {
-				if ( shutdown_callback != NULL )
-					shutdown_callback();
-				else
-					printf("Shutdown flag received, but no callback is set\n");
-			}
+			return false;
 		}
-		else if ( strncmp((char*)buff, PYCUBED_IMU_DATA_MSGTYPE, 3) == 0 ) {
-			
-			int utc_yyyy;
-			int utc_MM;
-			int utc_dd;
-			int utc_hh;
-			int utc_mm;
-			int utc_ss;
-			float accel_x;
-			float accel_y;
-			float accel_z;
-			float mag_x;
-			float mag_y;
-			float mag_z;
-			float gyro_x;
-			float gyro_y;
-			float gyro_z;
-			int checksum;
-			
-			sscanf((char*)buff, "%*s,%4d%2d%2d%2d%2d%2d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%x",
-				   &utc_yyyy, &utc_MM, &utc_dd, &utc_hh, &utc_mm, &utc_ss,
-				   &accel_x, &accel_y, &accel_z,
-				   &mag_x, &mag_y, &mag_z,
-				   &gyro_x, &gyro_y, &gyro_z,
-				   &checksum);
-			
-			
-			
-			// Update the IMU info
-			imu_info.utc = 0; // TODO
-			imu_info.accel.col[0] = accel_x;
-			imu_info.accel.col[1] = accel_y;
-			imu_info.accel.col[2] = accel_z;
-			imu_info.mag.col[0] = mag_x;
-			imu_info.mag.col[1] = mag_y;
-			imu_info.mag.col[2] = mag_z;
-			imu_info.omega.col[0] = gyro_x;
-			imu_info.omega.col[1] = gyro_y;
-			imu_info.omega.col[2] = gyro_z;
-		}
-		else if ( strncmp((char*)buff, PYCUBED_GPS_DATA_MSGTYPE, 3) == 0 ) {
-			
-			int utc_yyyy;
-			int utc_MM;
-			int utc_dd;
-			int utc_hh;
-			int utc_mm;
-			int utc_ss;
-			char has_fix;
-			float latitude;
-			float longitude;
-			int fix_quality;
-			int sats_used;
-			float altitude;
-			float speed;
-			float azimuth;
-			float horizontal_dilution;
-			int checksum;
-			
-			sscanf((char*)buff, "%*s,%4d%2d%2d%2d%2d%2d,%c,%f,%f,%d,%d,%f,%f,%f,%f,%x",
-				   &utc_yyyy, &utc_MM, &utc_dd, &utc_hh, &utc_mm, &utc_ss,
-				   &has_fix, &latitude, &longitude, &fix_quality, &sats_used,
-				   &altitude, &speed, &azimuth, &horizontal_dilution, &checksum);
-			
-			gps_info.utc = 0; // TODO
-			gps_info.has_fix = has_fix == 'y' ? true : false;
-			gps_info.latitude = latitude;
-			gps_info.longitude = longitude;
-			gps_info.fix_quality = fix_quality;
-			gps_info.sats_used = sats_used;
-			gps_info.altitude = altitude;
-			gps_info.speed = speed;
-			gps_info.azimuth = azimuth;
-			gps_info.horizontal_dilution = horizontal_dilution;
-			
-		}
-		else if ( strncmp((char*)buff, PYCUBED_TEMP_DATA_MSGTYPE, 3) == 0 ) {
-			
-			int utc_yyyy;
-			int utc_MM;
-			int utc_dd;
-			int utc_hh;
-			int utc_mm;
-			int utc_ss;
-			float cpu_temp;
-			float batt_temp;
-			int checksum;
-			
-			sscanf((char*)buff, "%*s,%4d%2d%2d%2d%2d%2d,%f,%f,%x",
-				   &utc_yyyy, &utc_MM, &utc_dd, &utc_hh, &utc_mm, &utc_ss,
-				   &cpu_temp, &batt_temp, &checksum);
-			
-			temp_info.utc = 0; // TODO
-			temp_info.cpu_temp = cpu_temp;
-			temp_info.batt_temp = batt_temp;
-		}
-		else if ( strncmp((char*)buff, PYCUBED_POWER_DATA_MSGTYPE, 3) == 0 ) {
-			
-			
-			int utc_yyyy;
-			int utc_MM;
-			int utc_dd;
-			int utc_hh;
-			int utc_mm;
-			int utc_ss;
-			float batt_voltage;
-			float batt_current;
-			float sys_voltage;
-			float sys_current;
-			int checksum;
-			
-			sscanf((char*)buff, "%*s,%4d%2d%2d%2d%2d%2d,%f,%f,%f,%f,%x",
-				   &utc_yyyy, &utc_MM, &utc_dd, &utc_hh, &utc_mm, &utc_ss,
-				   &batt_voltage, &batt_current,
-				   &sys_voltage, &sys_current, &checksum);
-			
-			power_info.utc = 0; // TODO
-			power_info.batt_voltage = batt_voltage;
-			power_info.batt_current = batt_current;
-			power_info.sys_voltage = sys_voltage;
-			power_info.sys_current = sys_current;
-		}
-		else {
-			printf("Invalid PyCubed message received. Message discarded.");
-		}
+		
+		// Compute the checksum (TODO)
+		int checksum = 0;
+		
+		// Remove the checksum from the argument list
+		argument_strings.pop_back();
+		
+		// Call the message handler
+		return handler.callback(argument_strings, *this);
+	}
+	// Check if there is a message parser for this message type
+	else if ( parsers.find(message_type_str) != parsers.end() ) {
+		return parsers[message_type_str].callback(*(UARTDevice*)this, *this);
+	}
+	// At this point, the message is not supported
+	else {
+		printf("PyCubed message type '%s' is not supported.\n", message_type_str.c_str());
+		return false;
+	}
+}
+
+bool PyCubed::Parser_PKT(UARTDevice &uart, PyCubed &pycubed) {
+	uint8_t buff[256];
+	
+	// Read the length of the packet
+	uint8_t length_buff[5];
+	uint8_t *p = length_buff;
+	
+	do {
+		uart.Read(p++, 1);
+	} while ( (char)*(p - 1) != ',' && (p - length_buff) < 4 );
+	
+	// Convert the packet length string to an integer
+	length_buff[4] = '\0';
+	int packet_len = atoi((char*)length_buff);
+	
+	// Print a debug string
+	printf("Received packet of length %d\n", packet_len);
+	
+	// Read the packet
+	uart.Read(buff, packet_len);
+	
+	// Add the packet to the incoming packet queue
+	PyCubedPacket packet;
+	packet.content.data = vector<uint8_t>(buff, buff + packet_len);
+	pycubed.incoming_packets.push(packet);
+	
+	
+	// Read the checksum
+	uint8_t checksum_buff[4];
+	checksum_buff[3] = '\0'; // Change newline to null
+	
+	int checksum = atoi((char*)checksum_buff + 1);
+	
+	// TODO: do something with the checksum
+	
+	return true;
+}
+bool PyCubed::Handler_PST(std::vector<std::string> args, PyCubed &pycubed) {
+	
+	// Store timestamp (TODO)
+	bool shutdown_requested = args[0][0] == 'y';
+	
+	if ( shutdown_requested ) {
+		if ( pycubed.shutdown_callback != nullptr )
+			pycubed.shutdown_callback();
+		else
+			printf("Shutdown signal received, but no callback is set\n");
 	}
 	
-	
-	
-	// TODO: check if input is awaiting
-	return false;
+	// Indicate success
+	return true;
 }
+bool PyCubed::Handler_IMU(std::vector<std::string> args, PyCubed &pycubed) {
+	
+	// Store timestamp (TODO)
+	string timestamp = args[0];
+	
+	// Store vector values
+	pycubed.imu_info.acceleration.x = atof(args[1].c_str());
+	pycubed.imu_info.acceleration.y = atof(args[2].c_str());
+	pycubed.imu_info.acceleration.z = atof(args[3].c_str());
+	
+	pycubed.imu_info.magnetometer.x = atof(args[4].c_str());
+	pycubed.imu_info.magnetometer.y = atof(args[5].c_str());
+	pycubed.imu_info.magnetometer.z = atof(args[6].c_str());
+	
+	pycubed.imu_info.gyroscope.x = atof(args[7].c_str());
+	pycubed.imu_info.gyroscope.y = atof(args[8].c_str());
+	pycubed.imu_info.gyroscope.z = atof(args[9].c_str());
+	
+	// Indicate success
+	return true;
+}
+bool PyCubed::Handler_GPS(std::vector<std::string> args, PyCubed &pycubed) {
+	
+	// Store timestamp (TODO)
+	string timestamp = args[0];
+	
+	// Check if the GPS has a fix
+	pycubed.gps_info.has_fix = args[1][0] == 'y';
+	
+	// Only store new information if the GPS has a fix
+	if ( pycubed.gps_info.has_fix ) {
+		pycubed.gps_info.latitude = atof(args[2].c_str());
+		pycubed.gps_info.longitude = atof(args[3].c_str());
+		pycubed.gps_info.fix_quality = atoi(args[4].c_str());
+		pycubed.gps_info.sats_used = atoi(args[5].c_str());
+		pycubed.gps_info.altitude = atof(args[6].c_str());
+		pycubed.gps_info.speed = atof(args[7].c_str());
+		pycubed.gps_info.azimuth = atof(args[8].c_str());
+		pycubed.gps_info.horizontal_dilution = atof(args[9].c_str());
+	}
+	
+	// Indicate success
+	return true;
+}
+bool PyCubed::Handler_TMP(std::vector<std::string> args, PyCubed &pycubed) {
+	
+	// Store timestamp (TODO)
+	string timestamp = args[0];
+	
+	// Store temperature readings
+	pycubed.temp_info.cpu_temp = atof(args[1].c_str());
+	pycubed.temp_info.batt_temp = atof(args[2].c_str());
+	
+	return true;
+}
+bool PyCubed::Handler_PWR(std::vector<std::string> args, PyCubed &pycubed) {
+	
+	// Store timestamp (TODO)
+	string timestamp = args[0];
+	
+	// Store power readings
+	pycubed.power_info.batt_voltage = atof(args[1].c_str());
+	pycubed.power_info.batt_current = atof(args[2].c_str());
+	pycubed.power_info.sys_voltage = atof(args[3].c_str());
+	pycubed.power_info.sys_current = atof(args[4].c_str());
+	
+	return true;
+}
+
+

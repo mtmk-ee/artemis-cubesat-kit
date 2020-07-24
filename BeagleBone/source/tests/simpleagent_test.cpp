@@ -1,75 +1,56 @@
 
 #include "utility/SimpleAgent.h"
 
-// Standard headers
-#include <iostream>
-#include <fstream>
-#include <unordered_map>
-#include <dirent.h>
-#include "device/ADT7311.h"
-
 using namespace std;
 using namespace cubesat;
 
-
-SimpleAgent *agent;
-
-string double_value(vector<string> args) {
-	if ( args.size() != 1 ) {
-		return "Usage: double_value number";
-	}
-	return to_string(atof(args[0].c_str()) * 2);
+// A simple request that gives a friendly greeting
+string SayHi() {
+	printf("Hey there! (inside agent)\n");
+	return "Hey there (outside agent)";
 }
 
-int main(int argc, char** argv) {
+int main() {
 	
-	// Create an agent and set how often it runs
-	agent = new SimpleAgent("tempsensor");
-	agent->SetLoopPeriod(2);
+	SimpleAgent *agent = new SimpleAgent("my_agent"); // Create the SimpleAgent
+	agent->SetLoopPeriod(2); // Set the agent to run at 2 second intervals
 	
-	// Add a 'TemperatureSensor' (built in) device
-	Device *my_sensor = agent->NewDevice<TemperatureSensor>("my_sensor");
+	// Create a temperature sensor
+	TemperatureSensor *my_sensor = agent->NewDevice<TemperatureSensor>("my_sensor");
+	my_sensor->Post(my_sensor->utc = Time::Now()); // Set and post the UTC timestamp property
+	my_sensor->Post(my_sensor->temperature = 0); // Set and post the temperature property
 	
-	// Add a property to the device and post it.
-	// Posted properties can be displayed in COSMOS Web
-	my_sensor->SetProperty<TemperatureSensor::Temperature>(0, true);
+	// Post the UTC node property
+	agent->AddNodeProperty<Node::UTC>(Time::Now());
 	
-	// Add a custom property
-	my_sensor->SetProperty<int>("address", 0x68);
+	// Add a request that can be called externally
+	agent->AddRequest("say_hi", SayHi, "Gives you a friendly greeting",
+					  "Prints a greeting inside the agent and returns the greeting as well");
 	
-	agent->AddNodeProperty<Node::UTC>(123);
-	agent->SetNodeProperty<Node::BatteryCapacity>(987654321.0123456789);
+	// Finish setting up the SimpleAgent
+	agent->Finalize(); // Let the agent know we're done posting properties
+	agent->DebugPrint(); // Print out all of the properties and requests
 	
-	// Let the agent know all the posted properties have been added
-	agent->FinalizeDevices();
+	int counter = 0;
 	
-	// Add request functions with aliases
-	agent->AddRequest({"double_value", "twice_value"}, double_value, "Doubles a value");
-	agent->AddRequest({"half_value", "onehalf_value"},
-					  [](vector<string> args) -> string {
-							if ( args.size() != 1 ) {
-								return "Usage: half_value number";
-							}
-							return to_string(atof(args[0].c_str()) / 2);
-						}
-					  , "Halves a value");
-	
-	
-	agent->DebugPrint();
-	
-	int i = 0;
-	
+	// Here comes the main loop...
 	while ( agent->StartLoop() ) {
-		my_sensor->SetProperty<TemperatureSensor::Temperature>(300);
 		
-		agent->SetNodeProperty<Node::UTC>(currentmjd());
-		agent->SetNodeProperty<Node::BatteryCapacity>((float)i);
+		// Update the node timestamp
+		agent->SetNodeProperty<Node::UTC>(Time::Now());
 		
-		++i;
+		// Update values in the sensor. Since these values were posted,
+		// the new values can be viewed externally
+		my_sensor->utc = Time::Now(); // Set the timestamp to the current time
+		my_sensor->temperature = counter; // Set the temperature to a counter value
+		
+		// Increment the counter (in place of actually
+		// doing stuff with hardware)
+		++counter;
 	}
 	
+	// Free any memory associated with the SimpleAgent
 	delete agent;
-	
 	
 	return 0;
 }

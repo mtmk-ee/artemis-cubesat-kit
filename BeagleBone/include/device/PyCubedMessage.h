@@ -7,6 +7,7 @@
 #include <string>
 #include <cstring>
 #include "support/datalib.h"
+#include "utility/Types.h"
 
 #define PYCUBED_BEAGLEBONE_STATUS_MSGTYPE "BST"
 #define PYCUBED_PYCUBED_STATUS_MSGTYPE "PST"
@@ -56,16 +57,17 @@ namespace cubesat {
 	
 	
 	
-	
+	//! Holds IMU information
 	struct PyCubedIMUInfo {
-		float utc;
-		rvector mag;
-		rvector accel;
-		rvector omega;
+		double utc;
+		Vec3 magnetometer;
+		Vec3 acceleration;
+		Vec3 gyroscope;
 	};
 	
+	//! Holds GPS information
 	struct PyCubedGPSInfo {
-		float utc;
+		double utc;
 		bool has_fix;
 		float latitude;
 		float longitude;
@@ -77,49 +79,21 @@ namespace cubesat {
 		float horizontal_dilution;
 	};
 	
+	//! Holds temperature information
 	struct PyCubedTempInfo {
-		float utc;
+		double utc;
 		float cpu_temp;
 		float batt_temp;
 	};
 	
+	//! Holds power information
 	struct PyCubedPowerInfo {
-		float utc;
+		double utc;
 		float batt_voltage;
 		float batt_current;
 		float sys_voltage;
 		float sys_current;
 	};
-	
-	namespace detail {
-		namespace pycubed {
-			
-			
-			// A command sent to the PyCubed
-			enum class TxHeaderType : uint8_t {
-				Handoff, // Notifies PyCubed that it can take over as controller
-				Startup,
-				KillRadio, // Tells PyCubed to disable the radio
-				Enable,
-				Disable,
-				SendFile, // Send file to PyCubed
-			};
-			
-			// A command received from the PyCubed
-			enum class RxHeaderType : uint8_t {
-				Shutdown,
-				ReceiveFile, // Receive file from PyCubed
-				IMUData,
-				GPSData,
-				BattData,
-				PowerData,
-				Packet,
-			};
-			
-			
-			
-		}
-	}
 }
 
 

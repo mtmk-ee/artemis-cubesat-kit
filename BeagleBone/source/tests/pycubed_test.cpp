@@ -80,7 +80,7 @@ int main(int argc, char ** argv) {
 		printf("Polling messages from PyCubed (%d/%d)\n", i, kPollCount);
 		
 		for (; pycubed->ReceiveNextMessage();) {
-			printf("Received message: %s\n", pycubed->GetLastMessage());
+			
 		}
 		
 		// Retrieve device info
@@ -92,9 +92,9 @@ int main(int argc, char ** argv) {
 		printf("======================================\n");
 		printf("IMU Data: \n");
 		printf("\tTimestamp: %f\n", imu.utc);
-		printf("\tAccel:    (%.2f, %.2f, %.2f)\n", imu.accel.col[0], imu.accel.col[1], imu.accel.col[2]);
-		printf("\tMagnetic: (%.2f, %.2f, %.2f)\n", imu.mag.col[0], imu.mag.col[1], imu.mag.col[2]);
-		printf("\tGyro:     (%.2f, %.2f, %.2f)\n", imu.omega.col[0], imu.omega.col[1], imu.omega.col[2]);
+		printf("\tAccel:    (%.2f, %.2f, %.2f)\n", imu.acceleration.x, imu.acceleration.y, imu.acceleration.z);
+		printf("\tMagnetic: (%.2f, %.2f, %.2f)\n", imu.magnetometer.x, imu.magnetometer.y, imu.magnetometer.z);
+		printf("\tGyro:     (%.2f, %.2f, %.2f)\n", imu.gyroscope.x, imu.gyroscope.y, imu.gyroscope.z);
 		printf("\n");
 		
 		printf("GPS Data: \n");

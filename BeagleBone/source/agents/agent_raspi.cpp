@@ -18,22 +18,27 @@ using namespace cubesat;
 
 // The agent object which allows for communication with COSMOS
 SimpleAgent *agent;
-Device *raspi, *camera;
-Device *pycubed, *tempsensors, *sunsensors, *switches, *heater;
+CPU *raspi;
+Camera *camera;
+CustomDevice *pycubed, *tempsensors, *sunsensors, *switches, *heater;
+bool perform_shutdown = false;
+
+Timer up_time_timer;
 
 // =========== Function Prototypes ===========
 //! Attempts to connect to the Raspberry Pi by pinging it
 void ConnectRaspi();
+//! Updates the Raspberry Pi
+void UpdateRaspi();
 //! Reads and stores SOH data from other agents
 void GrabSOHData();
 //! Calls a system command on the Raspberry Pi
 void SystemCall(const std::string &command, std::string &output);
-//! Returns the duration for which the Raspberry Pi has been connected
-size_t GetUpTime();
 
 string Request_DumpData();
 string Request_SSH(vector<string> args);
 string Request_Ping();
+string Request_Shutdown();
 // ===========================================
 
 
@@ -43,23 +48,23 @@ int main(int argc, char** argv) {
 	agent = new SimpleAgent(CUBESAT_AGENT_RASPI_NAME);
 	agent->SetLoopPeriod(SLEEP_TIME);
 	
-	// Add the Raspberry Pi
-	raspi = agent->NewDevice<CPU>("raspi");
-	raspi->AddProperty<CPU::UTC>(0);
-	raspi->AddProperty<CPU::Load>(0);
-	raspi->AddProperty<CPU::MemoryUsed>(0);
-	raspi->AddProperty<CPU::MaxMemory>(0.5);
-	raspi->AddProperty<CPU::BootCount>(0);
-	raspi->AddProperty<CPU::UpTime>(0);
-	raspi->SetProperty<bool>("connected", false);
-	raspi->SetProperty<double>("connection_time", 0);
-	
 	// Add the camera
 	camera = agent->NewDevice<Camera>("camera");
-	camera->AddProperty<Camera::UTC>(0);
-	camera->AddProperty<Camera::Enabled>(0);
-	camera->AddProperty<Camera::PixelWidth>(0);
-	camera->AddProperty<Camera::PixelHeight>(0);
+	camera->Post(camera->utc = 0);
+	camera->Post(camera->enabled = false);
+	camera->Post(camera->pixel_width = 1280);
+	camera->Post(camera->pixel_height = 700);
+	
+	// Add the Raspberry Pi
+	raspi = agent->NewDevice<CPU>("raspi");
+	raspi->Post(raspi->utc = Time::Now());
+	raspi->Post(raspi->temperature = 273.15);
+	raspi->Post(raspi->load = 0);
+	raspi->Post(raspi->memory_usage = 0);
+	raspi->Post(raspi->max_memory = 0.5);
+	raspi->Post(raspi->boot_count = 0);
+	raspi->Post(raspi->up_time = 0);
+	raspi->SetCustomProperty<bool>("connected", false);
 	
 	// Add custom devices to hold SOH data
 	tempsensors = agent->NewDevice<CustomDevice>("agent_temp");
@@ -68,12 +73,13 @@ int main(int argc, char** argv) {
 	pycubed = agent->NewDevice<CustomDevice>("agent_pycubed");
 	switches = agent->NewDevice<CustomDevice>("agent_switch");
 	
-	agent->FinalizeDevices();
+	agent->Finalize();
 	
 	// Add requests
 	agent->AddRequest({"dumpdata", "agentdata"}, Request_DumpData, "Prints data collected from other agents");
 	agent->AddRequest({"ssh", "command"}, Request_SSH, "Runs a command on the Raspberry Pi");
 	agent->AddRequest({"ping", "is_up"}, Request_Ping, "Checks if the Raspberry Pi is up");
+	agent->AddRequest({"shutdown_raspi", "end"}, Request_Shutdown, "Attempts to shut down the Raspberry Pi");
 	
 	agent->DebugPrint();
 	
@@ -81,6 +87,7 @@ int main(int argc, char** argv) {
 	// Run the main loop for this agent
 	while ( agent->StartLoop() ) {
 		ConnectRaspi();
+		UpdateRaspi();
 		GrabSOHData();
 	}
 	
@@ -96,6 +103,8 @@ void ConnectRaspi() {
 	std::string response;
 	const int kNumAttempts = 3;
 	
+	raspi->utc = Time::Now();
+	
 	// Attempt to connect some number of times
 	for (int i = 0; i < kNumAttempts; ++i) {
 		// Run the ping command to check if the raspi is up
@@ -106,11 +115,12 @@ void ConnectRaspi() {
 			printf("RaspberryPi is UP\n");
 			
 			// Set the connection time
-			if ( !raspi->GetProperty<bool>("connected") )
-				raspi->SetProperty<double>("connection_time", currentmjd());
+			if ( !raspi->GetCustomProperty<bool>("connected") ) {
+				up_time_timer.Start();
+			}
 			
-			raspi->SetProperty<bool>("connected", true);
-			raspi->SetProperty<CPU::UpTime>(GetUpTime());
+			raspi->SetCustomProperty<bool>("connected", true);
+			raspi->up_time = (int)up_time_timer.Seconds();
 			
 			return;
 		}
@@ -118,16 +128,39 @@ void ConnectRaspi() {
 			printf("Cannot reach Raspbery Pi. Attempting to reconnect...\n");
 	}
 	
-	raspi->SetProperty<bool>("connected", false);
-	raspi->SetProperty<double>("connection_time", 0);
-	raspi->SetProperty<CPU::UpTime>(0);
+	raspi->SetCustomProperty<bool>("connected", false);
+	raspi->up_time = 0;
 	
 	printf("Failed to connect to Raspberry Pi. Will attempt on next cycle.\n");
 }
 
-size_t GetUpTime() {
-	return utc2unixseconds(currentmjd()) - utc2unixseconds(raspi->GetProperty<double>("connection_time"));
+void UpdateRaspi() {
+	if ( !raspi->GetCustomProperty<bool>("connected") ) {
+		
+		if ( perform_shutdown ) {
+			printf("Cannot shut down the Raspberry Pi: it is not connected\n");
+			perform_shutdown = false;
+		}
+		
+		return;
+	}
+	
+	if ( perform_shutdown ) {
+		
+		printf("Attempting to shut down Raspberry Pi\n");
+		
+		// Create the command string
+		string command = "ssh pi@raspberrypi.local sudo shutdown now";
+		
+		
+		// Call the command
+		string output;
+		SystemCall(command, output);
+		
+		perform_shutdown = false;
+	}
 }
+
 
 void GrabSOHData() {
 	static RemoteAgent agent_temp = agent->FindAgent(CUBESAT_AGENT_TEMP_NAME);
@@ -137,130 +170,132 @@ void GrabSOHData() {
 	static RemoteAgent agent_pycubed = agent->FindAgent(CUBESAT_AGENT_PYCUBED_NAME);
 	
 	// Get values from agent_temp
-	if ( agent_temp.Reconnect() ) {
-		auto values = agent_temp.GetValues({"device_tsen_temp_000", "device_tsen_utc_000",
+	if ( agent_temp.Connect() ) {
+		auto values = agent_temp.GetCOSMOSValues({"device_tsen_temp_000", "device_tsen_utc_000",
 											"device_tsen_temp_001", "device_tsen_utc_001",
 											"device_tsen_temp_002", "device_tsen_utc_002",
 											"device_tsen_temp_003", "device_tsen_utc_003",
 											"device_tsen_temp_004", "device_tsen_utc_004"});
 		if ( !values.empty() ) {
-			tempsensors->SetProperty<bool>("active", true);
+			tempsensors->SetCustomProperty<bool>("active", true);
 			
-			tempsensors->SetProperty<float>("temp_eps", values["device_tsen_temp_000"].nvalue);
-			tempsensors->SetProperty<float>("temp_obc", values["device_tsen_temp_001"].nvalue);
-			tempsensors->SetProperty<float>("temp_raspi", values["device_tsen_temp_002"].nvalue);
-			tempsensors->SetProperty<float>("temp_battery", values["device_tsen_temp_003"].nvalue);
-			tempsensors->SetProperty<float>("temp_pycubed", values["device_tsen_temp_004"].nvalue);
+			tempsensors->SetCustomProperty<float>("temp_eps", values["device_tsen_temp_000"].nvalue);
+			tempsensors->SetCustomProperty<float>("temp_obc", values["device_tsen_temp_001"].nvalue);
+			tempsensors->SetCustomProperty<float>("temp_raspi", values["device_tsen_temp_002"].nvalue);
+			tempsensors->SetCustomProperty<float>("temp_battery", values["device_tsen_temp_003"].nvalue);
+			tempsensors->SetCustomProperty<float>("temp_pycubed", values["device_tsen_temp_004"].nvalue);
 			
-			tempsensors->SetProperty<double>("utc_eps", values["device_tsen_utc_000"].nvalue);
-			tempsensors->SetProperty<double>("utc_obc", values["device_tsen_utc_001"].nvalue);
-			tempsensors->SetProperty<double>("utc_raspi", values["device_tsen_utc_002"].nvalue);
-			tempsensors->SetProperty<double>("utc_battery", values["device_tsen_utc_003"].nvalue);
-			tempsensors->SetProperty<double>("utc_pycubed", values["device_tsen_utc_004"].nvalue);
+			tempsensors->SetCustomProperty<double>("utc_eps", values["device_tsen_utc_000"].nvalue);
+			tempsensors->SetCustomProperty<double>("utc_obc", values["device_tsen_utc_001"].nvalue);
+			tempsensors->SetCustomProperty<double>("utc_raspi", values["device_tsen_utc_002"].nvalue);
+			tempsensors->SetCustomProperty<double>("utc_battery", values["device_tsen_utc_003"].nvalue);
+			tempsensors->SetCustomProperty<double>("utc_pycubed", values["device_tsen_utc_004"].nvalue);
+			
+			raspi->temperature = values["device_tsen_temp_002"].nvalue;
 		}
 		else
-			tempsensors->SetProperty<bool>("active", false);
+			tempsensors->SetCustomProperty<bool>("active", false);
 	}
 	else
-		tempsensors->SetProperty<bool>("active", false);
+		tempsensors->SetCustomProperty<bool>("active", false);
 	
 	// Get values from agent_sunsensor
-	if ( agent_sunsensor.Reconnect() ) {
-		auto values = agent_sunsensor.GetValues({"device_ssen_temp_000", "device_ssen_utc_000",
+	if ( agent_sunsensor.Connect() ) {
+		auto values = agent_sunsensor.GetCOSMOSValues({"device_ssen_temp_000", "device_ssen_utc_000",
 												 "device_ssen_temp_001", "device_ssen_utc_001",
 												 "device_ssen_temp_002", "device_ssen_utc_002",
 												 "device_ssen_temp_003", "device_ssen_utc_003",
 												 "device_ssen_temp_004", "device_ssen_utc_004",
 												 "device_ssen_temp_005", "device_ssen_utc_005"});
 		if ( !values.empty() ) {
-			sunsensors->SetProperty<bool>("active", true);
+			sunsensors->SetCustomProperty<bool>("active", true);
 			
-			sunsensors->SetProperty<float>("lux_plusx", values["device_ssen_temp_000"].nvalue);
-			sunsensors->SetProperty<float>("lux_minusx", values["device_ssen_temp_001"].nvalue);
-			sunsensors->SetProperty<float>("lux_plusy", values["device_ssen_temp_002"].nvalue);
-			sunsensors->SetProperty<float>("lux_minusy", values["device_ssen_temp_003"].nvalue);
-			sunsensors->SetProperty<float>("lux_plusy", values["device_ssen_temp_004"].nvalue);
-			sunsensors->SetProperty<float>("lux_minusy", values["device_ssen_temp_005"].nvalue);
+			sunsensors->SetCustomProperty<float>("lux_plusx", values["device_ssen_temp_000"].nvalue);
+			sunsensors->SetCustomProperty<float>("lux_minusx", values["device_ssen_temp_001"].nvalue);
+			sunsensors->SetCustomProperty<float>("lux_plusy", values["device_ssen_temp_002"].nvalue);
+			sunsensors->SetCustomProperty<float>("lux_minusy", values["device_ssen_temp_003"].nvalue);
+			sunsensors->SetCustomProperty<float>("lux_plusy", values["device_ssen_temp_004"].nvalue);
+			sunsensors->SetCustomProperty<float>("lux_minusy", values["device_ssen_temp_005"].nvalue);
 			
-			sunsensors->SetProperty<double>("utc_plusx", values["device_ssen_utc_000"].nvalue);
-			sunsensors->SetProperty<double>("utc_minusx", values["device_ssen_utc_001"].nvalue);
-			sunsensors->SetProperty<double>("utc_plusy", values["device_ssen_utc_002"].nvalue);
-			sunsensors->SetProperty<double>("utc_minusy", values["device_ssen_utc_003"].nvalue);
-			sunsensors->SetProperty<double>("utc_plusz", values["device_ssen_utc_004"].nvalue);
-			sunsensors->SetProperty<double>("utc_minusz", values["device_ssen_utc_005"].nvalue);
+			sunsensors->SetCustomProperty<double>("utc_plusx", values["device_ssen_utc_000"].nvalue);
+			sunsensors->SetCustomProperty<double>("utc_minusx", values["device_ssen_utc_001"].nvalue);
+			sunsensors->SetCustomProperty<double>("utc_plusy", values["device_ssen_utc_002"].nvalue);
+			sunsensors->SetCustomProperty<double>("utc_minusy", values["device_ssen_utc_003"].nvalue);
+			sunsensors->SetCustomProperty<double>("utc_plusz", values["device_ssen_utc_004"].nvalue);
+			sunsensors->SetCustomProperty<double>("utc_minusz", values["device_ssen_utc_005"].nvalue);
 		}
 		else
-			sunsensors->SetProperty<bool>("active", false);
+			sunsensors->SetCustomProperty<bool>("active", false);
 	}
 	else
-		sunsensors->SetProperty<bool>("active", false);
+		sunsensors->SetCustomProperty<bool>("active", false);
 	
 	// Get values from agent_heater
-	if ( agent_heater.Reconnect() ) {
-		auto values = agent_heater.GetValues({"device_htr_volt_000", "device_htr_utc_000"});
+	if ( agent_heater.Connect() ) {
+		auto values = agent_heater.GetCOSMOSValues({"device_htr_volt_000", "device_htr_utc_000"});
 		
 		if ( !values.empty() ) {
-			heater->SetProperty<bool>("active", true);
+			heater->SetCustomProperty<bool>("active", true);
 			
-			heater->SetProperty<bool>("enabled", values["device_htr_volt_000"].nvalue != 0.0);
-			heater->SetProperty<double>("utc", values["device_htr_utc_000"].nvalue);
+			heater->SetCustomProperty<bool>("enabled", values["device_htr_volt_000"].nvalue != 0.0);
+			heater->SetCustomProperty<double>("utc", values["device_htr_utc_000"].nvalue);
 		}
 	}
 	
 	// Get values from agent_switch
-	if ( agent_switch.Reconnect() ) {
-		auto values = agent_switch.GetValues({"device_swch_volt_000", "device_swch_utc_000",
+	if ( agent_switch.Connect() ) {
+		auto values = agent_switch.GetCOSMOSValues({"device_swch_volt_000", "device_swch_utc_000",
 											  "device_swch_volt_001", "device_swch_utc_001",
 											  "device_swch_volt_002", "device_swch_utc_002"});
 		if ( !values.empty() ) {
-			switches->SetProperty<bool>("active", true);
+			switches->SetCustomProperty<bool>("active", true);
 			
-			switches->SetProperty<bool>("sw_temp", values["device_swch_volt_000"].nvalue != 0.0);
-			switches->SetProperty<bool>("sw_sunsensor", values["device_swch_volt_001"].nvalue != 0.0);
-			switches->SetProperty<bool>("sw_heater", values["device_swch_volt_002"].nvalue != 0.0);
+			switches->SetCustomProperty<bool>("sw_temp", values["device_swch_volt_000"].nvalue != 0.0);
+			switches->SetCustomProperty<bool>("sw_sunsensor", values["device_swch_volt_001"].nvalue != 0.0);
+			switches->SetCustomProperty<bool>("sw_heater", values["device_swch_volt_002"].nvalue != 0.0);
 			
-			switches->SetProperty<double>("utc_temp", values["device_swch_utc_000"].nvalue);
-			switches->SetProperty<double>("utc_sunsensor", values["device_swch_utc_001"].nvalue);
-			switches->SetProperty<double>("utc_heater", values["device_swch_utc_002"].nvalue);
+			switches->SetCustomProperty<double>("utc_temp", values["device_swch_utc_000"].nvalue);
+			switches->SetCustomProperty<double>("utc_sunsensor", values["device_swch_utc_001"].nvalue);
+			switches->SetCustomProperty<double>("utc_heater", values["device_swch_utc_002"].nvalue);
 		}
 		else
-			switches->SetProperty<bool>("active", false);
+			switches->SetCustomProperty<bool>("active", false);
 	}
 	else
-		switches->SetProperty<bool>("active", false);
+		switches->SetCustomProperty<bool>("active", false);
 	
 	// Get values from agent_pycubed
-	if ( agent_pycubed.Reconnect() ) {
-		auto values = agent_switch.GetValues({"device_imu_mag_x_000", "device_imu_mag_y_000", "device_imu_mag_z_000",
+	if ( agent_pycubed.Connect() ) {
+		auto values = agent_switch.GetCOSMOSValues({"device_imu_mag_x_000", "device_imu_mag_y_000", "device_imu_mag_z_000",
 											  "device_imu_accel_x_000", "device_imu_accel_y_000", "device_imu_accel_z_000",
 											  "device_imu_omega_x_000", "device_imu_omega_y_000", "device_imu_omega_z_000", "device_imu_utc_000",
 											  "device_cpu_volt_000", "device_cpu_amp_000", "device_cpu_utc_000",
 											  "device_batt_volt_000", "device_batt_amp_000", "device_batt_utc_000"});
 		if ( !values.empty() ) {
-			pycubed->SetProperty<bool>("active", true);
+			pycubed->SetCustomProperty<bool>("active", true);
 			
-			pycubed->SetProperty<double>("imu_utc", values["device_imu_utc_000"].nvalue);
-			pycubed->SetProperty<float>("imu_mag_x", values["device_imu_mag_x_000"].nvalue);
-			pycubed->SetProperty<float>("imu_mag_y", values["device_imu_mag_y_000"].nvalue);
-			pycubed->SetProperty<float>("imu_mag_z", values["device_imu_mag_z_000"].nvalue);
-			pycubed->SetProperty<float>("imu_accel_x", values["device_imu_accel_x_000"].nvalue);
-			pycubed->SetProperty<float>("imu_accel_y", values["device_imu_accel_y_000"].nvalue);
-			pycubed->SetProperty<float>("imu_accel_z", values["device_imu_accel_z_000"].nvalue);
-			pycubed->SetProperty<float>("imu_gyro_x", values["device_imu_omega_000"].nvalue);
-			pycubed->SetProperty<float>("imu_gyro_y", values["device_imu_omega_y_000"].nvalue);
-			pycubed->SetProperty<float>("imu_gyro_z", values["device_imu_omega_z_000"].nvalue);
+			pycubed->SetCustomProperty<double>("imu_utc", values["device_imu_utc_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_mag_x", values["device_imu_mag_x_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_mag_y", values["device_imu_mag_y_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_mag_z", values["device_imu_mag_z_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_accel_x", values["device_imu_accel_x_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_accel_y", values["device_imu_accel_y_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_accel_z", values["device_imu_accel_z_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_gyro_x", values["device_imu_omega_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_gyro_y", values["device_imu_omega_y_000"].nvalue);
+			pycubed->SetCustomProperty<float>("imu_gyro_z", values["device_imu_omega_z_000"].nvalue);
 			
-			pycubed->SetProperty<float>("power_utc", values["device_cpu_utc_000"].nvalue);
-			pycubed->SetProperty<float>("sys_voltage", values["device_cpu_volt_000"].nvalue);
-			pycubed->SetProperty<float>("sys_current", values["device_cpu_amp_000"].nvalue);
-			pycubed->SetProperty<float>("batt_voltage", values["device_batt_volt_000"].nvalue);
-			pycubed->SetProperty<float>("batt_current", values["device_batt_amp_000"].nvalue);
+			pycubed->SetCustomProperty<float>("power_utc", values["device_cpu_utc_000"].nvalue);
+			pycubed->SetCustomProperty<float>("sys_voltage", values["device_cpu_volt_000"].nvalue);
+			pycubed->SetCustomProperty<float>("sys_current", values["device_cpu_amp_000"].nvalue);
+			pycubed->SetCustomProperty<float>("batt_voltage", values["device_batt_volt_000"].nvalue);
+			pycubed->SetCustomProperty<float>("batt_current", values["device_batt_amp_000"].nvalue);
 		}
 		else
-			pycubed->SetProperty<bool>("active", false);
+			pycubed->SetCustomProperty<bool>("active", false);
 	}
 	else
-		pycubed->SetProperty<bool>("active", false);
+		pycubed->SetCustomProperty<bool>("active", false);
 }
 
 
@@ -286,63 +321,63 @@ string Request_DumpData() {
 	ss << "{";
 	
 	ss <<	"\"agent_temp\": {";
-	ss <<		"\"active\": " << (tempsensors->GetProperty<bool>("active") ? "true" : "false") << ", ";
-	ss <<		"\"temp_eps\": " << tempsensors->GetProperty<float>("temp_eps") << ", ";
-	ss <<		"\"temp_obc\": " << tempsensors->GetProperty<float>("temp_obc") << ", ";
-	ss <<		"\"temp_raspi\": " << tempsensors->GetProperty<float>("temp_raspi") << ", ";
-	ss <<		"\"temp_battery\": " << tempsensors->GetProperty<float>("temp_battery") << ", ";
-	ss <<		"\"temp_pycubed\": " << tempsensors->GetProperty<float>("temp_pycubed");
+	ss <<		"\"active\": " << (tempsensors->GetCustomProperty<bool>("active") ? "true" : "false") << ", ";
+	ss <<		"\"temp_eps\": " << tempsensors->GetCustomProperty<float>("temp_eps") << ", ";
+	ss <<		"\"temp_obc\": " << tempsensors->GetCustomProperty<float>("temp_obc") << ", ";
+	ss <<		"\"temp_raspi\": " << tempsensors->GetCustomProperty<float>("temp_raspi") << ", ";
+	ss <<		"\"temp_battery\": " << tempsensors->GetCustomProperty<float>("temp_battery") << ", ";
+	ss <<		"\"temp_pycubed\": " << tempsensors->GetCustomProperty<float>("temp_pycubed");
 	ss <<	"}, ";
 	
 	ss <<	"\"agent_sunsensor\": {";
-	ss <<		"\"active\": " << (sunsensors->GetProperty<bool>("active") ? "true" : "false") << ", ";
-	ss <<		"\"ss_plusx\": " << tempsensors->GetProperty<float>("lux_plusx") << ", ";
-	ss <<		"\"ss_minusx\": " << tempsensors->GetProperty<float>("lux_minusx") << ", ";
-	ss <<		"\"ss_plusy\": " << tempsensors->GetProperty<float>("lux_plusy") << ", ";
-	ss <<		"\"ss_minusy\": " << tempsensors->GetProperty<float>("lux_minusy") << ", ";
-	ss <<		"\"ss_plusz\": " << tempsensors->GetProperty<float>("lux_plusz") << ", ";
-	ss <<		"\"ss_minusz\": " << tempsensors->GetProperty<float>("lux_minusz");
+	ss <<		"\"active\": " << (sunsensors->GetCustomProperty<bool>("active") ? "true" : "false") << ", ";
+	ss <<		"\"ss_plusx\": " << tempsensors->GetCustomProperty<float>("lux_plusx") << ", ";
+	ss <<		"\"ss_minusx\": " << tempsensors->GetCustomProperty<float>("lux_minusx") << ", ";
+	ss <<		"\"ss_plusy\": " << tempsensors->GetCustomProperty<float>("lux_plusy") << ", ";
+	ss <<		"\"ss_minusy\": " << tempsensors->GetCustomProperty<float>("lux_minusy") << ", ";
+	ss <<		"\"ss_plusz\": " << tempsensors->GetCustomProperty<float>("lux_plusz") << ", ";
+	ss <<		"\"ss_minusz\": " << tempsensors->GetCustomProperty<float>("lux_minusz");
 	ss <<	"}, ";
 	
 	ss <<	"\"agent_pycubed\": {";
-	ss <<		"\"active\": " << (pycubed->GetProperty<bool>("active") ? "true" : "false") << ", ";
+	ss <<		"\"active\": " << (pycubed->GetCustomProperty<bool>("active") ? "true" : "false") << ", ";
 	ss <<		"\"imu\": {";
 	ss <<			"\"accel\": [";
-	ss <<				 pycubed->GetProperty<float>("imu_accel_x") << ", ";
-	ss <<				 pycubed->GetProperty<float>("imu_accel_y") << ", ";
-	ss <<				 pycubed->GetProperty<float>("imu_accel_z");
+	ss <<				 pycubed->GetCustomProperty<float>("imu_accel_x") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("imu_accel_y") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("imu_accel_z");
 	ss <<			"], ";
 	ss <<			"\"mag\": [";
-	ss <<				 pycubed->GetProperty<float>("imu_mag_x") << ", ";
-	ss <<				 pycubed->GetProperty<float>("imu_mag_y") << ", ";
-	ss <<				 pycubed->GetProperty<float>("imu_mag_z");
+	ss <<				 pycubed->GetCustomProperty<float>("imu_mag_x") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("imu_mag_y") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("imu_mag_z");
 	ss <<			"], ";
 	ss <<			"\"gyro\": [";
-	ss <<				 pycubed->GetProperty<float>("imu_gyro_x") << ", ";
-	ss <<				 pycubed->GetProperty<float>("imu_gyro_y") << ", ";
-	ss <<				 pycubed->GetProperty<float>("imu_gyro_z");
+	ss <<				 pycubed->GetCustomProperty<float>("imu_gyro_x") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("imu_gyro_y") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("imu_gyro_z");
 	ss <<			"]";
 	ss <<		"}, ";
 	ss <<		"\"power\": {";
-	ss <<			"\"batt_voltage\": " << pycubed->GetProperty<float>("batt_voltage") << ", ";
-	ss <<			"\"batt_current\": " << pycubed->GetProperty<float>("batt_current") << ", ";
-	ss <<			"\"sys_voltage\": " << pycubed->GetProperty<float>("sys_voltage") << ", ";
-	ss <<			"\"sys_current\": " << pycubed->GetProperty<float>("sys_current");
+	ss <<			"\"batt_voltage\": " << pycubed->GetCustomProperty<float>("batt_voltage") << ", ";
+	ss <<			"\"batt_current\": " << pycubed->GetCustomProperty<float>("batt_current") << ", ";
+	ss <<			"\"sys_voltage\": " << pycubed->GetCustomProperty<float>("sys_voltage") << ", ";
+	ss <<			"\"sys_current\": " << pycubed->GetCustomProperty<float>("sys_current");
 	ss <<		"}";
 	ss <<	"}, ";
 	
 	ss <<	"\"agent_switch\": {";
-	ss <<		"\"active\": " << (switches->GetProperty<bool>("active") ? "true" : "false") << ", ";
+	ss <<		"\"active\": " << (switches->GetCustomProperty<bool>("active") ? "true" : "false") << ", ";
 	ss <<		"\"enabled\": [";
-	ss <<			(switches->GetProperty<bool>("sw_temp") ? "true" : "false") << ", ";
-	ss <<			(switches->GetProperty<bool>("sw_sunsensor") ? "true" : "false") << ", ";
-	ss <<			(switches->GetProperty<bool>("sw_heater") ? "true" : "false") << ", ";
+	ss <<			(switches->GetCustomProperty<bool>("sw_temp") ? "true" : "false") << ", ";
+	ss <<			(switches->GetCustomProperty<bool>("sw_sunsensor") ? "true" : "false") << ", ";
+	ss <<			(switches->GetCustomProperty<bool>("sw_heater") ? "true" : "false") << ", ";
 	ss <<		"]";
 	ss <<	"}, ";
 	
 	ss <<	"\"agent_heater\": {";
-	ss <<		"\"active\": " << (heater->GetProperty<bool>("active") ? "true" : "false") << ", ";
-	ss <<		"\"enabled\": " << (heater->GetProperty<bool>("enabled") ? "true" : "false");
+	ss <<		"\"active\": " << (heater->GetCustomProperty<bool>("active") ? "true" : "false") << ", ";
+	ss <<		"\"enabled\": " << (heater->GetCustomProperty<bool>("enabled") ? "true" : "false");
 	ss <<	"},";
 	
 	ss <<	"\"agent_raspi\": {";
@@ -394,5 +429,9 @@ string Request_Ping() {
 		}
 	}
 	return "DOWN";
+}
+string Request_Shutdown() {
+	perform_shutdown = true;
+	return "OK";
 }
 

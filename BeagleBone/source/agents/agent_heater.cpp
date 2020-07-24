@@ -21,23 +21,15 @@ using namespace cubesat;
 
 // The agent object which allows for communication with COSMOS
 SimpleAgent *agent;
-Device *heater;
-Device *temp_eps, *temp_obc, *temp_raspi, *temp_battery, *temp_pycubed;
+Heater *heater;
+
+TemperatureSensor *temp_sensor[TEMPSENSOR_COUNT];
 
 
 // Other settings
 float heater_enable_temp = 5; // Enable heater when temperatures are below this value (celcius)
 float heater_disable_temp = 20; // Disable heater when temperatures are above this value (celcius)
 
-
-
-// =========== Function Prototypes ===========
-
-
-/**
- * @brief Sets up the heaters.
- */
-void InitHeaters();
 /**
  * @brief Checks the latest temperatures and handles activation of the heaters if necessary.
  */
@@ -54,18 +46,13 @@ void SetHeaterState(bool enabled);
 
 
 //! Request to enable the heaters
-string Request_Enable() {
-	SetHeaterState(true);
-	
-	return "OK";
-}
+string Request_Enable();
 //! Request to disable the heaters
-string Request_Disable() {
-	SetHeaterState(false);
-	
-	return "OK";
-}
-// ===========================================
+string Request_Disable();
+//! Request to set the heater state
+string Request_Set(vector<string> args);
+//! Request to check the heater state
+string Request_Get();
 
 
 
@@ -74,37 +61,43 @@ int main(int argc, char** argv) {
 	agent = new SimpleAgent(CUBESAT_AGENT_HEATER_NAME, CUBESAT_NODE_NAME, true);
 	agent->CrashIfNotOpen();
 	agent->SetLoopPeriod(SLEEP_TIME);
-	
+	currentmjd();
 	
 	// Add heater
 	heater = agent->NewDevice<Heater>("heater");
-	heater->AddProperty<Heater::Enabled>(false);
-	heater->AddProperty<Heater::UTC>(0);
+	heater->Post(heater->utc);
+	heater->Post(heater->enabled);
+	heater->Post(heater->voltage);
+	heater->utc = Time::Now();
+	heater->enabled =false;
+	heater->voltage = 0;
 	
 	// Add temperature sensors and set default values
-	temp_eps = agent->NewDevice<TemperatureSensor>("temp_eps");
-	temp_obc = agent->NewDevice<TemperatureSensor>("temp_obc");
-	temp_raspi = agent->NewDevice<TemperatureSensor>("temp_raspi");
-	temp_battery = agent->NewDevice<TemperatureSensor>("temp_battery");
-	temp_pycubed = agent->NewDevice<TemperatureSensor>("temp_pycubed");
-	temp_eps->SetProperty<TemperatureSensor::Temperature>(273.15);
-	temp_obc->SetProperty<TemperatureSensor::Temperature>(273.15);
-	temp_raspi->SetProperty<TemperatureSensor::Temperature>(273.15);
-	temp_battery->SetProperty<TemperatureSensor::Temperature>(273.15);
-	temp_pycubed->SetProperty<TemperatureSensor::Temperature>(273.15);
+	temp_sensor[0] = agent->NewDevice<TemperatureSensor>("temp_eps");
+	temp_sensor[1] = agent->NewDevice<TemperatureSensor>("temp_obc");
+	temp_sensor[2] = agent->NewDevice<TemperatureSensor>("temp_raspi");
+	temp_sensor[3] = agent->NewDevice<TemperatureSensor>("temp_battery");
+	temp_sensor[4] = agent->NewDevice<TemperatureSensor>("temp_pycubed");
+	
+	for (int i = 0; i < TEMPSENSOR_COUNT; ++i) {
+		temp_sensor[i]->utc = Time::Now();
+		temp_sensor[i]->temperature = 273.15;
+	}
 	
 	// Let the agent know all the devices have been set up
-	agent->FinalizeDevices();
+	agent->Finalize();
 	
 	// Add request callbacks
-	agent->AddRequest({"enable", "on"}, Request_Enable, "Enables the heater", "Enables the heater", true);
-	agent->AddRequest({"disable", "off"}, Request_Disable, "Disables the heater", "Disables the heater", true);
+	agent->AddRequest({"enable", "on"}, Request_Enable, "Enables the heater", "Enables the heater");
+	agent->AddRequest({"disable", "off"}, Request_Disable, "Disables the heater", "Disables the heater");
+	agent->AddRequest("set", Request_Set, "Sets the state of the heater", "Usage: set [on | off]");
+	agent->AddRequest({"state", "get"}, Request_Get, "Gets the state of the heater");
 	
 	// Debug print
 	agent->DebugPrint();
 	
-	// Initialize the heaters
-	InitHeaters();
+	// Make sure the heater is disabled
+	SetHeaterState(false);
 	
 	
 	// Start executing the agent
@@ -121,21 +114,16 @@ int main(int argc, char** argv) {
 }
 
 
-void InitHeaters() {
-	// TODO
-}
-
-
 void GetTemperatures() {
 	static RemoteAgent agent_temp = agent->FindAgent(CUBESAT_AGENT_TEMP_NAME);
 	
 	// Attempt to reconnect to agent_temp
-	if ( !agent_temp.Reconnect() ) {
+	if ( !agent_temp.Connect() ) {
 		return;
 	}
 	
 	// Get the temperature and timestamp values from agent_temp
-	auto values = agent_temp.GetValues({
+	auto values = agent_temp.GetCOSMOSValues({
 										   "device_tsen_temp_000", "device_tsen_utc_000",
 										   "device_tsen_temp_001", "device_tsen_utc_001",
 										   "device_tsen_temp_002", "device_tsen_utc_002",
@@ -149,19 +137,11 @@ void GetTemperatures() {
 		return;
 	}
 	
-	// Store the temperatures
-	temp_eps->SetProperty<TemperatureSensor::Temperature>(values["device_tsen_temp_000"].nvalue);
-	temp_obc->SetProperty<TemperatureSensor::Temperature>(values["device_tsen_temp_001"].nvalue);
-	temp_raspi->SetProperty<TemperatureSensor::Temperature>(values["device_tsen_temp_002"].nvalue);
-	temp_battery->SetProperty<TemperatureSensor::Temperature>(values["device_tsen_temp_003"].nvalue);
-	temp_pycubed->SetProperty<TemperatureSensor::Temperature>(values["device_tsen_temp_004"].nvalue);
-	
-	// Store the timestamps
-	temp_eps->SetProperty<TemperatureSensor::UTC>(values["device_tsen_utc_000"].nvalue);
-	temp_obc->SetProperty<TemperatureSensor::UTC>(values["device_tsen_utc_001"].nvalue);
-	temp_raspi->SetProperty<TemperatureSensor::UTC>(values["device_tsen_utc_002"].nvalue);
-	temp_battery->SetProperty<TemperatureSensor::UTC>(values["device_tsen_utc_003"].nvalue);
-	temp_pycubed->SetProperty<TemperatureSensor::UTC>(values["device_tsen_utc_004"].nvalue);
+	// Store the temperatures and timestamps
+	for (int i = 0; i < TEMPSENSOR_COUNT; ++i) {
+		temp_sensor[i]->utc = values["device_tsen_utc_00" + std::to_string(i)].nvalue;
+		temp_sensor[i]->temperature = values["device_tsen_temp_00" + std::to_string(i)].nvalue;
+	}
 }
 
 
@@ -170,7 +150,7 @@ void HandleTemperatures() {
 	// TODO: Handle other temperature sensors. For now, only the battery temperature is used.
 	
 	// Get the battery temperature
-	float temp = temp_battery->GetProperty<TemperatureSensor::Temperature>();
+	float temp = temp_sensor[TEMPSENSOR_BATT_ID]->temperature;
 	
 	// Handle temperature ranges
 	// Temperature below value needed to enable heater
@@ -188,7 +168,7 @@ void HandleTemperatures() {
 		SetHeaterState(false);
 	}
 	
-	heater->Timestamp<Heater>();
+	heater->utc = Time::Now();
 }
 
 
@@ -196,7 +176,7 @@ void SetHeaterState(bool enabled) {
 	static RemoteAgent agent_switch = agent->FindAgent(CUBESAT_AGENT_SWITCH_NAME);
 	
 	// Check if agent_switch has been connected to yet
-	if ( !agent_switch.Reconnect() ) {
+	if ( !agent_switch.Connect() ) {
 		return;
 	}
 	
@@ -216,8 +196,38 @@ void SetHeaterState(bool enabled) {
 	}
 	
 	// Set the heater properties
-	heater->Timestamp<Heater>();
-	heater->SetProperty<Heater::Enabled>(enabled);
+	heater->utc = Time::Now();
+	heater->enabled = enabled;
 }
 
 
+string Request_Enable() {
+	SetHeaterState(true);
+	
+	return "OK";
+}
+string Request_Disable() {
+	SetHeaterState(false);
+	
+	return "OK";
+}
+string Request_Set(vector<string> args) {
+	
+	// Make sure the number of arguments is correct
+	if ( args.size() != 1 )
+		return "Usage: set [on | off]";
+	
+	ToLowercaseInPlace(args[0]);
+	
+	if ( args[0] == "on" )
+		SetHeaterState(true);
+	else if ( args[0] == "off" )
+		SetHeaterState(false);
+	else
+		return "Usage: set [on | off]";
+	
+	return "OK";
+}
+string Request_Get() {
+	return ToString(heater->enabled);
+}

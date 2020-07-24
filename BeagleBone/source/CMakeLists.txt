@@ -63,8 +63,10 @@ set(CUBESAT_DEVICE_SRC	device/I2CDevice.cpp
 						device/PyCubed.cpp
 						device/switch.cpp
 						device/GPIO.cpp
-						utility/SimpleAgent.cpp)
+						utility/SimpleAgent.cpp
+						utility/Device.cpp)
 add_library(CubesatDevices STATIC ${CUBESAT_DEVICE_SRC})
+target_link_libraries(CubesatDevices ${COSMOS_LIBS})
 
 set(CUBESAT_LIBS CubesatDevices)
 
