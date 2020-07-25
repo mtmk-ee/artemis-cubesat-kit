@@ -1,1 +1,5 @@
+name: Artemis Cubesat Kit
+description: Artemis Cubesat Kit
 theme: jekyll-theme-slate
+markdown: GFL
+highlighter: rouge
