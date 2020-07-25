@@ -1,8 +1,8 @@
 ---
 layout: default
 title: "Home"
+hide_sidebar: true
 ---
-{% include nav.html nav=page.nav %}
 
 This wiki provides information on how the software used in the Artemis CubeSat Kit.
 
