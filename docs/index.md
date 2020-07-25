@@ -1,12 +1,13 @@
 ---
-title: Artemis CubeSat Kit
+layout: page
+title: "Home"
 ---
 
 
 This wiki provides information on how the software used in the Artemis CubeSat Kit.
 
 * Tutorials
-* Documentation|Documentation (Software)
+* Documentation
 * About Us
 * Frequently Asked Questions|FAQ
 
@@ -24,6 +25,7 @@ Here are some outside resources to assist you on your quest:
     * [Tutorials from Tutorialspoint](https://www.tutorialspoint.com/python/index.htm)
   * C++
     * [Tutorials from Tutorialspoint](https://www.tutorialspoint.com/cplusplus/index.htm)
+    
 ### Tools
   * [Repl.it](https://repl.it/) provides a convenient web-based IDE for a variety of programming languages
 
