@@ -1,15 +1,14 @@
 ---
-layout: post
 title: Artemis CubeSat Kit
 ---
 
 
 This wiki provides information on how the software used in the Artemis CubeSat Kit.
 
-* [[Tutorials]]
-* [[Documentation|Documentation (Software)]]
-* [[About Us]]
-* [[Frequently Asked Questions|FAQ]]
+* Tutorials
+* Documentation|Documentation (Software)
+* About Us
+* Frequently Asked Questions|FAQ
 
 ## Additional Resources
 Here are some outside resources to assist you on your quest:
