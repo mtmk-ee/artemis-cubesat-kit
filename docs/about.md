@@ -1,18 +1,9 @@
 ---
-<<<<<<< HEAD
 layout: page
 title: About Us
 #permalink: /about/
 ---
 
-
-
-=======
-layout: default
-title: "About Us"
----
-
->>>>>>> 4ceb539c9b22aaf3eb0889bf3b9f6c2e36853fa5
 ## What is the Artemis CubeSat Kit?
 The Artemis CubeSat Kit is a project undertaken by [Hawaii Space Flight Laboratory](https://www.hsfl.hawaii.edu/) at the [University of Hawaiʻi at Mānoa](https://manoa.hawaii.edu/).
 
