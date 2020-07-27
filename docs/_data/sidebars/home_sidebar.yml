@@ -2,6 +2,7 @@
 
 entries:
 - title: Sidebar
+  product: Artemis Cubesat Kit
   levels: one
   folders:
 
@@ -18,6 +19,7 @@ entries:
       url: /about.html
       output: web
 
+
   - title: Tutorials
     output: web
     folderitems:
@@ -25,6 +27,8 @@ entries:
       url: /pages/tutorials/index.html
       output: web
       subfolders:
+
+
       - title: Getting Started Series
         output: web
         subfolderitems:
@@ -40,45 +44,109 @@ entries:
         - title: "4. Camera Script"
           url: /pages/tutorials/setup/setup4.html
           output: web
-      - title: Writing Payload Scripts
+
+
+      - title: Payload Script Series
         output: web
         subfolderitems:
         - title: "1. Writing Payload Scripts"
           url: /pages/tutorials/scripts/scripts1.html
           output: web
-        - title: "2. Viewing the Output"
+        - title: "2. Reading Sensors"
           url: /pages/tutorials/scripts/scripts2.html
           output: web
-      - title: Writing Agents
+        - title: "3. Working With Agents"
+          url: /pages/tutorials/scripts/scripts3.html
+          output: web
+        - title: "4. Viewing the Output"
+          url: /pages/tutorials/scripts/scripts4.html
+          output: web
+
+
+      - title: COSMOS Series
         output: web
         subfolderitems:
-        - title: "1. COSMOS and QtCreator"
-          url: /pages/tutorials/agents/agents1.html
+        - title: "1. Introduction to COSMOS"
+          url: /pages/tutorials/cosmos/cosmos1.html
           output: web
-        - title: "2. Using SimpleAgent"
-          url: /pages/tutorials/agents/agents2.html
+        - title: "2. COSMOS and QtCreator"
+          url: /pages/tutorials/cosmos/cosmos2.html
           output: web
-        - title: "3. Modifying COSMOS Web"
-          url: /pages/tutorials/agents/agents3.html
+        - title: "3. Writing Agents"
+          url: /pages/tutorials/cosmos/cosmos3.html
           output: web
-        
-      - title: COSMOS
+        - title: "4. Modifying COSMOS Web"
+          url: /pages/tutorials/cosmos/cosmos4.html
+          output: web
+
+
+# =================================================================================
+  - title: Documentation
+    output: web
+    folderitems:
+    - title: Doxygen
+      url: /pages/documentation/other/doxygen.html
+      output: web
+
+
+      subfolders:
+
+
+      - title: Python Library
         output: web
         subfolderitems:
-        - title: COSMOS and QtCreator
-          url: /pages/software/tutorials/cosmos/cosmos-and-qtcreator.html
+        - title: Python Library
+          url: /pages/documentation/python-library/python-library.html
           output: web
-        - title: Customizing COSMOS Web
-          url: /pages/software/tutorials/cosmos/customizing-cosmos-web.html
+
+          
+      - title: Included Agents
+        output: web
+        subfolderitems:
+        - title: Heater Agent
+          url: /pages/documentation/agents/heater-agent.html
           output: web
-      
-    - title: Hardware
-      url: pages/hardware
+        - title: PyCubed Agent
+          url: /pages/documentation/agents/pycubed-agent.html
+          output: web
+        - title: Raspberry Pi Agent
+          url: /pages/documentation/agents/raspberry-pi-agent.html
+          output: web
+        - title: Switch Agent
+          url: /pages/documentation/agents/switch-agent.html
+          output: web
+        - title: Sun Sensor Agent
+          url: /pages/documentation/agents/sun-sensor-agent.html
+          output: web
+        - title: Temperature Sensor Agent
+          url: /pages/documentation/agents/temperature-sensor-agent.html
+          output: web
+
+
+      - title: Utility Classes
+        output: web
+        subfolderitems:
+        - title: SimpleAgent
+          url: /pages/documentation/utility-classes/simpleagent.html
+          output: web
+        - title: SimpleAgent Devices
+          url: /pages/documentation/utility-classes/simpleagent-devices.html
+          output: web
+        - title: Time
+          url: /pages/documentation/utility-classes/time.html
+          output: web
+
+
+# =================================================================================
+  - title: Additional Resources
+    output: web
+    folderitems:
+    - title: Programming Tutorials
+      url: /pages/other/programming-tutorials.html
       output: web
-    - title: About Us
-      url: /about
+    - title: Hardware Interfaces
+      url: /pages/other/hardware-interfaces.html
       output: web
-    - title: FAQ
-      url: /pages/faq.html
+    - title: Useful Tools
+      url: /pages/other/useful-tools.html
       output: web
-  

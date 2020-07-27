@@ -4,9 +4,8 @@ tags: [software]
 keywords: software
 layout: page
 #last_updated: July 3, 2016
-sidebar: software_sidebar
-permalink: /pages/software/documentation/beaglebone/utility/simpleagent.html
-folder: /software/documentation/utility
+sidebar: home_sidebar
+permalink: /pages/documentation/utility-classes/simpleagent.html
 ---
 
 Note: this wiki page provides documentation for the SimpleAgent class. For the tutorial, see the [SimpleAgent tutorial](/pages/software/tutorials/beaglebone/utility/simpleagent-tutorial.html).

@@ -4,9 +4,8 @@ tags: [software]
 keywords: software
 layout: page
 #last_updated: July 3, 2016
-sidebar: software_sidebar
-permalink: /pages/software/documentation/beaglebone/agents/sun-sensor-agent.html
-folder: /software/documentation/agents/
+sidebar: home_sidebar
+permalink: /pages/documentation/agents/sun-sensor-agent.html
 ---
 
 ## Quick Details

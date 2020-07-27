@@ -5,14 +5,10 @@ keywords: software
 layout: page
 #last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/agents/agents1.html
-folder: /pages/tutorials/agents
+permalink: /pages/tutorials/cosmos/cosmos2.html
 ---
 
 **Language: C++**
-
-## Prerequisites
-* [[Setup Tutorial|Unboxing the Hardware]]
 
 ## Introduction
 QtCreator is an IDE (integrated development environment) targeted at C/C++ developers, and is included in the [[Artemis Development Environment]] by default.

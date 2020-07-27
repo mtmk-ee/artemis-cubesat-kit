@@ -1,27 +1,17 @@
-🚧⚠️ This page is currently under construction ⚠️🚧
-
-[[Wiki Home Page|Home]]
+---
+title: SimpleAgent Devices
+tags: [software]
+keywords: software
+layout: page
+#last_updated: July 3, 2016
+sidebar: home_sidebar
+permalink: /pages/documentation/utility-classes/simpleagent-devices.html
+---
 
 > **_Note:_**  this wiki page provides documentation for the Device class. For a tutorial on using devices, see [[SimpleAgent Tutorial]].
 
 > **_Note:_**  this wiki page only includes important features of the Device class. For the full documentation, see [[Doxygen Documentation]].
 
-## Contents
-1. [Quick Details](#quick_details)
-2. [Description](#description)
-3. [Member Functions](#member_functions)
-4. [Supported Device Types](#supported_device_types)
-    * [Battery](#battery)
-    * [Camera](#camera)
-    * [CPU](#cpu)
-    * [GPS](#gps)
-    * [Heater](#heater)
-    * [IMU](#imu)
-    * [RadioTransceiver](#radiotransceiver)
-    * [SunSensor](#sunsensor)
-    * [Switch](#switch)
-    * [TemperatureSensor](#temperaturesensor)
-    * [_CustomDevice_](#customdevice)
 
 ## Quick Details <a name="quick_details"></a>
 |   Property   |      Value     |

@@ -3,10 +3,6 @@
 topnav:
 - title: Topnav
   items:
-    - title: Software
-      url: "/pages/software/index.html"
-    - title: Hardware
-      url: /hardware.html
     - title: GitHub
       external_url: https://github.com/mtmk-ee/artemis-cubesat-kit
 

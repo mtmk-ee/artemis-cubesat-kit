@@ -1,10 +1,9 @@
 ---
 title: "Artemis CubeSat Kit"
 keywords: homepage
-tags: [getting_started]
 sidebar: home_sidebar
 permalink: index.html
-summary: Artemis Cubesat Kit
+toc: false
 ---
 
 
@@ -13,4 +12,12 @@ summary: Artemis Cubesat Kit
 Here you'll find documentation and tutorials for the Artemis Cubesat Kit, a low-cost kit containing all the necessary subsystems for a 1U cubesat. For more information on the project itself, visit the _About Us_ page on the sidebar.
 
 
-If you are just getting started with a cubesat kit of your own, you should definitely check out the Getting Started set of tutorials.
+## What Next?
+
+If you are just getting started with a cubesat kit of your own, you should definitely check out the _Getting Started_ set of tutorials over on the sidebar.
+
+After getting set up, you may want to move on to the _Payload Script_ series of tutorials, demonstrating how you can write your own payload scripts.
+
+After getting more acquainted with the kit, you can always check out the documentation to reference behavior and usage, or just to gather ideas on what you can do!
+
+Running into issues? Try checking out the _FAQ_ page over on the sidebar, or submitting an issue on the GitHub repo linked at the top of the page.

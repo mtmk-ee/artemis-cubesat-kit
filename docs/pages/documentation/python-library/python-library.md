@@ -1,4 +1,9 @@
-🚧⚠️ This page is currently under construction. Please check back later! ⚠️🚧
+---
+title: Python Library
+keywords: python, library
+sidebar: home_sidebar
+permalink: /pages/documentation/python-library/python-library.html
+---
 
 > **_Note:_** this page serves as documentation for the Artemis CubeSat Library. For a tutorial on writing payload scripts using this library, visit [[Payload Script Tutorial]].
 

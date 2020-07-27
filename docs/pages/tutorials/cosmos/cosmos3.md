@@ -5,7 +5,7 @@ keywords: software
 layout: page
 #last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/agents/agents2.html
+permalink: /pages/tutorials/cosmos/cosmos3.html
 ---
 
 **Language: C++**

@@ -1,12 +1,13 @@
-🚧⚠️ This page is currently under construction ⚠️🚧
+---
+title: Time Class
+tags: [software]
+keywords: software
+layout: page
+#last_updated: July 3, 2016
+sidebar: home_sidebar
+permalink: /pages/documentation/utility-classes/time.html
+---
 
-[[Wiki Home Page|Home]]
-
-## Contents
-1. [Quick Details](#quick_details)
-2. [Description](#description)
-3. [Member Functions](#member_functions)
-4. [See Also](#see_also)
 
 ## Quick Details <a name="quick_details"></a>
 |   Property   |      Value     |
