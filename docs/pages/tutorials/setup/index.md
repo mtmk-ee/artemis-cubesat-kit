@@ -5,8 +5,8 @@ keywords: software
 layout: page
 #last_updated: July 3, 2016
 sidebar: software_sidebar
-permalink: /pages/software/tutorials/setup/index.html
-folder: /software/tutorials/setup
+permalink: /pages/tutorials/setup/index.html
+folder: /pages/tutorials
 ---
 
 

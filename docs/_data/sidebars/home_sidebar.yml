@@ -5,23 +5,80 @@ entries:
   levels: one
   folders:
 
-  - title: Sections
+  - title: Overview
     output: web
     folderitems:
-    - title: Softare
-      url: pages/software
+    - title: Home
+      url: /index.html
+      output: web
+    - title: FAQ
+      url: /pages/faq.html
+      output: web
+    - title: About Us
+      url: /about.html
+      output: web
+
+  - title: Tutorials
+    output: web
+    folderitems:
+    - title: Tutorial Home
+      url: /pages/tutorials/index.html
       output: web
       subfolders:
+      - title: Getting Started Series
+        output: web
+        subfolderitems:
+        - title: "1. Unboxing"
+          url: /pages/tutorials/setup/setup1.html
+          output: web
+        - title: "2. Development Environment"
+          url: /pages/tutorials/setup/setup2.html
+          output: web
+        - title: "3. COSMOS Web"
+          url: /pages/tutorials/setup/setup3.html
+          output: web
+        - title: "4. Camera Script"
+          url: /pages/tutorials/setup/setup4.html
+          output: web
+      - title: Writing Payload Scripts
+        output: web
+        subfolderitems:
+        - title: "1. Writing Payload Scripts"
+          url: /pages/tutorials/scripts/scripts1.html
+          output: web
+        - title: "2. Viewing the Output"
+          url: /pages/tutorials/scripts/scripts2.html
+          output: web
+      - title: Writing Agents
+        output: web
+        subfolderitems:
+        - title: "1. COSMOS and QtCreator"
+          url: /pages/tutorials/agents/agents1.html
+          output: web
+        - title: "2. Using SimpleAgent"
+          url: /pages/tutorials/agents/agents2.html
+          output: web
+        - title: "3. Modifying COSMOS Web"
+          url: /pages/tutorials/agents/agents3.html
+          output: web
+        
+      - title: COSMOS
+        output: web
+        subfolderitems:
+        - title: COSMOS and QtCreator
+          url: /pages/software/tutorials/cosmos/cosmos-and-qtcreator.html
+          output: web
+        - title: Customizing COSMOS Web
+          url: /pages/software/tutorials/cosmos/customizing-cosmos-web.html
+          output: web
+      
     - title: Hardware
       url: pages/hardware
       output: web
-      subfolders:
     - title: About Us
       url: /about
       output: web
-    - title: Product 1
-      url: /p1_landing_page.html
+    - title: FAQ
+      url: /pages/faq.html
       output: web
-    - title: Product 2
-      url: /p2_landing_page.html
-      output: web
+  

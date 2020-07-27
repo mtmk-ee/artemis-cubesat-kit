@@ -4,9 +4,9 @@ tags: [software]
 keywords: software
 layout: page
 #last_updated: July 3, 2016
-sidebar: software_sidebar
-permalink: /pages/software/tutorials/cosmos/cosmos-and-qtcreator.html
-folder: /software/tutorials/setup
+sidebar: home_sidebar
+permalink: /pages/tutorials/agents/agents1.html
+folder: /pages/tutorials/agents
 ---
 
 **Language: C++**

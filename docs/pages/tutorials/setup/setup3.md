@@ -4,9 +4,9 @@ tags: [software]
 keywords: software
 layout: page
 #last_updated: July 3, 2016
-sidebar: software_sidebar
-permalink: /pages/software/tutorials/setup/setup3.html
-folder: /software/tutorials/setup
+sidebar: home_sidebar
+permalink: /pages/tutorials/setup/setup3.html
+folder: /pages/tutorials/setup
 ---
 | _Pages in this Tutorial_                                  |
 | --------------------------------------------------------- |

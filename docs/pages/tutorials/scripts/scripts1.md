@@ -1,14 +1,14 @@
+---
+title: Writing Payload Scripts
+tags: [software, payload, scripts, camera]
+keywords: software, payload, scripts, camera
+layout: page
+#last_updated: July 3, 2016
+sidebar: home_sidebar
+permalink: /pages/tutorials/scripts/scripts1.html
+---
+
 **Language: Python**
-
-## Contents
-1. [Introduction](#introduction)
-2. [The Payload Script](#the_payload_script)
-    * [Getting Started](#getting_started)
-    * [Initializing the Payload Device](#initializing_the_payload_device)
-    * [The Main Loop](#the_main_loop)
-    * [Putting it all Together](#putting_it_all_together)
-3. [Related Pages](#related_pages)
-
 
 ## Introduction <a name="introduction"></a>
 

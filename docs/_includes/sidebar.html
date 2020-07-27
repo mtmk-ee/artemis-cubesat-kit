@@ -34,26 +34,7 @@
                   {% else %}
                   <li><a title="{{subfolderitem.title}}" href="{{subfolderitem.url | prepend: site.baseurl }}">{{subfolderitem.title}}</a></li>
                   {% endif %}
-                  {% for subsubfolders in subfolderitem.subfolders %}
-                  {% if subsubfolders.output contains "web" %}
-                  <li class="subfolders">
-                      <a title="{{subsubfolders.title}}" href="#">{{ subsubfolders.title }}</a>
-                      <ul>
-                          {% for subsubfolderitem in subsubfolders.subfolderitems %}
-                          {% if subsubfolderitem.output contains "web" %}
-                          {% if subsubfolderitem.external_url %}
-                          <li><a title="{{subsubfolderitem.title}}" href="{{subsubfolderitem.external_url}}" target="_blank" rel="noopener">{{subsubfolderitem.title}}</a></li>
-                          {% elsif page.url == subsubfolderitem.url %}
-                          <li class="active"><a title="{{subsubfolderitem.title}}" href="{{subsubfolderitem.url | prepend: site.baseurl }}">{{subsubfolderitem.title}}</a></li>
-                          {% else %}
-                          <li><a title="{{subsubfolderitem.title}}" href="{{subsubfolderitem.url | prepend: site.baseurl }}">{{subsubfolderitem.title}}</a></li>
-                          {% endif %}
-                          {% endif %}
-                          {% endfor %}
-                      </ul>
-                  </li>
-                  {% endif %}
-                  {% endfor %}
+                  
                   {% endif %}
                   {% endfor %}
               </ul>

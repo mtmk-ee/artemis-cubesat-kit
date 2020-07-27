@@ -1,12 +1,11 @@
 ---
-title: SimpleAgent Tutorial
+title: Writing Agents
 tags: [software]
 keywords: software
 layout: page
 #last_updated: July 3, 2016
-sidebar: software_sidebar
-permalink: /pages/software/tutorials/beaglebone/utility/simpleagent-tutorial.html
-folder: /software/documentation/utility
+sidebar: home_sidebar
+permalink: /pages/tutorials/agents/agents2.html
 ---
 
 **Language: C++**
