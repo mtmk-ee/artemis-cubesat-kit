@@ -21,9 +21,9 @@ folder: /software/documentation/agents/
 ## Description
 The heater agent (AKA `agent_heater`) is an agent that handles the heater device. Should any temperatures fall too low, the heater agent will enable the heater. Later when the temperatures readings are sufficient, the heater agent will disable the heater. For the specific temperatures different events occur at, see the [temperature events table](#temperature_events)
 
-The physical heater device is controlled using requests issued to the [switch agent](/pages/software/documentation/beaglebone/agents/switch-agent.html) which, in turn, enables or disables the switched line for the heater.
+The physical heater device is controlled using requests issued to the [switch agent]({{site.base_url}}/pages/software/documentation/beaglebone/agents/switch-agent.html) which, in turn, enables or disables the switched line for the heater.
 
-All temperature values are retrieved from the [temperature sensor agent](/pages/software/documentation/beaglebone/agents/temperature-sensor-agent.html).
+All temperature values are retrieved from the [temperature sensor agent]({{site.base_url}}/pages/software/documentation/beaglebone/agents/temperature-sensor-agent.html).
 
 ## Requests
 
@@ -97,4 +97,4 @@ Below is a table showing the devices and COSMOS names for properties used.
 ## Block Diagram
 Below is a software diagram demonstrating the behavior of the heater agent.
 
-<img src="/resources/diagrams/agent_heater_diagram.png" width="700px">
+<img src="{{site.base_url}}/resources/diagrams/agent_heater_diagram.png" width="700px">
