@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Welcome to Jekyll!
 #
 # This config file is meant for settings that affect your whole blog, values
@@ -205,3 +206,10 @@ description: "Intended as a documentation theme based on Jekyll for technical wr
 
 
 github: [metadata]
+=======
+name: Artemis Cubesat Kit
+description: Artemis Cubesat Kit
+remote_theme: tomjoht/documentation-theme-jekyll
+markdown: GFL
+highlighter: rouge
+>>>>>>> 4ceb539c9b22aaf3eb0889bf3b9f6c2e36853fa5
