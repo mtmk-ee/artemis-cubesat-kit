@@ -32,7 +32,7 @@ entries:
         output: web
         subfolderitems:
         - title: SimpleAgent Tutorial
-          url: /pages/software/tutorials/beaglebone/utility/simpleagent-tutorial.md
+          url: /pages/software/tutorials/beaglebone/utility/simpleagent-tutorial.html
           output: web
         
       - title: COSMOS
