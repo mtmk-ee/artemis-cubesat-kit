@@ -44,9 +44,3 @@ An online spacecraft design lab course will be developed around the kit and rele
 | Katlynn                    | Volunteer                              |
 | Bob Potter                 | Mechanical Volunteer                   |
 | Spencer Young              | Software Intern, creator of COSMOS Web |
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 4ceb539c9b22aaf3eb0889bf3b9f6c2e36853fa5
