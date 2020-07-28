@@ -23,4 +23,4 @@ layout: page
 Below is a software diagram demonstrating the behavior of this agent
 
 {% assign diagram = site.data.agents[page.agent_name].diagram %}
-<img src="{{site.baseurl}}{{site.agent_diagram_folder}}/{{diagram.file}}" alt="Agent block diagram" {% if diagram.width %} width={{diagram.width}} {% endif %} {% if diagram.height %} height={{diagram.height}} {% endif %} />
+<img src="{{site.baseurl}}{{site.agent_diagram_folder}}/{{diagram.file}}" alt="Agent block diagram" {% if diagram.width %} style="width:{{diagram.width}};" {% endif %}/>

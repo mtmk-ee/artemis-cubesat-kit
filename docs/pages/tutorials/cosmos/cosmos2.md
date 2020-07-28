@@ -1,14 +1,19 @@
 ---
 title: COSMOS and QtCreator
+permalink: /pages/tutorials/cosmos/cosmos2.html
+layout: series
+
 tags: [software]
 keywords: software
-layout: page
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/cosmos/cosmos2.html
+toc: false
+
+series:
+    language: "C++"
+    prev: /pages/tutorials/cosmos/cosmos1.html
+    next: /pages/tutorials/cosmos/cosmos3.html
 ---
 
-**Language: C++**
 
 ## Introduction
 QtCreator is an IDE (integrated development environment) targeted at C/C++ developers, and is included in the [[Artemis Development Environment]] by default.

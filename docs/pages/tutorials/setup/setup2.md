@@ -1,12 +1,12 @@
 ---
 title: "Getting Started Part 2 - Development Environment"
+layout: series
+permalink: /pages/tutorials/setup/setup2.html
+
 tags: [software]
 keywords: software
-layout: series
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/setup/setup2.html
-folder: /pages/tutorials/setup
+toc: false
 
 
 series:
@@ -126,22 +126,3 @@ Now we can enable some handy functionality for the guest machine:
 
 ## Further Reading
 * [[Artemis Development Environment]]
-
-
----------------------------------------------------------
-
-<!-- <p style="text-align:left;">
-    <a href="{{site.baseurl}}/pages/tutorials/setup/setup1.html">
-        <button type="button" class="btn btn-primary">
-            Previous
-        </button>
-    </a>
-    <a href="{{site.baseurl}}/pages/tutorials/setup/setup3.html">
-        <button type="button" class="btn btn-primary" style="float:right;">
-            Next
-        </button>
-    </a>
-</p> -->
-
-
-{% include series/nav_buttons.html %}

@@ -12,7 +12,59 @@ description:
 # Diagram info
 diagram:
   file: "agent_pycubed_diagram.png"
-  width: 100%
+  width: "800px"
+
+# Request table
+requests:
+  - name: "Check Connection"
+    usage: "is_up"
+    brief: Checks if the PyCubed can be reached.
+    note: >
+      If the PyCubed is connected properly, the request will return `"UP"`.
+      Otherwise, the request will return `"DOWN"`.
+
+  - name: "Send Message"
+    usage: "send_message <message_str>"
+    aliases: "send"
+    brief: Sends a message to the PyCubed.
+    note: >
+      The argument `message_str` is a message formatted to the
+      [PyCubed communication protocol](/pages/software/documentation/pycubed/communication-protocol.html) requirements.
+      The leading `$` and checksum should not be included.
+
+  - name: "Get IMU Data"
+    usage: "imu"
+    brief: Retrieves the PyCubed IMU data.
+    note: >
+      Returns a JSON-formatted string.
+
+  - name: "Get GPS Data"
+    usage: "gps"
+    brief: Retrieves the PyCubed GPS data.
+    note: >
+      Returns a JSON-formatted string.
+
+  - name: "Get Power Data"
+    usage: "power"
+    brief: Retrieves the PyCubed power data.
+    note: >
+      Returns a JSON-formatted string.
+
+  - name: "Get Temperature Data"
+    usage: "temperature"
+    aliases: "temp"
+    brief: Retrieves the PyCubed temperature data.
+    note: >
+      Returns a JSON-formatted string.
+
+  - name: "Kill Radio"
+    usage: "killradio yes"
+    brief: Kills future radio transmission.
+    note: |
+      The argument `yes` is required, and is meant to prevent accidental usage of the request.
+
+      > **_Note:_** **You should not call this request** unless the radio is transmitting harmful noise, or if you are performing tests.
+
 
 # "COSMOS Property" info
 cosmos_node:

@@ -1,14 +1,18 @@
 ---
 title: Writing Agents
+permalink: /pages/tutorials/cosmos/cosmos3.html
+layout: series
+
 tags: [software]
 keywords: software
-layout: page
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/cosmos/cosmos3.html
----
+toc: false
 
-**Language: C++**
+series:
+    language: "C++"
+    prev: /pages/tutorials/cosmos/cosmos2.html
+    next: /pages/tutorials/cosmos/cosmos4.html
+---
 
 ## Introduction
 

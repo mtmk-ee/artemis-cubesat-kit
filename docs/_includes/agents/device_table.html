@@ -76,6 +76,7 @@ function CopyToClipboard(containerid) {
 </tbody>
 </table>
 
+{% if page.cosmos_node %}
 <h3>Node Properties</h3>
 {% if cosmos_node %}
 <table>
@@ -103,4 +104,6 @@ function CopyToClipboard(containerid) {
 {% endfor %}
 </tbody>
 </table>
+{% endif %}
+
 {% endif %}

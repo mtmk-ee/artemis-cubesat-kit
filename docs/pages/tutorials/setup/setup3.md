@@ -1,12 +1,12 @@
 ---
 title: "Getting Started Part 3 - COSMOS Web"
+layout: series
+permalink: /pages/tutorials/setup/setup3.html
+
 tags: [software]
 keywords: software
-layout: series
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/setup/setup3.html
-folder: /pages/tutorials/setup
+toc: false
 
 series:
   prev: /pages/tutorials/setup/setup2.html

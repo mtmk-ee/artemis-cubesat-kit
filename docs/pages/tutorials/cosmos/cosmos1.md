@@ -1,14 +1,18 @@
 ---
 title: Introduction to COSMOS
+permalink: /pages/tutorials/cosmos/cosmos1.html
+layout: series
+
 tags: [software]
 keywords: software
-layout: page
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/cosmos/cosmos1.html
+toc: false
+
+series:
+    language: "English"
+    next: /pages/tutorials/cosmos/cosmos2.html
 ---
 
-**Language: English**
 
 
 

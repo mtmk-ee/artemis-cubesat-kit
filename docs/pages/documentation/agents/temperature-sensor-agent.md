@@ -1,7 +1,7 @@
 ---
 title: Temperature Sensor Agent
-layout: agent
 permalink: /pages/documentation/agents/temperature-sensor-agent.html
+layout: agent
 
 sidebar: home_sidebar
 tags: [software]
@@ -14,42 +14,6 @@ agent_name: agent_temp
 The temperature sensor agent (aka `agent_temp`) is an agent that handles operations with the temperature sensors.
 
 There are two different ways that the temperature sensors are hooked up. Some sensors are connected to the BeagleBone SPI headers through the PC104 headers, and the others must be accessed through the [PyCubed agent](pycubed-agent.html). The temperature sensor agent handles temperature collection for both cases.
-
-## Requests
-
-### Sensor Status
-Usage: `sensor <device name>`
-
-Aliases: N/A
-
-#### Description
-This request returns the status of a given sensor.
-
-The argument `device name` corresponds to the [name of the temperature sensor](#sensor_names).
-
-#### Examples
-To display the status of the battery temperature sensor:
-
-```bash
-$ agent cubesat temp sensor temp_battery
-```
-
-### List Available Sensors
-Usage: `list`
-
-Aliases: N/A
-
-#### Description
-
-This request lists all available temperature sensors
-
-#### Example
-
-To view all available temperature sensors:
-
-```bash
-$ agent cubesat temp list
-```
 
 ## Sensor Names
 Below is a table showing which sensor names correspond to which physical devices.

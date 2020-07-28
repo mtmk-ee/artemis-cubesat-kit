@@ -16,6 +16,20 @@ diagram:
   file: "agent_temp_diagram.png"
   width: "700px"
 
+# Request table
+requests:
+  - name: "Sensor Status"
+    usage: "sensor <name>"
+    brief: Returns the status of a given sensor.
+    note: >
+      The argument `name` corresponds to the
+      [name of the temperature sensor](#sensor-names).
+
+  - name: "List Sensors"
+    usage: "list"
+    brief: Lists all available temperature sensors.
+    note: ""
+
 # Device table
 cosmos_devices:
 

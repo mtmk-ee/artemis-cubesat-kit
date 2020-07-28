@@ -1,12 +1,15 @@
 ---
 title: Viewing the Output
+permalink: /pages/tutorials/scripts/scripts4.html
+layout: series
+
 tags: [software]
 keywords: software
-layout: page
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/scripts/scripts4.html
+toc: false
+
+series:
+    prev: /pages/tutorials/scripts/scripts3.html
 ---
 
-**Language: Python**
 

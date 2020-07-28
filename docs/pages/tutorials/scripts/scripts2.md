@@ -1,11 +1,17 @@
 ---
 title: Reading Sensors
+permalink: /pages/tutorials/scripts/scripts2.html
+layout: series
+
+
 tags: [software, payload, scripts, camera]
 keywords: software, payload, scripts, camera
-layout: page
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/scripts/scripts2.html
+toc: false
+
+series:
+    language: Python
+    prev: /pages/tutorials/scripts/scripts1.html
+    next: /pages/tutorials/scripts/scripts3.html
 ---
 
-**Language: Python**

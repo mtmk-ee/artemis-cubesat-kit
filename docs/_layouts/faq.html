@@ -2,19 +2,32 @@
 layout: page
 ---
 
+{% assign sections = site.data.faq[page.faq].sections %}
+{% assign element_number = 0 %}
 
+{% for section in sections %}
 
-## Raspberry Pi
+<h2>{{section.name}}</h2>
 
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h4 class="panel-title">
-            <a class="noCrossRef accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">After powering my Raspberry Pi I can no longer access it from the BeagleBone</a>
-        </h4>
-    </div>
-    <div id="collapseOne" class="panel-collapse collapse noCrossRef">
-        <div class="panel-body">
-            Disconnecting power to the Raspberry Pi without shutting it down beforehand can cause the micro SD card containing the operating system to become corrupted. Unfortunately you probably won't be able to recover any data from the card. If you can't even connect to the Raspberry Pi from a desktop machine or laptop, you should try flashing its micro SD card with a fresh image.
-        </div>
+{% for element in section.content %}
+{% capture element_number %}{% increment element_number %}{% endcapture %}
+
+<div class="panel-heading">
+    <h4 class="panel-title">
+        <a class="noCrossRef accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse{{element_number}}">
+            {{element.question}}
+        </a>
+    </h4>
+</div>
+<div id="collapse{{element_number}}" class="panel-collapse collapse noCrossRef">
+    <div class="panel-body">
+        {{element.answer | markdownify}}
     </div>
 </div>
+
+{% endfor %}
+
+</div>
+
+{% endfor %}

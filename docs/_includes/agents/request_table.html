@@ -23,9 +23,9 @@
 {% for alias in request.aliases %}
 <code>{{alias}}</code>
 {% endfor %}
+<br>
 {% endif %}
-<br><br>
-
+<br>
 <strong>Description:</strong> {{ request.brief | markdownify | remove: "<p>" | remove: "</p>" }}
 <br><br>
 

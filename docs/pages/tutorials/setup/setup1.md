@@ -1,12 +1,13 @@
 ---
 title: "Getting Started Part 1 - Unboxing"
+layout: series
+permalink: /pages/tutorials/setup/setup1.html
+
 tags: [software]
 keywords: software
-layout: series
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/setup/setup1.html
-folder: /overview/tutorials
+toc: false
+
 
 series:
   next: /pages/tutorials/setup/setup2.html

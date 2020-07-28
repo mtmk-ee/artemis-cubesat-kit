@@ -16,42 +16,6 @@ The sun sensor agent (aka `agent_sun`) is an agent that handles operations with 
 
 There are six sun sensors, with one located on each faces of the cubesat.
 
-## Requests
-
-### Sensor Status
-Usage: `sensor <device name>`
-
-Aliases: N/A
-
-#### Description
-This request returns the status of a given sensor.
-
-The argument `device name` corresponds to the [name of the sun sensor](#sensor_names).
-
-#### Examples
-To display the status of the sun sensor on the +X (plus x) side of the structure:
-
-```bash
-$ agent cubesat sun sensor ss_plusx
-```
-
-### List Available Sensors
-Usage: `list`
-
-Aliases: N/A
-
-#### Description
-
-This request lists all available sun sensors.
-
-#### Example
-
-To view all available sun sensors:
-
-```bash
-$ agent cubesat sun list
-```
-
 ## Sensor Names
 Below is a table showing which sensor names correspond to which physical devices.
 

@@ -16,55 +16,6 @@ The switch agent (aka `agent_switch`) is an agent that provides control to the s
 
 The PDU switched lines are controlled using several of the BeagleBone's GPIO pins. The switch agent internally either sets a GPIO pin HIGH to enable a switched line, or sets a GPIO pin LOW to disable it.
 
-## Requests
-
-### Switch Line Control
-Usage: `switch <device name> [on | off]`
-
-Aliases: `state`, `set`, `get`
-
-#### Description
-This request either enables, disables, or displays information for a given switch.
-
-The argument `device_name` corresponds to the [name of the switch](#pin mapping).
-
-The second argument is optional. If `on` is given, the agent will turn on the given switch. If `off` is given, the agent will turn off the given switch. If this argument is not supplied, the status of the given switch will be returned.
-
-#### Examples
-To turn on the temperature sensor switch:
-
-```bash
-$ agent cubesat switch switch sw_temp on
-```
-
-To turn off the temperature sensor switch:
-
-```bash
-$ agent cubesat switch switch sw_temp off
-```
-
-To view the status of the temperature sensor switch:
-
-```bash
-$ agent cubesat switch switch sw_temp
-```
-
-### List Available Switches
-Usage: `list`
-
-Aliases: N/A
-
-#### Description
-
-This request lists all available switches.
-
-#### Example
-
-To view all available switches:
-
-```bash
-$ agent cubesat switch list
-```
 
 ## Pin Mapping
 Below is a table showing which GPIO pins control which switched lines:

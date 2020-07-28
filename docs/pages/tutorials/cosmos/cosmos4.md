@@ -1,13 +1,17 @@
 ---
 title: Modifying COSMOS Web
+permalink: /pages/tutorials/cosmos/cosmos4.html
+layout: series
+
 tags: [software]
 keywords: software
-layout: page
-#last_updated: July 3, 2016
 sidebar: home_sidebar
-permalink: /pages/tutorials/cosmos/cosmos4.html
+toc: false
+
+series:
+    language: "JavaScript"
+    prev: /pages/tutorials/cosmos/cosmos3.html
 ---
 
-**Language: JavaScript**
 
 ## Introduction

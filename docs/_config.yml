@@ -159,6 +159,18 @@ defaults:
       sidebar: home_sidebar
       topnav: topnav
 
+  -
+    scope:
+      path: ""
+      type: "series"
+    values:
+      layout: "series"
+      comments: false # Change to false if you don't want to use Commento.io
+      search: true
+      sidebar: home_sidebar
+      topnav: topnav
+      toc: false
+
 # ====================== Sidebars ======================
 sidebars:
 - home_sidebar
