@@ -1,0 +1,19 @@
+---
+layout: page
+---
+
+<!-- ==================== Quick Details ==================== -->
+<h2>Quick Details</h2>
+{% include class_docs/detail_table.html %}
+
+
+<!-- ==================== Page Contents ==================== -->
+{{ content }}
+
+
+<!-- ==================== Member Functions ==================== -->
+{% if page.list_members == true %}
+<h2>Member Functions</h2>
+{% include class_docs/member_table.html %}
+{% endif %}
+

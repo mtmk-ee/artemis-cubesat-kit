@@ -1,0 +1,35 @@
+
+{% assign functions = site.data.class_docs[page.class_name].functions %}
+
+{% assign function_counter = 0 %}
+
+<div class="panel panel-default">
+
+
+{% for function in functions %}
+
+{% capture function_counter %}{% increment function_counter %}{% endcapture %}
+{% capture highlighted %}{% highlight cpp %}{{function.declaration }}{% endhighlight %}{% endcapture %}
+{% capture highlighted %}{{highlighted | remove: '<pre>' | remove: '</pre>' }}{% endcapture %}
+
+<div class="panel-heading">
+    <h4 class="panel-title">
+        <a class="noCrossRef accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse{{function_counter}}" aria-expanded="true">{{ function.name }}</a>
+    </h4>
+</div>
+<div id="collapse{{function_counter}}" class="panel-collapse noCrossRef collapse in"  aria-expanded="true">
+<div class="panel-body">
+
+<strong>Declaration: </strong> {{ highlighted }}
+<br><br>
+{{ function.description | markdownify }}
+
+</div>
+</div>
+
+
+
+{% endfor %}
+
+
+</div>

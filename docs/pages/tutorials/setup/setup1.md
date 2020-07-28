@@ -1,31 +1,21 @@
 ---
-title: Setup Part 1
+title: "Getting Started Part 1 - Unboxing"
 tags: [software]
 keywords: software
-layout: page
+layout: series
 #last_updated: July 3, 2016
 sidebar: home_sidebar
 permalink: /pages/tutorials/setup/setup1.html
 folder: /overview/tutorials
+
+series:
+  next: /pages/tutorials/setup/setup2.html
+
 ---
 
-| _Pages in this Tutorial_                                  |
-| --------------------------------------------------------- |
-| **1. Unboxing the Hardware**                              |
-| 2. [Setting up the Development Environment](setup2.html)  |
-| 3. [Using COSMOS Web](setup3.html)                        |
-| 4. [Running the Camera Script](setup4.html)               |
 
 
 ## 1. Opening the Box
 
 ## 2. Verifying Hardware Integrity
 
-
----------------------------------------------------------------------------------------------------------------------------------------------
-
-<div align="right">
-
-**Next:** [[Setting up the Development Environment]]
-
-</div>

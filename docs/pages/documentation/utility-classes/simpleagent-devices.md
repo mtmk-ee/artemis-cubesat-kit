@@ -2,40 +2,32 @@
 title: SimpleAgent Devices
 tags: [software]
 keywords: software
-layout: page
+layout: class
 #last_updated: July 3, 2016
 sidebar: home_sidebar
 permalink: /pages/documentation/utility-classes/simpleagent-devices.html
----
 
-> **_Note:_**  this wiki page provides documentation for the Device class. For a tutorial on using devices, see [[SimpleAgent Tutorial]].
+class_name: device
+list_members: false
+---
 
 > **_Note:_**  this wiki page only includes important features of the Device class. For the full documentation, see [[Doxygen Documentation]].
 
 
-## Quick Details <a name="quick_details"></a>
-|   Property   |      Value     |
-| ------------ | -------------- |
-| Source Files  | [Device.h](https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/BeagleBone/include/utility/Device.h) <br> [DeviceDetail.h](https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/BeagleBone/include/utility/Device.h) <br> [source/utility/Device.cpp](https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/BeagleBone/source/utility/Device.cpp) |
-
 ## Description <a name="description"></a>
 The `Device` class is a base (i.e. parent or super) class of various types. The devices have various properties which can be posted, meaning that they can be viewed externally (e.g. through a terminal or [[COSMOS Web]]). If a device doesn't have the properties necessary, custom properties can be used instead, although they cannot be posted. And if there isn't a supported device you need, you can always use the [`CustomDevice`](#customdevice) device type to hold custom properties (again, these cannot be posted).
 
-## Member Functions <a name="member_functions"></a>
-All device types inherit the following members:
+## Common Member Functions
+These functions belong to each device type.
 
-| Function | Description |
-| -------- | ----------- |
-| `void Post<T>(const T &property)` | Posts the given property, making it viewable externally. This must be one of the properties that is predefined by the device |
-| `void SetCustomProperty<T>(string name, T value)` | Stores a custom property with the given name and value. The template parameter `T` corresponds to the storage type |
-| `T& GetCustomProperty<T>(string name)` | Retrieves a previously-set custom variable with the given name and type `T`. If the type `T` does not match the one used to set the property, or the property was not previously set, an exception will be thrown |
+{% include class_docs/member_table.html %}
 
-## Supported Device Types <a name="supported_device_types"></a>
+## Supported Device Types
 Below are the supported device types. Note that in the last column of each table, the `XXX` indicates the COSMSOS device number.
 
 All of these devices below can accept custom properties, although these properties cannot be posted (i.e. viewed externally).
 
-### TemperatureSensor <a name="temperaturesensor"></a>
+### TemperatureSensor
 The `TemperatureSensor` device corresponds to a temperature sensor. In the Artemis CubeSat, the [ADT7311](https://www.analog.com/media/en/technical-documentation/data-sheets/ADT7311.pdf) is used.
 
 | Supported Properties | Member Name   | Storage Type       | COSMOS Name                |
@@ -47,7 +39,7 @@ The `TemperatureSensor` device corresponds to a temperature sensor. In the Artem
 | Power                | `power`       | `float`            | `device_tsen_power_XXX`    |
 | Enabled              | `enabled`     | `bool`             | `device_tsen_enabled_XXX`  |
 
-### SunSensor <a name="sunsensor"></a>
+### SunSensor
 The `SunSensor` device corresponds to a sun sensor. In the Artemis CubeSat, the [OPT3001](https://www.ti.com/lit/ds/symlink/opt3001.pdf?HQS=TI-null-null-digikeymode-df-pf-null-wwe&ts=1591292821916) is used.
 
 | Supported Properties | Member Name   | Storage Type       | COSMOS Name                |
@@ -59,7 +51,7 @@ The `SunSensor` device corresponds to a sun sensor. In the Artemis CubeSat, the 
 | Power                | `power`       | `float`            | `device_ssen_power_XXX`    |
 | Enabled              | `enabled`     | `bool`             | `device_ssen_enabled_XXX`  |
 
-### Heater <a name="heater"></a>
+### Heater
 The `Heater` device corresponds to a heater.
 
 | Supported Properties | Member Name   | Storage Type       | COSMOS Name              |
@@ -71,7 +63,7 @@ The `Heater` device corresponds to a heater.
 | Power                | `power`       | `float`            | `device_htr_power_XXX`   |
 | Enabled              | `enabled`     | `bool`             | `device_htr_enabled_XXX` |
 
-### IMU <a name="imu"></a>
+### IMU
 The `IMU` device corresponds to an IMU (inertial measurement unit). In the Artemis CubeSat, the [BMX160](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BMX160-DS000.pdf) is used.
 
 | Supported Properties | Member Name            | Storage Type       | COSMOS Name              |
@@ -86,7 +78,7 @@ The `IMU` device corresponds to an IMU (inertial measurement unit). In the Artem
 | Linear Acceleration  | `acceleration`         | `Vec3`             | `device_imu_accel_XXX`   |
 | Angular Acceleration | `angular_acceleration` | `Vec3`             | `device_imu_omega_XXX`   |
 
-### GPS <a name="gps"></a>
+### GPS
 The `GPS` device corresponds to a GPS (global positioning system).
 
 | Supported Properties        | Member Name       | Storage Type       | COSMOS Name                |
@@ -101,7 +93,7 @@ The `GPS` device corresponds to a GPS (global positioning system).
 | Latitude/Longitude/Altitude | `location`        | `Location`         | `device_gps_geods_XXX`     |
 | Velocity                    | `velocity`        | `Vec3`             | `device_gps_geocv_XXX`     |
 
-### Battery <a name="battery"></a>
+### Battery
 The `Battery` device corresponds to a battery. In the Artemis CubeSat, the [LG MJ1 18650](https://www.18650batterystore.com/v/files/lg_mj1_data_sheet.pdf) is used.
 
 | Supported Properties | Member Name      | Storage Type       | COSMOS Name                      |
@@ -117,7 +109,7 @@ The `Battery` device corresponds to a battery. In the Artemis CubeSat, the [LG M
 | Efficiency           | `efficiency`     | `float`            | `device_batt_efficiency_XXX`     |
 | Time Remaining       | `time_remaining` | `float`            | `device_batt_time_remaining_XXX` |
 
-### RadioTransceiver <a name="radiotransceiver"></a>
+### RadioTransceiver
 The `RadioTransceiver` device corresponds to a radio transceiver. In the Artemis Cubesat, the [RFM98PW](https://www.hoperf.com/data/upload/portal/20190301/RFM98PW.pdf) is used.
 
 | Supported Properties | Member Name         | Storage Type       | COSMOS Name               |
@@ -137,7 +129,7 @@ The `RadioTransceiver` device corresponds to a radio transceiver. In the Artemis
 | Good Packet Count    | `good_packet_count` | `int`              | `device_tcv_goodcnt_XXX`  |
 | Bad Packet Count     | `bad_packet_count`  | `float`            | `device_tcv_badcnt_XXX`   |
 
-### CPU <a name="cpu"></a>
+### CPU
 The `CPU` device corresponds to a CPU (central processing unit).
 
 | Supported Properties | Member Name    | Storage Type       | COSMOS Name                 |
@@ -155,7 +147,7 @@ The `CPU` device corresponds to a CPU (central processing unit).
 | Memory Use           | `memory_usage` | `float`            | `device_cpu_gib_XXX`        |
 | Maximum Memory Use   | `max_memory`   | `float`            | `device_cpu_maxgib_XXX`     |
 
-### Camera <a name="camera"></a>
+### Camera
 The `Camera` device corresponds to a camera. In the Artemis Cubesat, the [Raspberry Pi Camera Module V2](https://www.raspberrypi.org/documentation/hardware/camera/) is used.
 
 | Supported Properties | Member Name    | Storage Type       | COSMOS Name              |
@@ -172,7 +164,7 @@ The `Camera` device corresponds to a camera. In the Artemis Cubesat, the [Raspbe
 | Height               | `height`       | `float`            | `device_cam_height_XXX`  |
 | Focal Length         | `focal_length` | `float`            | `device_cam_flength_XXX` |
 
-### Switch <a name="switch"></a>
+### Switch
 The `Switch` device corresponds to an electrical switch.
 
 | Supported Properties | Member Name   | Storage Type       | COSMOS Name               |
@@ -185,7 +177,7 @@ The `Switch` device corresponds to an electrical switch.
 | Enabled              | `enabled`     | `bool`             | `device_swch_enabled_XXX` |
 
 
-### CustomDevice <a name="customdevice"></a>
+### CustomDevice
 The `CustomDevice` device can correspond to any device that does not fit into the COSMOS namespace.
 
 | Supported Properties | Member Name   | Storage Type       | COSMOS Name                |

@@ -16,82 +16,8 @@ agent_name: agent_raspi
 ## Description
 The Raspberry Pi agent (aka `agent_raspi`) is an agent that handles communication with the Raspberry Pi, including startup, shutdown, and data transfer.
 
-## Requests
-
-### Secure Shell Commanding
-Usage: `ssh <command>`
-
-Aliases: `command`
-
-#### Description
-This request executes a command on the Raspberry Pi through a SSH connection.
-
-The argument `command` is a shell command to run on the Raspberry Pi.
-
-#### Examples
-To list the contents of the home directory (`/home/pi/`) of the Raspberry Pi, we can use the Linux `ls` command:
-
-```bash
-$ agent cubesat raspi ssh ls /home/pi/
-```
-
-### Check Connection
-Usage: `ping`
-
-Aliases: `is_up`
-
-#### Description
-
-This request attempts to ping the Raspberry Pi to determine whether it is up or down. Internally this uses the Linux `ping` command to check if the Raspberry Pi is detected on the local network.
-
-If the Raspberry Pi can be reached, the request will return `"UP`". Otherwise, the request will return `"DOWN"`.
-
-#### Example
-
-To check if the Raspberry Pi can be reached:
-
-```bash
-$ agent cubesat raspi ping
-```
-
-### Shut Down Raspberry Pi
-Usage: `shutdown_raspi`
-
-Aliases: `end`
-
-#### Description
-
-This request attempts to shut down the Raspberry Pi. Internally this executes `sudo shutdown now` on the Raspberry Pi.
-
-> **_Note:_** the request name `shutdown` is not used, as this is reserved by COSMOS for a different purpose.
-
-#### Example
-
-To shut down the Raspberry Pi:
-
-```bash
-$ agent cubesat raspi shutdown_raspi
-```
-
-### Get Agent Data
-Usage: `get_data`
-
-Aliases: `agent_data`
-
-#### Description
-
-This request returns all collected data from other agents as a JSON-formatted string. This request is primarily used by the Artemis CubeSat Library on the Raspberry Pi to fetch data.
-
-#### Example
-
-To view all available agent data:
-
-```bash
-$ agent cubesat raspi get_data
-```
-
 ## Available Agent Data
-Below is a table showing which properties are collected from various other agents. This data can be viewed through the [`get_data`](#get_agent_data) request.
+Below is a table showing which properties are collected from various other agents. This data can be viewed through the [`get_data`](#get-agent-data) request.
 
 (TODO)
 

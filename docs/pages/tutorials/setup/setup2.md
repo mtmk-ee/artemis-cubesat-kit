@@ -1,22 +1,18 @@
 ---
-title: Setup Part 2
+title: "Getting Started Part 2 - Development Environment"
 tags: [software]
 keywords: software
-layout: page
+layout: series
 #last_updated: July 3, 2016
 sidebar: home_sidebar
 permalink: /pages/tutorials/setup/setup2.html
 folder: /pages/tutorials/setup
+
+
+series:
+  prev: /pages/tutorials/setup/setup1.html
+  next: /pages/tutorials/setup/setup3.html
 ---
-
-| _Pages in this Tutorial_                                  |
-| --------------------------------------------------------- |
-| 1. [Unboxing the Hardware](setup1.html)                   |
-| **2. Setting up the Development Environment**             |
-| 3. [Using COSMOS Web](setup3.html)                        |
-| 4. [Running the Camera Script](setup4.html)               |
-
----------------------------------------------------------
 
 ## What You Need
 
@@ -134,5 +130,18 @@ Now we can enable some handy functionality for the guest machine:
 
 ---------------------------------------------------------
 
-**Previous:** [[Unboxing the Hardware]] &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;**Next:** [[Using COSMOS Web]]
+<!-- <p style="text-align:left;">
+    <a href="{{site.baseurl}}/pages/tutorials/setup/setup1.html">
+        <button type="button" class="btn btn-primary">
+            Previous
+        </button>
+    </a>
+    <a href="{{site.baseurl}}/pages/tutorials/setup/setup3.html">
+        <button type="button" class="btn btn-primary" style="float:right;">
+            Next
+        </button>
+    </a>
+</p> -->
 
+
+{% include series/nav_buttons.html %}

@@ -1,0 +1,28 @@
+
+<p style="text-align:left;">
+
+{% if page.series.prev %}
+<a href="{{site.baseurl}}{{page.series.prev}}">
+    <button type="button" class="btn btn-primary">
+        Previous
+    </button>
+</a>
+{% else %}
+<button type="button" class="btn btn-primary" disabled>
+    Previous
+</button>
+{% endif %}
+
+{% if page.series.next %}
+<a href="{{site.baseurl}}{{page.series.next}}">
+    <button type="button" class="btn btn-primary" style="float:right;">
+        Next
+    </button>
+</a>
+{% else %}
+<button type="button" class="btn btn-primary" style="float:right;" disabled>
+    Next
+</button>
+{% endif %}
+
+</p>

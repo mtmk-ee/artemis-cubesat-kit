@@ -1,19 +1,17 @@
 ---
-title: Setup Part 3
+title: "Getting Started Part 3 - COSMOS Web"
 tags: [software]
 keywords: software
-layout: page
+layout: series
 #last_updated: July 3, 2016
 sidebar: home_sidebar
 permalink: /pages/tutorials/setup/setup3.html
 folder: /pages/tutorials/setup
+
+series:
+  prev: /pages/tutorials/setup/setup2.html
+  next: /pages/tutorials/setup/setup4.html
 ---
-| _Pages in this Tutorial_                                  |
-| --------------------------------------------------------- |
-| 1. [Unboxing the Hardware](setup1.html)                   |
-| 2. [Setting up the Development Environment](setup2.html)  |
-| **3. Using COSMOS Web**                                   |
-| 4. [Running the Camera Script](setup4.html)               |
 
 <div id="toc"></div>
 
@@ -70,8 +68,3 @@ Next, click on _Realms_ -> _Artemis_ to switch to the Artemis cubesat view. In t
 <div align="center">
 <img src="https://github.com/mtmk-ee/artemis-cubesat-kit/wiki/resources/tutorials/setup/cosmos_web_home.png" width=600></img>
 </div><br>
-
----------------------------------------------------------------------------------------------------------------------------------------------
-
-**Previous:** [[Setting up the Development Environment]] &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; **Next:** [[Running the Camera Script]]
-
