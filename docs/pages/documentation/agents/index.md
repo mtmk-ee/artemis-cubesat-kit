@@ -1,11 +1,6 @@
 ---
 layout: default
-title: Included Agents
-nav_order: 1
-has_children: true
-parent: BeagleBone
-grand_parent: Documentation
 ---
-{: .no_toc }
 
-
+<!-- Redirect -->
+<meta http-equiv="refresh" content="0; url=heater-agent.html">

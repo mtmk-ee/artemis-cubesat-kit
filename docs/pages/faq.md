@@ -6,7 +6,7 @@ sidebar: home_sidebar
 permalink: /pages/faq.html
 folder: /pages
 
-faq: main
+faq: faq
 ---
 
 

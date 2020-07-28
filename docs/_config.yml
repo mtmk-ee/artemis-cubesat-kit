@@ -139,37 +139,18 @@ defaults:
       search: true
       sidebar: home_sidebar
       topnav: topnav
-  -
-    scope:
-      path: ""
-      type: "tooltips"
-    values:
-      layout: "page"
-      search: true
-      tooltip: true
 
-  -
+  - # Agent layout defaults
     scope:
-      path: ""
-      type: "posts"
+      path: "pages/documentation/agents"
+      type: "pages"
     values:
-      layout: "post"
+      layout: "agent"
       comments: false # Change to false if you don't want to use Commento.io
       search: true
       sidebar: home_sidebar
       topnav: topnav
 
-  -
-    scope:
-      path: ""
-      type: "series"
-    values:
-      layout: "series"
-      comments: false # Change to false if you don't want to use Commento.io
-      search: true
-      sidebar: home_sidebar
-      topnav: topnav
-      toc: false
 
 # ====================== Sidebars ======================
 sidebars:

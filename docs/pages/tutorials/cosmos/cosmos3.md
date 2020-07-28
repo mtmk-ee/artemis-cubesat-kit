@@ -41,7 +41,7 @@ Now that we've gotten definitions out of the way, we can start by creating a Sim
 ### Creating the SimpleAgent
 First, you'll need to include the header file with all of the SimpleAgent definitions:
 
-```cppwhat are examples of some requests?
+```cpp
 #include "utility/SimpleAgent.h"
 ```
 

@@ -1,11 +1,10 @@
 ---
 title: SimpleAgent Devices
+permalink: /pages/documentation/utility-classes/simpleagent-devices.html
+layout: class
+
 tags: [software]
 keywords: software
-layout: class
-#last_updated: July 3, 2016
-sidebar: home_sidebar
-permalink: /pages/documentation/utility-classes/simpleagent-devices.html
 
 class_name: device
 list_members: false

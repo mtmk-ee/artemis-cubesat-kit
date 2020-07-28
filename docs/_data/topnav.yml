@@ -7,6 +7,8 @@ topnav:
       external_url: http://leonidas-b.hsfl.hawaii.edu/wordpress-5.0.1/artemis-2-2/
     - title: GitHub
       external_url: https://github.com/mtmk-ee/artemis-cubesat-kit
+    - title: Submit an Issue
+      external_url: https://github.com/mtmk-ee/artemis-cubesat-kit/issues
 
 #Topnav dropdowns
 # topnav_dropdowns:

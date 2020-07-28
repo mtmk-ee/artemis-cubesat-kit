@@ -1,5 +1,29 @@
 
+# List the names of sections in the order they will appear
+order:
+  - "Raspberry Pi"
+  - "COSMOS"
+  - "BeagleBone"
+  - "VirtualBox"
+
 sections:
+
+  # ================== COSMOS ==================
+  - name: "COSMOS"
+    content:
+
+      - question: "Some of my SimpleAgent device properties aren't showing up externally, what's happening?"
+        answer: >
+          Unfortunately there is currently a bug in COSMOS which prevents certain properties from being posted.
+          There's no good way to figure out which ones are broken other than to dig through the COSMOS source
+          code. For now you can try using a different property to store your values. Hopefully this issue gets 
+          fixed soon!
+
+      - question: "None of the properties for _one_ of my SimpleAgent devices are showing up externally. What gives?"
+        answer: >
+          This seems to be a bug in COSMOS, but it's difficult to replicate. For now you can try switching the 
+          order you create your devices. If you have only a single device, you can add another device beforehand 
+          which goes unused.
 
   # ================== Raspberry Pi ==================
   - name: "Raspberry Pi"
@@ -18,22 +42,6 @@ sections:
           Raspberry Pi. To fix this, you can try disabling DNS in the SSH configuration for both the BeagleBone 
           and Raspberry Pi.
 
-  # ================== COSMOS ==================
-  - name: "COSMOS"
-    content:
-
-      - question: "Some of my SimpleAgent device properties aren't showing up externally, what's happening?"
-        answer: >
-          Unfortunately there is currently a bug in COSMOS which prevents certain properties from being posted.
-          There's no good way to figure out which ones are broken other than to dig through the COSMOS source
-          code. For now you can try using a different property to store your values. Hopefully this issue gets 
-          fixed soon!
-
-      - question: "None of the properties for _one_ of my SimpleAgent devices are showing up externally. What gives?"
-        answer: >
-          This seems to be a bug in COSMOS, but it's difficult to replicate. For now you can try switching the 
-          order you create your devices. If you have only a single device, you can add another device beforehand 
-          which goes unused.
 
   # ================== BeagleBone ==================
   - name: "BeagleBone"
