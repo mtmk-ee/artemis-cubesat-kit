@@ -1,20 +1,17 @@
 ---
 title: Raspberry Pi Agent
-tags: [software]
-keywords: software
-layout: page
-#last_updated: July 3, 2016
-sidebar: home_sidebar
+layout: agent
 permalink: /pages/documentation/agents/raspberry-pi-agent.html
----
 
-## Quick Details
-|   Property   |      Value     |
-| ------------ | -------------- |
-| Program Name | `agent_raspi`  |
-| Agent Name   | `raspi`        |
-| Source File  | [agent_raspi.cpp]({{ site.gh_repo }}/blob/master/BeagleBone/source/agents/agent_raspi.cpp) |
-| Hardware     | [Raspberry Pi Zero](https://www.raspberrypi.org/products/raspberry-pi-zero/) |
+sidebar: home_sidebar
+tags: [software, raspberrypi]
+keywords: software
+
+agent_name: agent_raspi
+
+# "Quick Description" info
+
+---
 
 ## Description
 The Raspberry Pi agent (aka `agent_raspi`) is an agent that handles communication with the Raspberry Pi, including startup, shutdown, and data transfer.
@@ -199,83 +196,3 @@ Below is a table showing which properties are collected from various other agent
         </tr>
     </tbody>
 </table>
-
-
-
-## COSMOS Properties
-Below is a table showing the devices and COSMOS names for properties used by the Raspberry Pi agent.
-
-<table>
-    <thead>
-        <tr>
-            <th>Device</th>
-            <th>Property</th>
-            <th>COSMOS Name</th>
-            <th>Storage Type</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td rowspan=7>Raspberry Pi CPU</td>
-            <td>UTC Timestamp</td>
-            <td>device_cpu_utc_000</td>
-            <td>double</td>
-        </tr>
-        <tr>
-            <td>Load</td>
-            <td>device_cpu_load_000</td>
-            <td>float</td>
-        </tr>
-        <tr>
-            <td>Memory Use (GiB) </td>
-            <td>device_cpu_gib_000</td>
-            <td>float</td>
-        </tr>
-        <tr>
-            <td>Maximum Memory (GiB)</td>
-            <td>device_cpu_maxgib_000</td>
-            <td>float</td>
-        </tr>
-        <tr>
-            <td>Up Time (s)</td>
-            <td>device_cpu_uptime_000</td>
-            <td>int</td>
-        </tr>
-        <tr>
-            <td>Boot Count</td>
-            <td>device_cpu_boot_count_000</td>
-            <td>int</td>
-        </tr>
-        <tr>
-            <td>Temperature (K)</td>
-            <td>device_cpu_temp_000</td>
-            <td>float</td>
-        </tr>
-        <tr>
-            <td rowspan=4>Raspberry Pi Camera</td>
-            <td>UTC Timestamp</td>
-            <td>device_cam_utc_000</td>
-            <td>double</td>
-        </tr>
-        <tr>
-            <td>Enabled</td>
-            <td>device_cam_enabled_000</td>
-            <td>bool</td>
-        </tr>
-        <tr>
-            <td>Image Width (Pixels)</td>
-            <td>device_cam_pwidth_000</td>
-            <td>int</td>
-        </tr>
-        <tr>
-            <td>Image Height (Pixels)</td>
-            <td>device_cam_pheight_000</td>
-            <td>int</td>
-        </tr>
-    </tbody>
-</table>
-
-## Block Diagram
-Below is a software diagram demonstrating the behavior of the Raspberry Pi agent.
-
-<img src="/resources/diagrams/agent_raspi_diagram.png" width="800px">

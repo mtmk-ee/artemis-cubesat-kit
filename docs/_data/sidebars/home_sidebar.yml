@@ -6,6 +6,8 @@ entries:
   levels: one
   folders:
 
+    
+# =================================================================================
   - title: Overview
     output: web
     folderitems:
@@ -15,11 +17,8 @@ entries:
     - title: FAQ
       url: /pages/faq.html
       output: web
-    - title: About Us
-      url: /about.html
-      output: web
 
-
+# =================================================================================
   - title: Tutorials
     output: web
     folderitems:
@@ -112,11 +111,11 @@ entries:
         - title: Raspberry Pi Agent
           url: /pages/documentation/agents/raspberry-pi-agent.html
           output: web
-        - title: Switch Agent
-          url: /pages/documentation/agents/switch-agent.html
-          output: web
         - title: Sun Sensor Agent
           url: /pages/documentation/agents/sun-sensor-agent.html
+          output: web
+        - title: Switch Agent
+          url: /pages/documentation/agents/switch-agent.html
           output: web
         - title: Temperature Sensor Agent
           url: /pages/documentation/agents/temperature-sensor-agent.html

@@ -1,0 +1,77 @@
+
+# Quick Description table
+description:
+  program_name: agent_switch
+  agent_name: switch
+  files:
+    - name: "agent_switch.cpp"
+  hardware:
+    - name: "Power Distribution Unit (PDU)"
+
+# Diagram info
+diagram:
+  file: "agent_switch_diagram.png"
+  width: "400px"
+
+# Device table
+cosmos_devices:
+
+  # =================== Heater ===================
+  - name: "Switch<br>(Heater)"
+    cosmos_device_name: "swch"
+    cosmos_device_number: "000"
+    properties:
+      - name: "UTC"
+        cosmos_name: "utc"
+        storage_type: ["double", "Time"]
+        description: "The UTC timestamp as a Modified Julian Day"
+        
+      - name: "Enabled"
+        cosmos_name: "enabled"
+        storage_type: "bool"
+        description: "`true` if the switch is enabled"
+        
+      - name: "Voltage"
+        cosmos_name: "volt"
+        storage_type: "float"
+        description: "The voltage supplied"
+
+  # =================== Temperature Sensors ===================
+  - name: "Switch<br>(Temperature Sensors)"
+    cosmos_device_name: "swch"
+    cosmos_device_number: "001"
+    properties:
+      - name: "UTC"
+        cosmos_name: "utc"
+        storage_type: ["double", "Time"]
+        description: "The UTC timestamp as a Modified Julian Day"
+        
+      - name: "Enabled"
+        cosmos_name: "enabled"
+        storage_type: "bool"
+        description: "`true` if the switch is enabled"
+        
+      - name: "Voltage"
+        cosmos_name: "volt"
+        storage_type: "float"
+        description: "The voltage supplied"
+
+  # =================== Sun Sensors ===================
+  - name: "Switch<br>(Sun Sensors)"
+    cosmos_device_name: "swch"
+    cosmos_device_number: "002"
+    properties:
+      - name: "UTC"
+        cosmos_name: "utc"
+        storage_type: ["double", "Time"]
+        description: "The UTC timestamp as a Modified Julian Day"
+        
+      - name: "Enabled"
+        cosmos_name: "enabled"
+        storage_type: "bool"
+        description: "`true` if the switch is enabled"
+        
+      - name: "Voltage"
+        cosmos_name: "volt"
+        storage_type: "float"
+        description: "The voltage supplied"

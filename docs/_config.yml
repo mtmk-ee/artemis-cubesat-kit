@@ -1,81 +1,44 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-#
-# If you need help with YAML syntax, here are some quick references for you: 
-# https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
-# https://learnxinyminutes.com/docs/yaml/
-#
-# Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
 
+# ====================== Site Settings ======================
+
+# Site title
 title: Artemis CubeSat Kit
+
+# Email address to display
 #email: your-email@example.com
-description: >- # this means to ignore newlines until "baseurl:"
-  A cubesat kit created by Hawaii Space Flight Laboratory
+
+# Site description, used by search engines
+description: "A low-cost cubesat kit for education. Created by Hawaii Space Flight Laboratory"
+
+# The subpath of the website on the domain
 baseurl: "/artemis-cubesat-kit" # the subpath of your site, e.g. /blog
-url: "https://mtmk-ee.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+
+# The hostname & protocol of the site
+url: "https://mtmk-ee.github.io"
+
+# The external project website
+project_website: "http://leonidas-b.hsfl.hawaii.edu/wordpress-5.0.1/artemis-2-2/"
+
 #twitter_username: jekyllrb
 #github_username: mtmk-ee
 
-# Build settings
-plugins:
-  - jekyll-feed
+# Plugins
+# plugins:
+#   - jekyll-
+    
+# ===================================== Internal Paths =====================================
+agent_diagram_folder: "/resources/diagrams/agents"
 
 
-#remote_theme: tomjoht/documentation-theme-jekyll
+# ===================================== GitHub Folders =====================================
+
+# The github repository URL
+gh_repo: "https://github.com/mtmk-ee/artemis-cubesat-kit"
+
+# The folder agent source files are used in (used in quick description)
+gh_agent_source_folder: "/blob/master/BeagleBone/source/agents"
 
 # ===================================== Theme Configuration =====================================
-# theme: "just-the-docs"
-# logo: "/resources/logos/hsfl.png"
-
-# search:
-#   # Split pages into sections that can be searched individually
-#   # Supports 1 - 6, default: 2
-#   heading_level: 2
-#   # Maximum amount of previews per search result
-#   # Default: 3
-#   previews: 5
-#   # Maximum amount of words to display before a matched word in the preview
-#   # Default: 5
-#   preview_words_before: 5
-#   # Maximum amount of words to display after a matched word in the preview
-#   # Default: 10
-#   preview_words_after: 10
-#   # Set the search token separator
-#   # Default: /[\s\-/]+/
-#   # Example: enable support for hyphenated search words
-#   tokenizer_separator: /[\s/]+/
-#   # Display the relative url in search results
-#   # Supports true (default) or false
-#   rel_url: true
-#   # Enable or disable the search button that appears in the bottom right corner of every page
-#   # Supports true or false (default)
-#   button: false
-
-# # Heading anchor links appear on hover over h1-h6 tags in page content
-# # allowing users to deep link to a particular heading on a page.
-# #
-# # Supports true (default) or false
-# heading_anchors: true
-
-
-# # Footer content 
-# # appears at the bottom of every page's main content
-# footer_content: "Copyright &copy; 2020 Hawaii Space Flight Laboratory.</a>"
-
-# # Footer last edited timestamp
-# last_edit_timestamp: false # show or hide edit time - page must have `last_modified_date` defined in the frontmatter
-# last_edit_time_format: "%b %e %Y at %I:%M %p" # uses ruby's time format: https://ruby-doc.org/stdlib-2.7.0/libdoc/time/rdoc/Time.html
 
 # # Footer "Edit this page on GitHub" link text
 # gh_edit_link: true # show or hide edit this page link
@@ -84,58 +47,65 @@ plugins:
 # gh_edit_branch: "master/docs" # the branch that your docs is served from
 # gh_edit_view_mode: "edit" # "tree" or "edit" if you want the user to jump into the editor immediately
 
-gh_repo: "https://github.com/mtmk-ee/artemis-cubesat-kit"
 
-# # Color scheme supports "light" (default) and "dark"
-# color_scheme: light
+# Color scheme supports "light" (default) and "dark"
+color_scheme: light
 
-
+# Determines whether the output should be for web or PDF. Accepts "web" and/or "pdf"
 output: web
-# this property is useful for conditional filtering of content that is separate from the PDF.
 
-topnav_title: Artemis Cubesat Kit
-# this appears on the top navigation bar next to the home button
+# This appears on the top navigation bar next to the home button
+topnav_title: "Artemis Cubesat Kit"
 
-site_title: Artemis Cubesat Kit
-# this appears in the html browser tab for the site title (seen mostly by search engines, not users)
+# This appears in the html browser tab for the site title (seen mostly by search engines, not users)
+site_title: "Artemis Cubesat Kit"
 
-company_name: Hawaii Space Flight Laboratory
-# this appears in the footer
+# This appears in the footer
+company_name: "Hawaii Space Flight Laboratory"
 
+
+# If you're using Github, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
 github_editme_path:
-# if you're using Github, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
 
+# If you're using GitLab, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
 # gitlab_editme_path: tomjoht/documentation-theme-jekyll/blob/gh-pages/
-# if you're using GitLab, provide the basepath to the branch you've created for reviews, following the sample here. if not, leave this value blank.
 
+# If you have google-analytics ID, put it in. if not, edit this value to blank.
 google_analytics:
-# if you have google-analytics ID, put it in. if not, edit this value to blank.
 
+# The preview server used. Leave as is.
 host: 127.0.0.1
-# the preview server used. Leave as is.
 
+# The port where the preview is rendered. You can leave this as is unless you have other Jekyll builds using this same port that might cause conflicts. in that case, use another port such as 4006.
 port: 4000
-# the port where the preview is rendered. You can leave this as is unless you have other Jekyll builds using this same port that might cause conflicts. in that case, use another port such as 4006.
 
+
+# These are the files and directories that jekyll will exclude from the build
 exclude:
   - .idea/
   - .gitignore
   - vendor
-# these are the files and directories that jekyll will exclude from the build
 
+
+
+# ====================== Feedback ======================
+
+# Default subject line for feedback
 feedback_subject_line: 
 
+# Used as a contact email for the Feedback link in the top navigation bar
 feedback_email:
-# used as a contact email for the Feedback link in the top navigation bar
 
+# If you uncomment the next line, the Feedback link gets removed
 feedback_disable: true
-# if you uncomment the previous line, the Feedback link gets removed
 
+# If you uncomment the next line, it changes the Feedback text
 # feedback_text: "Need help?"
-# if you uncomment the previous line, it changes the Feedback text
 
+# if you uncomment the next line, it changes where the feedback link points to
 # feedback_link: "http://helpy.io/"
-# if you uncomment the previous line, it changes where the feedback link points to
+
+# ====================== Markdown / Syntax Highlighting ======================
 
 highlighter: rouge
 # library used for syntax highlighting
@@ -154,6 +124,9 @@ collections:
     output: false
 # collections are declared here. this renders the content in _tooltips and processes it, but doesn't output it as actual files in the output unless you change output to true
 
+
+# ====================== Default Styles ======================
+# These are defaults used for the frontmatter for these file types
 defaults:
   -
     scope:
@@ -161,8 +134,8 @@ defaults:
       type: "pages"
     values:
       layout: "page"
-      comments: false
-      # if you don't want to use Commento.io and just hide comments, change true to false wherever you see the comments property
+      comments: false # Change to false if you don't want to use Commento.io
+      
       search: true
       sidebar: home_sidebar
       topnav: topnav
@@ -181,14 +154,12 @@ defaults:
       type: "posts"
     values:
       layout: "post"
-      comments: false
-      # if you don't want to use Commento.io and just hide comments, change true to false wherever you see the comments property
+      comments: false # Change to false if you don't want to use Commento.io
       search: true
       sidebar: home_sidebar
       topnav: topnav
 
-# these are defaults used for the frontmatter for these file types
-
+# ====================== Sidebars ======================
 sidebars:
 - home_sidebar
 - mydoc_sidebar
@@ -196,12 +167,13 @@ sidebars:
 - product2_sidebar
 - other
 
-description: "Intended as a documentation theme based on Jekyll for technical writers documenting software and other technical products, this theme has all the elements you would need to handle multiple products with both multi-level sidebar navigation, tags, and other documentation features."
+
+# ====================== feed.xml File ======================
+description: "A low-cost cubesat kit for educational purposes, created by Hawaii Space Flight Laboratory"
 # the description is used in the feed.xml file
 
 # needed for sitemap.xml file only
 # url: http://idratherbewriting.com
 # baseurl: /documentation-theme-jekyll
-
 
 github: [metadata]

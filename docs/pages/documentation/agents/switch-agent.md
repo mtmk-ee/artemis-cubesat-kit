@@ -1,20 +1,15 @@
 ---
 title: Switch Agent
+layout: agent
+permalink: /pages/documentation/agents/switch-agent.html
+
+sidebar: home_sidebar
 tags: [software]
 keywords: software
-layout: page
-#last_updated: July 3, 2016
-sidebar: home_sidebar
-permalink: /pages/documentation/agents/switch-agent.html
+
+agent_name: agent_switch
 ---
 
-## Quick Details
-|   Property   |      Value     |
-| ------------ | -------------- |
-| Program Name | `agent_switch` |
-| Agent Name   | `switch`       |
-| Source File  | [agent_switch.cpp]({{ site.gh_repo }}/blob/master/BeagleBone/source/agents/agent_switch.cpp) |
-| Hardware     | Power Distribution Unit |
 
 ## Description
 The switch agent (aka `agent_switch`) is an agent that provides control to the switched lines in the EPS power distribution unit (PDU). Little is actually done inside of the main loop of this agent, as most functionality is performed through requests.
@@ -79,73 +74,3 @@ Below is a table showing which GPIO pins control which switched lines:
 | `sw_heater` |     0     |        Heater       |  TODO    |       TODO       |       TODO        |
 | `sw_temp`   |     1     | Temperature Sensors |  TODO    |       TODO       |       TODO        |
 | `sw_ss`     |     2     |      Sun Sensors    |  TODO    |       TODO       |       TODO        |
-
-
-## COSMOS Properties
-Below is a table showing the devices and COSMOS names for properties used by the switch agent.
-
-<table>
-    <thead>
-        <tr>
-            <th>Device</th>
-            <th>Property</th>
-            <th>COSMOS Name</th>
-            <th>Storage Type</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td rowspan=3 style="text-align:center">Heater Switch</td>
-            <td>UTC Timestamp</td>
-            <td>device_swch_utc_000</td>
-            <td>double</td>
-        </tr>
-        <tr>
-            <td>Enabled</td>
-            <td>device_swch_enabled_000</td>
-            <td>bool</td>
-        </tr>
-        <tr>
-            <td>Voltage</td>
-            <td>device_swch_volt_000</td>
-            <td>float</td>
-        </tr>
-        <tr>
-            <td rowspan=3 style="text-align:center">Temperature Sensor Switch</td>
-            <td>UTC Timestamp</td>
-            <td>device_swch_utc_001</td>
-            <td>double</td>
-        </tr>
-        <tr>
-            <td>Enabled</td>
-            <td>device_swch_enabled_001</td>
-            <td>bool</td>
-        </tr>
-        <tr>
-            <td>Voltage</td>
-            <td>device_swch_volt_001</td>
-            <td>float</td>
-        </tr>
-        <tr>
-            <td rowspan=3 style="text-align:center">Sun Sensor Switch</td>
-            <td>UTC Timestamp</td>
-            <td>device_swch_utc_002</td>
-            <td>double</td>
-        </tr>
-        <tr>
-            <td>Enabled</td>
-            <td>device_swch_enabled_002</td>
-            <td>bool</td>
-        </tr>
-        <tr>
-            <td>Voltage</td>
-            <td>device_swch_volt_002</td>
-            <td>float</td>
-        </tr>
-    </tbody>
-</table>
-
-## Block Diagram
-Below is a software diagram demonstrating the behavior of the switch agent.
-
-<img src="/resources/diagrams/agent_switch_diagram.png" width="400px">

@@ -9,7 +9,7 @@ toc: false
 
 ## Welcome!
 
-Here you'll find documentation and tutorials for the Artemis Cubesat Kit, a low-cost kit containing all the necessary subsystems for a 1U cubesat. For more information on the project itself, visit the _About Us_ page on the sidebar.
+Here you'll find documentation and tutorials for the Artemis Cubesat Kit, a low-cost kit containing all the necessary subsystems for a 1U cubesat. For more information on the project itself, visit the <a href="{{ site.project_website }}" target="_blank" rel="noopener">project website</a>
 
 
 ## What Next?
