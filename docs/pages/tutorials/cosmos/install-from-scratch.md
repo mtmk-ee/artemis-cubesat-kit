@@ -57,7 +57,7 @@ Click on _File_ > _Open File or Project..._, and open up the file `~/cosmos/sour
 **TODO:** a project configuration dialog might show up?
 
 Once the project is finished loading, click the _Projects_ button on the left side of the window, and then click
-on _Desktop_ (the kit we added in the previous step), and then click on _Build_ under it.
+on _Desktop_, and then click on _Build_ under it.
 
 Make sure the build directory looks something like:
 
@@ -77,7 +77,7 @@ $ mkdir bin
 $ find ./ -perm /a+x -exec cp {} bin \;
 ```
 
-Now you can copy the contents of the `/home/YOUR_USERNAME/cosmos/source/core/build-core-Desktop-Debug/bin` folder to the `/home/YOUR_USERNAME/cosmos/bin` folder. There will be a bunch of files already in the destination folder, but you can remove the old ones (those are from the master branch);
+Now you can copy the contents of the `/home/YOUR_USERNAME/cosmos/source/core/build-core-Desktop-Debug/bin` folder to the `/home/YOUR_USERNAME/cosmos/bin` folder. There will be a bunch of files already in the destination folder, but you can remove the old ones (those are from the master branch).
 
 
 
