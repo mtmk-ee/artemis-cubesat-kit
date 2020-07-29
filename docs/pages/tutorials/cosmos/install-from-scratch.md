@@ -93,8 +93,6 @@ Now you can copy the contents of the `/home/YOUR_USERNAME/cosmos/source/core/bui
 
 ### Install the ARM Toolchain
 
-> **_Note:_** you can skip this step if you _don't_ want to compile your programs to run on the BeagleBone.
-
 The ARM toolchain consists of cross-compilers for ARM-based processors, such as the ones used on the BeagleBone and Raspberry Pi.
 
 First check if you already have the cross-compiler by running the following a terminal window:
@@ -135,8 +133,6 @@ Remove the two lines you previously added at the bottom, and save the file.
 
 
 ### Set up the Cross Compiler in Qt Creator
-
-> **_Note:_** you can skip this step if you _don't_ want to compile your programs to run on the BeagleBone.
 
 Open up Qt Creator, and click on _Tools > Options_.
 
