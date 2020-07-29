@@ -199,9 +199,14 @@ Now you can copy the `/home/YOUR_USERNAME/cosmos/source/core/build-core-arm32-De
 
 
 
+## Grab the SimpleAgent Template (Optional)
+If you want to use the SimpleAgent template project, you can clone it to your COSMOS project folder by
+running the following in a terminal window:
 
-
-
+```bash
+$ cd ~/cosmos/source/projects
+$ git clone https://github.com/mtmk-ee/simpleagent_template.git
+```
 
 
 
