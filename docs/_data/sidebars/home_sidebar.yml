@@ -150,6 +150,9 @@ entries:
         - title: Timer
           url: /pages/documentation/utility-classes/timer.html
           output: web
+        - title: GPIO
+          url: /pages/documentation/utility-classes/gpio.html
+          output: web
 
       - title: Miscellaneous
         output: web

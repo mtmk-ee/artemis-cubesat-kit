@@ -28,6 +28,12 @@ Duplicate the project folder `simpleagent_template` and rename it as you wish. I
 
 {% include image.html file="/resources/tutorials/cosmos/part1/copy_template.png" %}
 
+> **_Note:_** Feel like grabbing a fresh copy of the template? Run the following in a terminal:
+> ```bash
+> $ cd ~/cosmos/source/projects
+> $ git clone https://github.com/mtmk-ee/simpleagent_template.git
+> ```
+
 Open up QtCreator and go to _File_ -> _Open File or Project..._, and open the file `~/cosmos/source/projects/my_project/CMakeLists.txt`. This file contains the project configuration.
 
 {% include image.html file="/resources/tutorials/cosmos/part1/open_project_window.png" %}
