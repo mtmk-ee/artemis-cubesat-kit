@@ -42,9 +42,9 @@ $ ./cosmos-install.sh
 There are many changes present in the COSMOS Core dev branch that are not present in the master branch. To get the newest changes, switch to the dev branch:
 
 ```bin
-cd ~/cosmos/source/core
-git checkout dev
-git fetch
+$ cd ~/cosmos/source/core
+$ git checkout dev
+$ git fetch
 ```
 
 ## Compile COSMOS Core Locally
