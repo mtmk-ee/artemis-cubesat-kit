@@ -19,13 +19,18 @@ To build the program, click the hammer icon at the bottom left of the screen. Th
 
 {% include image.html file="/resources/tutorials/cosmos/part3/build.png" width="100%" %}
 
-## Deploy the Agent
+> **_Note:_** if only you want to run the agent locally, you can just click on the green triangle, and skip the next section.
+
+## Deploy the Agent on the BeagleBone
+
+> **_Note:_** you can skip this step if you only want to test your agent locally.
 
 > **_Tip:_** if you haven't used the Cloud9 IDE with the BeagleBone before, you should check out the
 > [Getting Started tutorial series]({{site.folder_tutorials_setup}}/setup1.html)
 
 Next, you'll need to deploy your agent to the BeagleBone, meaning that you will be moving the agent executables from your local computer onto the BeagleBone.
 
+## Copy the Executable
 
 You can copy the build folder to the BeagleBone by running the following terminal command:
 
@@ -37,7 +42,7 @@ Enter the password (default is `temppwd`), and wait a minute while the files cop
 
 {% include image.html file="/resources/tutorials/cosmos/part3/cloud9.png" %}
 
-## Run the Agent
+### Run the Agent
 
 
 To run the agent, you can enter the following command in a Cloud9 terminal:
@@ -78,6 +83,8 @@ $ agent cubesat my_agent say_hi
 
 {% include image.html file="/resources/tutorials/cosmos/part3/call_request.png" width="100%" %}
 
+> **_Note:_** the screenshot above is for running agents on the BeagleBone. If you're testing locally, then
+> you will be using Ubuntu's terminal.
 
 ## Stop the Agent
 

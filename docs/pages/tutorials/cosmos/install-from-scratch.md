@@ -52,7 +52,7 @@ $ git fetch
 > **_Note:_** you can skip this step if you _only_ want to compile your programs to run on the BeagleBone.
 
 
-Click on _File_ > _Open File or Project..._, and open up the file `~/cosmos/source/core/CMakeLists.txt`.
+In Qt Creator, click on _File_ > _Open File or Project..._, and open up the file `~/cosmos/source/core/CMakeLists.txt`.
 
 **TODO:** a project configuration dialog might show up?
 
@@ -167,7 +167,7 @@ Next, click _OK_.
 
 Now it's time to cross-compile for ARM.
 
-Click on _File_ > _Open File or Project..._, and open up the file `~/cosmos/source/core/CMakeLists.txt`.
+In Qt Creator, click on _File_ > _Open File or Project..._, and open up the file `~/cosmos/source/core/CMakeLists.txt`.
 
 **TODO:** a project configuration dialog might show up?
 
