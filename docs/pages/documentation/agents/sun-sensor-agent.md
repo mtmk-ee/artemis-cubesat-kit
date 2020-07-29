@@ -1,9 +1,8 @@
 ---
 title: Sun Sensor Agent
-layout: agent
 permalink: /pages/documentation/agents/sun-sensor-agent.html
+layout: agent
 
-sidebar: home_sidebar
 tags: [software, sunsensor]
 keywords: software
 

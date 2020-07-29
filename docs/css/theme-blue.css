@@ -22,8 +22,9 @@ h2:after {
 blockquote {
     color: #595959;
     font-size: 15px;
-    background-color: #f1f1f1;
-    border-left: 5px solid #b8b8b8;
+    background-color: #a9ddff;
+    border-left: 5px solid #496e86;
+    border-radius: 4px
 }
 
 

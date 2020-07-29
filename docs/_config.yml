@@ -29,6 +29,22 @@ project_website: "http://leonidas-b.hsfl.hawaii.edu/wordpress-5.0.1/artemis-2-2/
 # ===================================== Internal Paths =====================================
 agent_diagram_folder: "/resources/diagrams/agents"
 
+folder_resources: "/artemis-cubesat-kit/resources"
+folder_diagrams: "/artemis-cubesat-kit/resources/diagrams"
+
+
+folder_docs: "/artemis-cubesat-kit/pages/documentation"
+folder_docs_other: "/artemis-cubesat-kit/pages/documentation/other"
+folder_docs_cosmos: "/artemis-cubesat-kit/pages/documentation/cosmos"
+folder_docs_library: "/artemis-cubesat-kit/pages/documentation/python-library"
+folder_docs_agents: "/artemis-cubesat-kit/pages/documentation/agents"
+folder_docs_utility: "/artemis-cubesat-kit/pages/documentation/utility-classes"
+
+folder_tutorials: "/artemis-cubesat-kit/pages/tutorials"
+folder_tutorials_cosmos: "/artemis-cubesat-kit/pages/tutorials/cosmos"
+folder_tutorials_scripts: "/artemis-cubesat-kit/pages/tutorials/scripts"
+folder_tutorials_setup: "/artemis-cubesat-kit/pages/tutorials/setup"
+
 
 # ===================================== GitHub Folders =====================================
 
@@ -112,10 +128,15 @@ highlighter: rouge
 
 markdown: GFM
 kramdown:
- input: GFM
- auto_ids: true
- hard_wrap: false
- syntax_highlighter: rouge
+  input: GFM
+  auto_ids: true
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    block:
+      line_numbers: true
+      start_line: 1
 
 # filter used to process markdown. note that kramdown differs from github-flavored markdown in some subtle ways
 

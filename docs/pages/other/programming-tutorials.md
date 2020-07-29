@@ -1,10 +1,9 @@
 ---
 title: Programming Tutorials
-keywords: software
-layout: page
-#last_updated: July 3, 2016
-sidebar: home_sidebar
 permalink: /pages/other/programming-tutorials.html
+layout: page
+
+keywords: software
 ---
 
 > **_Disclaimer:_** the sites listed here have no affiliation with HSFL or the University of Hawaii at Manoa.
@@ -16,7 +15,6 @@ Looking to learn Python to write a payload script, or just want to brush up on y
 
 * [Tutorials from the Python team](https://docs.python.org/3/tutorial/)
 * [Tutorials from Tutorialspoint](https://www.tutorialspoint.com/python/index.htm)
-
 
 ## C++
 

@@ -13,7 +13,7 @@ series:
     next: /pages/tutorials/scripts/scripts2.html
 ---
 
-## Introduction <a name="introduction"></a>
+## Introduction
 
 Payload scripts running on the Raspberry Pi Zero make use of Python. You should probably have a decent understanding of Python before continuing.
 
@@ -21,7 +21,7 @@ In this tutorial, we'll use the [picamera](https://picamera.readthedocs.io/en/re
 
 ## The Payload Script
 
-### Getting Started <a name="getting_started"></a>
+### Getting Started
 First, you'll want to import the necessary packages:
 
 ```python
@@ -29,11 +29,12 @@ from artemis import cubesat
 from picamera import PiCamera
 from time import sleep
 ```
+
 The first line imports the `cubesat` module, which is used to communicate with the rest of the cubesat. The second line imports the `PiCamera` module, which is used to control the Raspberry Pi Camera. The last line imports the `sleep` function, which we will use later in the main loop.
 
 > **_Note:_** if you are modifying your payload device, then you should import any packages needed to control it.
 
-### Initializing the Payload Device <a name="initializing_the_payload_device"></a>
+### Initializing the Payload Device
 
 Next, we'll want to initialize the payload device. For the Raspberry Pi Camera it's very straightforward:
 
@@ -43,7 +44,7 @@ camera = PiCamera()
 
 You can also configure a bunch of camera settings if you would like. For details on using and configuring the camera using PiCamera, you can visit their [API documentation](https://picamera.readthedocs.io/en/release-1.13/api_camera.html) on this.
 
-### The Main Loop <a name="the_main_loop"></a>
+### The Main Loop
 Inside your payload script you will need an infinite `while` loop. Inside this loop you can perform all of the repetitive tasks needed to handle operations with your payload. Additionally, inside the loop you'll need to call the `cubesat`'s update function to make sure it's kept up to date with the latest sensor and agent information.
 
 A simple main loop for the Raspberry Pi Camera might look like this:
@@ -59,7 +60,7 @@ while True:
     sleep(5)
 ```
 
-### Putting it all Together <a name="putting_it_all_together"></a>
+### Putting it all Together
 
 Here is a basic payload script that captures images using the Raspberry Pi Camera and copies them to the BeagleBone:
 
@@ -103,5 +104,5 @@ Here's an explanation of what is happening at each step:
 
 > **_Note:_** since steps 3 through 7 occur in the main loop, they'll keep running until the program terminates.
 
-## Related Pages <a name="related_pages"></a>
-* [[Artemis CubeSat Library]]
+## Related Pages
+* [Artemis CubeSat Library]({{site.folder_docs_library}}/python-library.html)

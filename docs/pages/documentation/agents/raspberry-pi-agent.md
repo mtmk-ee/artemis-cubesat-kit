@@ -1,16 +1,12 @@
 ---
 title: Raspberry Pi Agent
-layout: agent
 permalink: /pages/documentation/agents/raspberry-pi-agent.html
+layout: agent
 
-sidebar: home_sidebar
 tags: [software, raspberrypi]
 keywords: software
 
 agent_name: agent_raspi
-
-# "Quick Description" info
-
 ---
 
 ## Description

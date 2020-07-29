@@ -29,9 +29,9 @@ After a while you should see the Cloud9 IDE appear in your browser.
 
 > **_Note:_** on Windows hosts you may need to _eject_ the BeagleBone device from File Explorer first.
 
-<div align="center">
-<img src="https://github.com/mtmk-ee/artemis-cubesat-kit/wiki/resources/tutorials/setup/cloud9_home.png" width=600></img>
-</div><br>
+
+{% include image.html file="/resources/tutorials/setup/part3/cloud9.png" width="100%" %}
+<br>
 
 The COSMOS agents (flight software programs) running on the BeagleBone should automatically start.
 

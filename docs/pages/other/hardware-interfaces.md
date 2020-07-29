@@ -1,10 +1,9 @@
 ---
 title: Hardware Interfaces
-keywords: software
-layout: page
-#last_updated: July 3, 2016
-sidebar: home_sidebar
 permalink: /pages/other/hardware-interfaces.html
+layout: page
+
+keywords: software
 ---
 
 > **_Disclaimer:_** the sites listed here have no affiliation with HSFL or the University of Hawaii at Manoa.

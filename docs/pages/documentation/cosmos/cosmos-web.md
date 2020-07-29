@@ -1,4 +1,13 @@
-🚧⚠️ This page is currently under construction. Please check back later! ⚠️🚧
+---
+title: COSMOS Web
+permalink: /pages/documentation/cosmos/cosmos-web.html
+layout: page
+
+tags: [software]
+keywords: software
+
+---
+
 
 ## What is COSMOS?
 
@@ -16,6 +25,3 @@
 
 
 ## Further Reading
-* [[SimpleAgent]]
-* [[SimpleAgent Devices]]
-* [[SimpleAgent Tutorial]]

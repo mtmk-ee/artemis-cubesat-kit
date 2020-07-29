@@ -65,17 +65,20 @@ entries:
       - title: COSMOS Series
         output: web
         subfolderitems:
-        - title: "1. Introduction to COSMOS"
+        - title: "1. COSMOS and QtCreator"
           url: /pages/tutorials/cosmos/cosmos1.html
           output: web
-        - title: "2. COSMOS and QtCreator"
+        - title: "2. Writing Agents"
           url: /pages/tutorials/cosmos/cosmos2.html
           output: web
-        - title: "3. Writing Agents"
+        - title: "3. Building and Deploying"
           url: /pages/tutorials/cosmos/cosmos3.html
           output: web
         - title: "4. Modifying COSMOS Web"
           url: /pages/tutorials/cosmos/cosmos4.html
+          output: web
+        - title: "Installing from Scratch"
+          url: /pages/tutorials/cosmos/install-from-scratch.html
           output: web
 
 
@@ -120,6 +123,16 @@ entries:
         - title: Temperature Sensor Agent
           url: /pages/documentation/agents/temperature-sensor-agent.html
           output: web
+      
+      - title: COSMOS
+        output: web
+        subfolderitems:
+        - title: COSMOS
+          url: /pages/documentation/cosmos/cosmos.html
+          output: web
+        - title: COSMOS Web
+          url: /pages/documentation/cosmos/cosmos-web.html
+          output: web
 
 
       - title: Utility Classes
@@ -133,6 +146,22 @@ entries:
           output: web
         - title: Time
           url: /pages/documentation/utility-classes/time.html
+          output: web
+        - title: Timer
+          url: /pages/documentation/utility-classes/timer.html
+          output: web
+
+      - title: Miscellaneous
+        output: web
+        subfolderitems:
+        - title: Doxygen
+          url: /pages/documentation/other/doxygen.html
+          output: web
+        - title: Development Environment
+          url: /pages/documentation/other/development-environment.html
+          output: web
+        - title: PyCubed Communication
+          url: /pages/documentation/other/pycubed-communication.html
           output: web
 
 

@@ -3,7 +3,6 @@ title: Temperature Sensor Agent
 permalink: /pages/documentation/agents/temperature-sensor-agent.html
 layout: agent
 
-sidebar: home_sidebar
 tags: [software]
 keywords: software
 

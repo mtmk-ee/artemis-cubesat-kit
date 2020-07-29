@@ -1,9 +1,8 @@
 ---
 title: Switch Agent
-layout: agent
 permalink: /pages/documentation/agents/switch-agent.html
+layout: agent
 
-sidebar: home_sidebar
 tags: [software]
 keywords: software
 

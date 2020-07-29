@@ -30,7 +30,7 @@ Since the disk image is compressed, you'll need to install [7-Zip](https://www.7
 
 ## 3. Set up the Virtual Machine
 
-> Having problems with this step? Visit the [[FAQ page|FAQ#VirtualBox]]
+> Having problems with this step? Visit the [FAQ page]({{site.baseurl}}/pages/faq.html#virtualbox)!
 
 Now that VirtualBox is installed, you can add the virtual machine containing the development environment.
 
@@ -125,4 +125,4 @@ Now we can enable some handy functionality for the guest machine:
 > **_Note:_** when pasting text into a terminal window, the keyboard shortcut <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd> is used. For copying text from a terminal window, the keyboard shortcut <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> is used.
 
 ## Further Reading
-* [[Artemis Development Environment]]
+* [Artemis Development Environment]({{site.folder_docs_other}}/development-environment.html)

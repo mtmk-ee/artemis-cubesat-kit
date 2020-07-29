@@ -10,7 +10,7 @@ class_name: device
 list_members: false
 ---
 
-> **_Note:_**  this wiki page only includes important features of the Device class. For the full documentation, see [[Doxygen Documentation]].
+> **_Note:_**  this wiki page only includes important features of the Device class. For the full documentation, see [Doxygen Documentation]({{site.folder_docs_other}}/doxygen.html).
 
 
 ## Description <a name="description"></a>

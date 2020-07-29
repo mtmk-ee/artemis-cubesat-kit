@@ -1,5 +1,5 @@
 ---
-title: Modifying COSMOS Web
+title: COSMOS Tutorial Part 4 - Modifying COSMOS Web
 permalink: /pages/tutorials/cosmos/cosmos4.html
 layout: series
 
