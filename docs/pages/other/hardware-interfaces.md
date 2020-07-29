@@ -10,6 +10,10 @@ keywords: software
 
 Hardware interfaces are used to communicate between hardware devices (sensors, CPUs, etc.), and if you want to work with them you may want to check out some of these tutorials:
 
+## USB
+* [Types of USB Cables](https://www.mymemory.co.uk/blog/what-different-usb-connection-types-are-there/)
+![Types of USB Cables](https://www.mymemory.co.uk/blog/wp-content/uploads/2019/03/5-1.jpg)
+
 ## I2C
 * [Introduction to I2C](https://www.corelis.com/education/tutorials/i2c-tutorial/)
 

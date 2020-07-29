@@ -18,7 +18,7 @@ series:
 ## What You Need
 * The assembled cubesat (included)
 * A computer with the Ubuntu development environment installed
-* USB Type A to USB Type B mini cable
+* USB Type A to USB Micro B cable
 
 ### 1. Connect to the BeagleBone
 Using the USB Type A to USB Type B mini cable, connect the port labeled `USB` on the BeagleBone to your computer. This will power and boot the BeagleBone.

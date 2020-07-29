@@ -44,7 +44,7 @@ folder_tutorials: "/artemis-cubesat-kit/pages/tutorials"
 folder_tutorials_cosmos: "/artemis-cubesat-kit/pages/tutorials/cosmos"
 folder_tutorials_scripts: "/artemis-cubesat-kit/pages/tutorials/scripts"
 folder_tutorials_setup: "/artemis-cubesat-kit/pages/tutorials/setup"
-
+folder_tutorials_from_scratch: "/artemis-cubesat-kit/pages/tutorials/setup-from-scratch"
 
 # ===================================== GitHub Folders =====================================
 

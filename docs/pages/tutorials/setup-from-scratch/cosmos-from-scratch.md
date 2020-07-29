@@ -1,6 +1,6 @@
 ---
 title: Installing COSMOS From Scratch
-permalink: /pages/tutorials/cosmos/install-from-scratch.html
+permalink: /pages/tutorials/setup-from-scratch/cosmos-from-scratch.html
 layout: page
 
 tags: [software]
@@ -166,7 +166,7 @@ Next, click _OK_.
 ### Cross-Compile COSMOS Core
 
 Now it's time to cross-compile for ARM.
-
+<br>
 In Qt Creator, click on _File_ > _Open File or Project..._, and open up the file `~/cosmos/source/core/CMakeLists.txt`.
 
 **TODO:** a project configuration dialog might show up?

@@ -77,8 +77,18 @@ entries:
         - title: "4. Modifying COSMOS Web"
           url: /pages/tutorials/cosmos/cosmos4.html
           output: web
-        - title: "Installing from Scratch"
-          url: /pages/tutorials/cosmos/install-from-scratch.html
+
+      - title: Setup from Scratch
+        output: web
+        subfolderitems:
+        - title: "COSMOS from Scratch"
+          url: /pages/tutorials/setup-from-scratch/cosmos-from-scratch.html
+          output: web
+        - title: "BeagleBone from Scratch"
+          url: /pages/tutorials/setup-from-scratch/beaglebone-from-scratch.html
+          output: web
+        - title: "Raspberry Pi from Scratch"
+          url: /pages/tutorials/setup-from-scratch/raspi-from-scratch.html
           output: web
 
 
