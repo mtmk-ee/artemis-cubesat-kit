@@ -1,7 +1,10 @@
-<img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/HSFL%20Logo.jpg" width="200"> <img src="https://github.com/mtmk-ee/artemis-cubesat-kit/blob/master/wiki/UH_Manoa_Logo.png" width="192">
+<img src="https://mtmk-ee.github.io/artemis-docs/resources/logos/hsfl.png" width="150"> <img src="https://mtmk-ee.github.io/artemis-docs/resources/logos/uh_manoa.png" width="150">
 
-# Artemis CubeSat Kit
+# Artemis Cubesat Kit
 
-Software for cubesat kit functionality
+Welcome! Here you'll find resources for the Artemis Cubesat Kit.
 
-See the [wiki](https://github.com/mtmk-ee/cubesat-kit/wiki) for more details on how the software works.
+For documentation and tutorials, visit the [technical details website](https://mtmk-ee.github.io/artemis-docs/index.html)
+
+For an overview of the project, visit the [project page](http://leonidas-b.hsfl.hawaii.edu/wordpress-5.0.1/artemis-2-2/)
+
