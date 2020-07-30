@@ -68,6 +68,11 @@ sections:
           You'll need to install <a href="tutorials/setup/setup2.html#install-guest-additions">VirtualBox Guest Additions</a>
           on your guest machine.
 
+      - question: "Why does my virtual machine randomly crash?"
+        answer: >
+          It might be a problem with hardware acceleration using your GPU. In the settings for the virtual machine
+          you can go to the Display tab and change the graphics controller setting, or disable hardware acceleration.
+
 
 
 

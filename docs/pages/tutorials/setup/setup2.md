@@ -30,7 +30,7 @@ Since the disk image is compressed, you'll need to install [7-Zip](https://www.7
 
 ## 3. Set up the Virtual Machine
 
-> Having problems with this step? Visit the [FAQ page]({{site.baseurl}}/pages/faq.html#virtualbox)!
+{% include note.html content='Having problems with this step? Visit the <a href="faq.html#virtualbox">FAQ page</a>!' %}
 
 Now that VirtualBox is installed, you can add the virtual machine containing the development environment.
 
@@ -82,7 +82,7 @@ After clicking the start button in the previous step, you should see the virtual
 
 Once Ubuntu has booted, you should be met with a login screen. The default username is _osboxes_, and the default password is _osboxes.org_
 
-> **_Note:_** for security, you may want to consider changing the password.
+{% include warning.html content='For security, you may want to consider changing the password.' %}
 
 #### 3.5 Install Guest Additions
 
@@ -95,7 +95,7 @@ sudo apt update
 sudo apt install build-essential dkms linux-headers-$(uname -r)
 ```
 
-> **_Note:_** until you finishing installing guest additions, copying and pasting between your host machine and virtual machine will not work.
+{% include note.html content='Until you finishing installing guest additions, copying and pasting between your host machine and virtual machine will not work.' %}
 
 Next, click on the _Devices_ menu at the top of the virtual machine, and click _Insert Guest Additions CD Image_ at the bottom of the list, and click the _Run_ button in the dialog that pops up. The program may take a few minutes to run, so feel free to go make some coffee.
 
@@ -120,9 +120,11 @@ Now we can enable some handy functionality for the guest machine:
 * To enable drag and drop between the host and guest, click _Devices_->_Drag and Drop_->_Bidirectional_.
 * To enable automatic resizing of the guest display, click _View_->_Auto-resize Guest Display_.
 
-> **_Note:_** there is currently an issue with VirtualBox on Windows machines which prevents you from dragging and dropping "complex" objects such as zip archives and directories. To get around this, you can set up a shared folder.
 
-> **_Note:_** when pasting text into a terminal window, the keyboard shortcut <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd> is used. For copying text from a terminal window, the keyboard shortcut <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> is used.
+{% include tip.html content='When pasting text into a terminal window, the keyboard shortcut <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd> is used. For copying text from a terminal window, the keyboard shortcut <kbd>Control</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> is used.' %}
+
+{% include note.html content='There is currently an issue with VirtualBox on Windows machines which prevents you from dragging and dropping "complex" objects such as zip archives and directories. To get around this, you can set up a shared folder.' %}
+
 
 ## Further Reading
 * [Artemis Development Environment]({{site.folder_docs_other}}/development-environment.html)

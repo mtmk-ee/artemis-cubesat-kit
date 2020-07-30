@@ -1,4 +1,3 @@
-# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
 
 entries:
 - title: Sidebar
@@ -16,6 +15,9 @@ entries:
       output: web
     - title: FAQ
       url: /pages/faq.html
+      output: web
+    - title: Safety First
+      url: /pages/safety-procedures.html
       output: web
 
 # =================================================================================

@@ -27,8 +27,7 @@ Open a web browser inside of Ubuntu and enter `192.168.6.2` into the URL bar. It
 
 After a while you should see the Cloud9 IDE appear in your browser.
 
-> **_Note:_** on Windows hosts you may need to _eject_ the BeagleBone device from File Explorer first.
-
+{% include note.html content='On Windows hosts you may need to eject the BeagleBone device from File Explorer first.' %}
 
 {% include image.html file="/resources/tutorials/setup/part3/cloud9.png" width="100%" %}
 <br>
@@ -51,8 +50,7 @@ npm start
 ```
 Your browser should automatically open to a new page and load the COSMOS Web GUI.
 
-> **_Note:_** if the page doesn't open, try entering `0.0.0.0:5000` in a new browser tab
-
+{% include note.html content="If the page doesn't open, try entering <code>0.0.0.0:5000</code> in a new browser tab." %}
 
 <div align="center">
 <img src="https://github.com/mtmk-ee/artemis-cubesat-kit/wiki/resources/tutorials/setup/cosmos_web_home.png" width=600></img>
@@ -60,10 +58,10 @@ Your browser should automatically open to a new page and load the COSMOS Web GUI
 
 Next, click on _Realms_ -> _Artemis_ to switch to the Artemis cubesat view. In the box at the top left you will see a list of agents that are currently running on the BeagleBone.
 
-> **_Note:_** if you don't see any agents other than _agent\_mongo_, then you will need to start them manually by running the following commands in a terminal window in the Cloud9 IDE:
-> ```bash
-> ./start_agents
-> ```
+
+{% include note.html content="if you don't see any agents other than <code>agent_mongo</code>, then you will need to start them manually by running the following commands in a terminal window in the Cloud9 IDE: <br>
+<code>./start_agents</code>" %}
+
 
 <div align="center">
 <img src="https://github.com/mtmk-ee/artemis-cubesat-kit/wiki/resources/tutorials/setup/cosmos_web_home.png" width=600></img>

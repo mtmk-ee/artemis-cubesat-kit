@@ -104,5 +104,11 @@ Here's an explanation of what is happening at each step:
 
 > **_Note:_** since steps 3 through 7 occur in the main loop, they'll keep running until the program terminates.
 
+## Accessing Device Data
+
+You can also read data from external devices by using the `cubesat` object's device members. For more information, visit
+the [library documentation]({{site.folder_docs_library}}/python-library.html)
+
+
 ## Related Pages
 * [Artemis CubeSat Library]({{site.folder_docs_library}}/python-library.html)

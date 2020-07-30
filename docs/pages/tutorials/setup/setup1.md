@@ -14,7 +14,7 @@ series:
 
 ---
 
-
+{% include important.html content='Make sure to reference the <a href="../../safety-procedures.html">Safety Procedures</a> page for best practices to avoid damaging your components.' %}
 
 ## 1. Opening the Box
 
