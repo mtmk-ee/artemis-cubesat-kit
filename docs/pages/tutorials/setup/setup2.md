@@ -30,7 +30,8 @@ Since the disk image is compressed, you'll need to install [7-Zip](https://www.7
 
 ## 3. Set up the Virtual Machine
 
-{% include note.html content='Having problems with this step? Visit the <a href="faq.html#virtualbox">FAQ page</a>!' %}
+{% assign faq_note = "Having problems with this step? Visit the [FAQ page](" | append: site.baseurl | append: "/pages/faq.html#virtualbox)!" %}
+{% include tip.html content=faq_note %}
 
 Now that VirtualBox is installed, you can add the virtual machine containing the development environment.
 

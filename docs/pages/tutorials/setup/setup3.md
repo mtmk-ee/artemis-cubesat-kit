@@ -38,31 +38,27 @@ The COSMOS agents (flight software programs) running on the BeagleBone should au
 In an Ubuntu terminal (_not_ the BeagleBone terminal), enter the following commands:
 
 ```bash
-sudo systemctl start mongod
-~/cosmos/tools/agent_mongo
+$ sudo systemctl start mongod
+$ ~/cosmos/tools/agent_mongo
 ```
 
 Open another terminal and enter the following commands:
 
 ```bash
-cd ~/cosmos/source/tools/cosmos-web
-npm start
+$ cd ~/cosmos/source/tools/cosmos-web
+$ npm start
 ```
 Your browser should automatically open to a new page and load the COSMOS Web GUI.
 
 {% include note.html content="If the page doesn't open, try entering <code>0.0.0.0:5000</code> in a new browser tab." %}
 
-<div align="center">
-<img src="https://github.com/mtmk-ee/artemis-cubesat-kit/wiki/resources/tutorials/setup/cosmos_web_home.png" width=600></img>
-</div><br>
+
+{% include image.html file="/resources/tutorials/setup/part3/cosmos_web_home.png" width="100%" alt="COSMOS Web homepage" align="center" %}
 
 Next, click on _Realms_ -> _Artemis_ to switch to the Artemis cubesat view. In the box at the top left you will see a list of agents that are currently running on the BeagleBone.
 
 
-{% include note.html content="if you don't see any agents other than <code>agent_mongo</code>, then you will need to start them manually by running the following commands in a terminal window in the Cloud9 IDE: <br>
-<code>./start_agents</code>" %}
+{% include note.html content="if you don't see any agents other than `agent_mongo`, then you will need to start them manually by running the following command in a terminal window in the Cloud9 IDE:
+`./start_agents`" %}
 
-
-<div align="center">
-<img src="https://github.com/mtmk-ee/artemis-cubesat-kit/wiki/resources/tutorials/setup/cosmos_web_home.png" width=600></img>
-</div><br>
+{% include image.html file="/resources/tutorials/setup/part3/cosmos_web_route.png" width="100%" alt="COSMOS Web route" align="center" %}

@@ -13,7 +13,7 @@ keywords: software
 
 If you want to install COSMOS without using the development environment, you can always install COSMOS from scratch.
 
-> **_Note:_** it is still _highly_ recommended that you install COSMOS on Ubuntu 18.04.3 for compatibility.
+{% include warning.html content="It is still _highly_ recommended that you install COSMOS on Ubuntu 18.04.3 for compatibility." %}
 
 ## Clone COSMOS Core
 
@@ -49,7 +49,7 @@ $ git fetch
 
 ## Compile COSMOS Core Locally
 
-> **_Note:_** you can skip this step if you _only_ want to compile your programs to run on the BeagleBone.
+{% include important.html content="You can skip this step if you _only_ want to compile your programs to run on the BeagleBone." %}
 
 
 In Qt Creator, click on _File_ > _Open File or Project..._, and open up the file `~/cosmos/source/core/CMakeLists.txt`.
@@ -87,7 +87,7 @@ Now you can copy the contents of the `/home/YOUR_USERNAME/cosmos/source/core/bui
 
 ## Compile COSMOS Core for the BeagleBone
 
-> **_Note:_** you can skip this step if you _don't_ want to compile your programs to run on the BeagleBone.
+{% include important.html content="You can skip this step if you _don't_ want to compile your programs to run on the BeagleBone." %}
 
 
 
@@ -193,10 +193,49 @@ $ mkdir bin
 $ find ./ -perm /a+x -exec cp {} bin \;
 ```
 
-Now you can copy the `/home/YOUR_USERNAME/cosmos/source/core/build-core-arm32-Debug/bin` folder to the `/home/debian/cosmos/bin` folder on the BeagleBone.
+### Copy the Executables
 
-> **_Tip:_** if you don't like using `rsync` to copy to the BeagleBone, you can use [FileZilla](https://filezilla-project.org/download.php) instead.
+Now you can copy the `/home/YOUR_USERNAME/cosmos/source/core/build-core-arm32-Debug/bin` folder to the `/home/debian/cosmos/bin` folder on the BeagleBone"
 
+```bash
+cd /home/YOUR_USERNAME/cosmos/source/core/build-core-arm32-Debug
+rsync -auv ./bin debian@beaglebone.local:/cosmos/
+```
+
+{% include tip.html content="If you don't like using `rsync` to copy to the BeagleBone, you can use [FileZilla](https://filezilla-project.org/download.php) instead." %}
+
+{% include note.html content="If you run into a warning saying `WARNING: POSSIBLE DNS SPOOFING DETECTED!`, then
+you can try fixing this by running `rm ~/.ssh/known_hosts`" %}
+
+
+### Add COSMOS to PATH
+
+If running the command `agent` from Cloud9 doesn't work, then the BeagleBone doesn't have the COSMOS `bin`
+folder added to the PATH variable. To add the folder, run the following in a Cloud9 terminal:
+
+```bash
+$ nano ~/.bashrc
+```
+
+This will open up the file containing the directories the shell looks for programs in.
+Now, add the following line to the bottom of the file:
+
+```
+export PATH="$HOME/cosmos/bin:$PATH"
+```
+
+{% include tip.html content="Does the file look weird when scrolling? You can press <kbd>Control</kbd> + <kbd>L</kbd>
+to manually refresh the view." %}
+
+After you've added that line, press <kbd>Control</kbd> + <kbd>S</kbd> to save the file, and then
+<kbd>Control</kbd> + <kbd>X</kbd> to exit.
+
+Next, close the terminal window and open up a new one to reload the PATH. You should be able to run the following command
+to see the usage of the program:
+
+```bash
+$ agent
+```
 
 
 ## Grab the SimpleAgent Template (Optional)

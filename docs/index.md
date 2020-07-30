@@ -12,7 +12,11 @@ toc: false
 Here you'll find documentation and tutorials for the Artemis Cubesat Kit, a low-cost kit containing all the necessary subsystems for a 1U cubesat. For more information on the project itself, visit the <a href="{{ site.project_website }}" target="_blank" rel="noopener">project website</a>
 
 
-## What Next?
+## What Now?
+
+{% include important.html content="Before doing anything, make sure to review the
+[safety procedures](pages/safety-procedures.html) for working with the hardware." %}
+
 
 If you are just getting started with a cubesat kit of your own, you should definitely check out the _Getting Started_ set of tutorials over on the sidebar.
 

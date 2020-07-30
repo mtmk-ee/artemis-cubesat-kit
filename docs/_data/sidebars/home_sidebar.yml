@@ -50,17 +50,14 @@ entries:
       - title: Payload Script Series
         output: web
         subfolderitems:
-        - title: "1. Writing Payload Scripts"
+        - title: "1. Writing a Payload Script"
           url: /pages/tutorials/scripts/scripts1.html
           output: web
-        - title: "2. Reading Sensors"
+        - title: "2. Uploading the Script"
           url: /pages/tutorials/scripts/scripts2.html
           output: web
-        - title: "3. Working With Agents"
+        - title: "3. Running the Script"
           url: /pages/tutorials/scripts/scripts3.html
-          output: web
-        - title: "4. Viewing the Output"
-          url: /pages/tutorials/scripts/scripts4.html
           output: web
 
 

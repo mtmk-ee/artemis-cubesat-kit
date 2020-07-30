@@ -7,6 +7,10 @@ tags: [software]
 keywords: software
 ---
 
+{% assign warning = "Before getting started, make sure to review the [safety procedures](" | append: 
+site.baseurl | append: "/pages/safety-procedures.html#raspberry-pi) for working with the Raspberry Pi." %}
+{% include important.html content=warning %}
+
 ## Enable SSH Over USB
 
 SSH is required in order to remotely connect to the Raspberry Pi.
@@ -28,7 +32,7 @@ If you receive a password prompt, the process did not work. See the page [here](
 Since logging with SSH will be fairly slow, we can speed it up by disabling DNS. Open up either `/etc/ssh/sshd_config` or `/etc/sshd_config` and change the line starting with `UseDNS` to `UseDNS no`. Upon reboot, this should drastically decrease the login time for the client calling SSH. This can be performed on both the Raspberry Pi and the BeagleBone.
 
 ## Connecting to the Internet Over USB
-> **_Note:_** this has not yet been successfully performed with either the BeagleBone or a Windows machine as the host. It seems to be easiest to use a Mac computer.
+{% include note.html content="This has not yet been successfully performed with either the BeagleBone or a Windows machine as the host. It seems to be easiest to use a Mac computer." %}
 
 ### Internet Sharing on a Mac
 Once the Raspberry Pi is set up, plug it into a Mac computer. Navigate to the Network pane in System Preferences, and you should see `RNDIS/Ethernet Gadget` pop up on the left. If you do not see this, there is probably something wrong. For more information on setting up internet sharing, visit [this article](https://solarianprogrammer.com/2018/12/07/raspberry-pi-zero-internet-usb/).
@@ -55,7 +59,8 @@ It’s as easy as that! For further details, visit the [PiCamera installation gu
 
 
 ## Camera Setup
-> **_Warning:_** always make sure to power off the Raspberry Pi before changing any connections!
+
+{% include warning.html content="Always make sure to power off the Raspberry Pi before changing any connections!" %}
 
 Physically connecting the Raspberry Pi Camera Module is straightforward: release the clip on the CSI port located on the side of the board opposite the micro SD card slot, plug in the ribbon cable to the port (ensuring that the metal contacts are face-down on the board), and snap the CSI clip back into place.
 

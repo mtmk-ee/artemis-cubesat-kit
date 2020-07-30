@@ -29,3 +29,6 @@ $ xdg-open doxygen/html/index.html
 
 Optionally, you can navigate in the file explorer to the `~/cosmos/source/projects/cubesat-kit/docs/doxygen/html`
 folder and open up the `index.html` file.
+
+{% include tip.html content="If you visit the Doxygen docs frequently, you should bookmark the `index.html` file.
+Otherwise you would need to dig through all the files every time!" %}

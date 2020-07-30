@@ -1,17 +1,21 @@
 ---
-title: Writing Payload Scripts
+title: Writing a Payload Script
 permalink: /pages/tutorials/scripts/scripts1.html
 layout: series
 
 tags: [software, payload, scripts, camera]
 keywords: software, payload, scripts, camera
-sidebar: home_sidebar
 toc: false
 
 series:
     language: Python
     next: /pages/tutorials/scripts/scripts2.html
 ---
+
+{% include important.html content="Before proceeding, make sure the Raspberry Pi is connected to the BeagleBone, and the
+BeagleBone to your computer. The camera should be connected to the Raspberry Pi as well." %}
+
+
 
 ## Introduction
 
@@ -32,7 +36,7 @@ from time import sleep
 
 The first line imports the `cubesat` module, which is used to communicate with the rest of the cubesat. The second line imports the `PiCamera` module, which is used to control the Raspberry Pi Camera. The last line imports the `sleep` function, which we will use later in the main loop.
 
-> **_Note:_** if you are modifying your payload device, then you should import any packages needed to control it.
+{% include tip.html content="If you are modifying your payload device, then you should import any packages needed to control it." %}
 
 ### Initializing the Payload Device
 
@@ -62,7 +66,9 @@ while True:
 
 ### Putting it all Together
 
-Here is a basic payload script that captures images using the Raspberry Pi Camera and copies them to the BeagleBone:
+Below is a basic payload script that captures images using the Raspberry Pi Camera and copies them to the BeagleBone.
+For the purposes of this tutorial, we will assume you have placed the code below in a file called `my_script.py`
+in the folder `~/scripts` in Ubuntu.
 
 ```python
 # 1. Import necessary modules
@@ -102,7 +108,8 @@ Here's an explanation of what is happening at each step:
 6. We send our newly-captured image file to the BeagleBone. Unless you provide a destination path, all files will end up in the `/home/debian/raspi/incoming` folder on the BeagleBone with the same file name as the source file.
 7. We tell the program to wait for 5 seconds before continuing, using Python's built-in `sleep` function. Without this, the program would quickly cycle through the main loop and would eat up a bunch of memory on the Raspberry Pi and BeagleBone with all those image files.
 
-> **_Note:_** since steps 3 through 7 occur in the main loop, they'll keep running until the program terminates.
+
+{% include note.html content="Since steps 3 through 7 occur in the main loop, they'll keep running until the program terminates." %}
 
 ## Accessing Device Data
 
