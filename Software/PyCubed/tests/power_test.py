@@ -1,24 +1,21 @@
-import struct
 import time
 
-from pycubed import cubesat
+from artemis import power
 
-import power
+duration = 10
 
+print('Testing Power Monitor')
 
-def TestPower(duration):
-	print('Testing Power Monitor')
-	
-	for i in range(duration):
-		# Print power usage
-		print('=' * 40)
-		print('Battery Voltage: {0:.6f} V'.format(power.GetBattVoltage()))
-		print('Charge Current: {0:.6f} A'.format(power.GetChargeCurrent()))
-		print('System Voltage: {0:.6f} V'.format(power.GetSystemVoltage()))
-		print('System Current: {0:.6f} A'.format(power.GetSystemCurrent()))
-		
-		# Wait for a second
-		time.sleep(1)
-		
+for i in range(duration):
+	# Print power usage
 	print('=' * 40)
-	print('Test finished')
+	print('Battery Voltage: {0:.3f} V'.format(power.GetBattVoltage()))
+	print('Charge Current: {0:.3f} A'.format(power.GetChargeCurrent()))
+	print('System Voltage: {0:.3f} V'.format(power.GetSystemVoltage()))
+	print('System Current: {0:.3f} A'.format(power.GetSystemCurrent()))
+	
+	# Wait for a second
+	time.sleep(1)
+	
+print('=' * 40)
+print('Test finished')

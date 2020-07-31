@@ -1,9 +1,7 @@
-import struct
 import time
 
-from pycubed import cubesat
+from artemis import gps
 
-import gps
 
 def Test(duration_sec):
 	print('Testing GPS')

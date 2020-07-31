@@ -1,14 +1,10 @@
 
-from cubesat import CubeSat
+from artemis import cubesat
 from time import sleep
-
-
-# Create a new CubeSat object to expose cubesat functionality
-cubesat = CubeSat()
 
 # Main loop
 while True:
-    # Update the cubesat
+    # Update the artemis
     cubesat.update()
     
     print('=' * 40)

@@ -1,10 +1,6 @@
-import struct
-import time
-
 from pycubed import cubesat
-import os, storage, time
-import adafruit_sdcard
-import file
+from artemis import file
+
 
 def PrintFiles():
 	print('Attempting to print contents of the SD card')
@@ -25,7 +21,7 @@ def TestWrite(path, contents = 'Hello there!'):
 	
 	if status:
 		print('Successfully wrote to file')
-	else:	
+	else:
 		print('Could not write to file')
 	
 def TestRead(path):

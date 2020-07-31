@@ -7,7 +7,7 @@ from time import sleep
 from picamera import PiCamera
 
 # CubeSat module
-from cubesat import CubeSat
+from artemis import cubesat
 
 # ====================== SETTINGS ======================
 OUTPUT_DIRECTORY = '/home/pi/payload_files'  # Where to save the images before sending them to the BeagleBone
@@ -39,12 +39,8 @@ soh_dict = {
 # ======================================================
 
 
-# Create a new CubeSat object to interface with the rest of the cubesat
-cubesat = CubeSat()
-
-
 def UpdateSOH():
-    'Sets the state of health string for the payload via cubesat.SetSOHString(...)'
+    'Sets the state of health string for the payload via artemis.SetSOHString(...)'
     global soh_dict, camera, resolution, iso, image_count, debug_mode
 
     soh_dict["camera"]["enabled"] = camera is None
@@ -59,7 +55,7 @@ def UpdateSOH():
     soh_json = json.dumps(soh_dict, sort_keys=False, indent=4, separators=(',', ': '))
 
     # Set the SOH string
-    # (TODO) cubesat.SetSOHString(soh)
+    # (TODO) artemis.SetSOHString(soh)
     if debug_mode:
         print('Current SOH:')
         print(soh_json)
