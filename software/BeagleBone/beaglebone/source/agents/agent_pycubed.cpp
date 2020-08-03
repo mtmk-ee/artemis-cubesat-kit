@@ -194,7 +194,6 @@ void InitPyCubed() {
 	gps->Post(gps->location = Location());
 	gps->Post(gps->velocity = Vec3());
 	gps->Post(gps->satellites_used = 0);
-	gps->utc = Time::Now();
 }
 
 bool ConnectPyCubed() {
@@ -275,7 +274,7 @@ void UpdatePyCubed() {
 	imu->temperature = temp_info.cpu_temp;
 	imu->magnetic_field = imu_info.magnetometer;
 	imu->acceleration = imu_info.acceleration;
-	imu->angular_acceleration = imu_info.gyroscope;
+	imu->angular_velocity = imu_info.gyroscope;
 	
 	// Store GPS info
 	gps->utc = Time::Now();
