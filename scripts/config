@@ -23,4 +23,4 @@ AGENT_MONGO_FOLDER=~/cosmos/tools
 # =========================== Flight Software ===========================
 
 # BeagleBone project folder
-BEAGLEBONE_PROJECT_FOLDER="${COSMOS_PROJECT_FOLDER}/BeagleBone"
+BEAGLEBONE_PROJECT_FOLDER="${COSMOS_PROJECT_FOLDER}/beaglebone"

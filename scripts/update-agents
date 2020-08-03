@@ -31,7 +31,7 @@ fi
 
 # Copy the BeagleBone folder to the COSMOS project folder
 echo "Copying BeagleBone project to $BEAGLEBONE_PROJECT_FOLDER..."
-cp -R ../software/BeagleBone "$BEAGLEBONE_PROJECT_FOLDER"
+cp -R ../software/BeagleBone/beaglebone "$BEAGLEBONE_PROJECT_FOLDER"
 echo "Done."
 
 
