@@ -4,6 +4,9 @@ project(beaglebone)
 #aux_source_directory(. SRC_LIST)
 #add_executable(${PROJECT_NAME} ${SRC_LIST})
 
+
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+
 # point to cosmos/source folder
 set(COSMOS_SOURCE   "../../../")
 set(USE_COSMOS_FROM "SOURCE")

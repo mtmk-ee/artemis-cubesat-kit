@@ -1,0 +1,24 @@
+#!/bin/bash
+
+source config
+
+HOSTNAME=$(hostname -s)
+
+SOURCE_DIR="${HOSTNAME}@${HOSTNAME}.local:${RASPI_PROJECT_FOLDER}/"
+DEST_DIR="pi@raspberrypi.local:/home/pi/raspberry-pi"
+
+# Make sure the source directory exists
+if [ ! -d "${RASPI_PROJECT_FOLDER}" ]; then
+  echo "The source folder ${RASPI_PROJECT_FOLDER} does not exist!"
+  exit 1
+fi
+
+# Copy the files
+ssh debian@beaglebone.local rsync -auv ${SOURCE_DIR} ${DEST_DIR}
+
+# Check if successful
+if [ $? -eq 0 ]; then
+    echo "Success"
+else
+    echo "Failed to transfer files. Is the BeagleBone connected?"
+fi
