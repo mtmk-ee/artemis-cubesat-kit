@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(cosmos-project-cubesat-kit)
+project(beaglebone)
 
 #aux_source_directory(. SRC_LIST)
 #add_executable(${PROJECT_NAME} ${SRC_LIST})
@@ -51,8 +51,7 @@ endif()
 
 
 
-include_directories("/home/osboxes/cosmos/source/projects/cubesat-kit/include")
-include_directories("/home/osboxes/cosmos/source/projects/cubesat-kit/include/thirdparty")
+include_directories("../include")
 
 
 set(CUBESAT_DEVICE_SRC	device/I2CDevice.cpp

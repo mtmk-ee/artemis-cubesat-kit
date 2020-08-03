@@ -34,7 +34,7 @@
 #include "utility/StringTools.h"
 #include "utility/TimeTools.h"
 
-
+#include <functional>
 #include <unordered_map>
 
 #pragma GCC diagnostic push
