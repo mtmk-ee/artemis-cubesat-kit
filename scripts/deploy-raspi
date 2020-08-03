@@ -14,7 +14,7 @@ if [ ! -d "${RASPI_PROJECT_FOLDER}" ]; then
 fi
 
 # Copy the files
-ssh debian@beaglebone.local rsync -auv ${SOURCE_DIR} ${DEST_DIR}
+ssh debian@192.168.6.2 rsync -auv ${SOURCE_DIR} ${DEST_DIR}
 
 # Check if successful
 if [ $? -eq 0 ]; then
