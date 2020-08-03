@@ -4,7 +4,7 @@
 source config
 
 
-SRC_ROUTE_FOLDER=../Software/cosmos-web/src/routes
+SRC_ROUTE_FOLDER=../software/cosmos-web/src/routes
 DEST_ROUTE_FOLDER="${COSMOS_WEB_FOLDER}/src/routes"
 
 echo "Updating COSMOS Web routes..."
