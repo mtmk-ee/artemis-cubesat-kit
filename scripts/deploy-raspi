@@ -2,10 +2,6 @@
 
 source config
 
-HOSTNAME=$(hostname -s)
-
-SOURCE_DIR="${HOSTNAME}@${HOSTNAME}.local:${RASPI_PROJECT_FOLDER}/"
-DEST_DIR="pi@raspberrypi.local:/home/pi/raspberry-pi"
 
 # Make sure the source directory exists
 if [ ! -d "${RASPI_PROJECT_FOLDER}" ]; then
@@ -13,12 +9,23 @@ if [ ! -d "${RASPI_PROJECT_FOLDER}" ]; then
   exit 1
 fi
 
-# Copy the files
-ssh debian@192.168.6.2 rsync -auv ${SOURCE_DIR} ${DEST_DIR}
+# Copy the Raspberry Pi project folder to a temporary folder on the BeagleBone
+rsync -auv "${RASPI_PROJECT_FOLDER}/" debian@192.168.6.2:/home/debian/raspi-temp
 
 # Check if successful
 if [ $? -eq 0 ]; then
-    echo "Success"
+    echo "Transferred files to BeagleBone"
 else
     echo "Failed to transfer files. Is the BeagleBone connected?"
+    exit
+fi
+
+# Copy the Raspberry Pi project folder from the temporary folder to the Raspberry Pi
+ssh debian@192.168.6.2 rsync -auv /home/debian/raspi-temp/ pi@raspberrypi.local:/home/pi/raspberry-pi
+
+# Check if successful
+if [ $? -eq 0 ]; then
+    echo "Transferred files to Raspberry Pi"
+else
+    echo "Failed to transfer files. Is the Raspberry Pi connected?"
 fi
