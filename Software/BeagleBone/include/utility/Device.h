@@ -218,8 +218,7 @@ namespace cubesat {
 			voltage(agent, cindex),
 			current(agent, cindex),
 			power(agent, cindex),
-			enabled(agent, cindex),
-			energy_used(agent, cindex)
+			enabled(agent, cindex)
 		{}
 		virtual ~TemperatureSensor() {}
 		
@@ -229,7 +228,6 @@ namespace cubesat {
 		_AddProperty(current, amp);
 		_AddProperty(power, power);
 		_AddProperty(enabled, enabled);
-		_AddProperty(energy_used, energy);
 	};
 	
 	class Heater : public Device, public DeviceImplBase<htrstruc, DeviceType::HTR> {
@@ -287,7 +285,7 @@ namespace cubesat {
 			
 			magnetic_field(agent, cindex),
 			acceleration(agent, cindex),
-			angular_acceleration(agent, cindex)
+			angular_velocity(agent, cindex)
 		{}
 		virtual ~IMU() {}
 		
@@ -300,7 +298,7 @@ namespace cubesat {
 		
 		_AddProperty(magnetic_field, mag);
 		_AddProperty(acceleration, accel);
-		_AddProperty(angular_acceleration, omega);
+		_AddProperty(angular_velocity, omega);
 	};
 	
 	class GPS : public Device, public DeviceImplBase<gpsstruc, DeviceType::GPS> {
@@ -346,6 +344,7 @@ namespace cubesat {
 			
 			percentage(agent, cindex),
 			capacity(agent, cindex),
+			charge(agent, cindex),
 			efficiency(agent, cindex),
 			time_remaining(agent, cindex)
 		{}
@@ -360,6 +359,7 @@ namespace cubesat {
 		
 		_AddProperty(percentage, percentage);
 		_AddProperty(capacity, capacity);
+		_AddProperty(charge, charge);
 		_AddProperty(efficiency, efficiency);
 		_AddProperty(time_remaining, time_remaining);
 	};
@@ -381,9 +381,9 @@ namespace cubesat {
 			power_in(agent, cindex),
 			power_out(agent, cindex),
 			max_power(agent, cindex),
-			bandwidth(agent, cindex),
-			good_packet_count(agent, cindex),
-			bad_packet_count(agent, cindex)
+			bandwidth(agent, cindex)
+			//good_packet_count(agent, cindex),
+			//bad_packet_count(agent, cindex)
 		{}
 		virtual ~RadioTransceiver() {}
 		
@@ -401,8 +401,8 @@ namespace cubesat {
 		_AddProperty(power_out, powerout);
 		_AddProperty(max_power, maxpower);
 		_AddProperty(bandwidth, band);
-		_AddProperty(good_packet_count, goodcnt);
-		_AddProperty(bad_packet_count, badcnt);
+		//_AddProperty(good_packet_count, goodcnt);
+		//_AddProperty(bad_packet_count, badcnt);
 	};
 	
 	class CPU : public Device, public DeviceImplBase<cpustruc, DeviceType::CPU> {

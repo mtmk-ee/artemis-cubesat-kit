@@ -80,7 +80,6 @@ int main(int argc, char** argv) {
 		temp_sensors[i]->Post(temp_sensors[i]->utc = Time::Now());
 		temp_sensors[i]->Post(temp_sensors[i]->temperature = 273.15);
 		temp_sensors[i]->Post(temp_sensors[i]->voltage = 0);
-		temp_sensors[i]->Post(temp_sensors[i]->power = 0);
 	}
 	
 	agent->Finalize();
@@ -261,6 +260,9 @@ void SetSensorPower(bool enable) {
 }
 
 string Request_Sensor(vector<string> args) {
+	if ( args.size() != 1 )
+		return "Usage: sensor <device name>";
+	
 	// Check if the device name is valid
 	if ( !agent->DeviceExists(args[0]) )
 		return "No matching sensor";

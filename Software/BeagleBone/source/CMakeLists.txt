@@ -86,8 +86,8 @@ add_executable(agent_switch agents/agent_switch.cpp)
 target_link_libraries(agent_switch ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
 # ADCS Agents
-add_executable(agent_sunsensor agents/agent_sunsensor.cpp)
-target_link_libraries(agent_sunsensor ${COSMOS_LIBS} ${CUBESAT_LIBS})
+add_executable(agent_sun agents/agent_sun.cpp)
+target_link_libraries(agent_sun ${COSMOS_LIBS} ${CUBESAT_LIBS})
 
 # PyCubed Agent
 add_executable(agent_pycubed agents/agent_pycubed.cpp)

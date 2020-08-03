@@ -22,6 +22,21 @@ namespace cubesat {
 			return Time();
 		}
 		
+		/**
+		 * @brief Converts this time to a year, month, and day
+		 * @param year The year
+		 * @param month The month of the year
+		 * @param day The day of the month (fractional)
+		 */
+		inline void GetYMD(int32_t &year, int32_t &month, double &day) {
+			mjd2ymd(utc_mjd, year, month, day);
+		}
+		
+		//! Returns this time as an ISO 8601 formatted string
+		inline std::string ToString() const {
+			return mjd2iso8601(utc_mjd);
+		}
+		
 		//! Converts this time to seconds
 		inline double Seconds() const {
 			return utc2unixseconds(utc_mjd);
@@ -39,8 +54,8 @@ namespace cubesat {
 			return Seconds() / 86400.0;
 		}
 		
-		//! Returns the modified Julian date (UTC)
-		inline double GetModifiedJulianDate() const {
+		//! Returns the modified Julian day (UTC)
+		inline double GetModifiedJulianDay() const {
 			return utc_mjd;
 		}
 		
@@ -49,11 +64,9 @@ namespace cubesat {
 			return utc_mjd;
 		}
 		
-		inline Time operator +(const Time &other) const {
-			return Time(utc_mjd + other.utc_mjd);
-		}
-		inline Time operator -(const Time &other) const {
-			return Time(utc_mjd - other.utc_mjd);
+		//! Returns this time as an ISO 8601 formatted string
+		inline operator std::string() const {
+			return ToString();
 		}
 		
 	private:

@@ -60,6 +60,14 @@ void UpdatePyCubed();
  */
 void Shutdown();
 
+string Request_IsUp();
+string Request_SendMessage(vector<string> args);
+string Request_GetIMUData();
+string Request_GetGPSData();
+string Request_GetPowerData();
+string Request_GetTemperatureData();
+string Request_KillRadio();
+
 
 // Tunnel stuff
 void StartTunnel(const std::string &tunnel_ip);
@@ -103,7 +111,7 @@ int main(int argc, char** argv) {
 	agent->AddNodeProperty<Node::PowerUse>(0);
 	agent->AddNodeProperty<Node::PowerGeneration>(0);
 	agent->AddNodeProperty<Node::BatteryCapacity>(3.5f * 4);
-	agent->AddNodeProperty<Node::BatteryPercentage>(0);
+	agent->AddNodeProperty<Node::BatteryCharge>(0);
 	
 	// Initialize the PyCubed
 	InitPyCubed();
@@ -166,6 +174,7 @@ void InitPyCubed() {
 	battery->Post(battery->utc = Time::Now());
 	battery->Post(battery->temperature = 273.15);
 	battery->Post(battery->capacity = 3.5f * 4);
+	battery->Post(battery->charge = 3.5f * 4);
 	battery->Post(battery->efficiency = 0.85f);
 	battery->Post(battery->percentage = 100);
 	battery->Post(battery->voltage = 0);
@@ -177,7 +186,7 @@ void InitPyCubed() {
 	imu->Post(imu->temperature = 273.15);
 	imu->Post(imu->acceleration = Vec3());
 	imu->Post(imu->magnetic_field = Vec3());
-	imu->Post(imu->angular_acceleration	= Vec3());
+	imu->Post(imu->angular_velocity	= Vec3());
 	
 	// Add the GPS
 	gps = agent->NewDevice<GPS>("gps");
@@ -276,7 +285,7 @@ void UpdatePyCubed() {
 	
 	// Store node info
 	agent->SetNodeProperty<Node::PowerUse>(power_info.batt_current * power_info.batt_voltage);
-	agent->SetNodeProperty<Node::BatteryPercentage>(0); // ?
+	agent->SetNodeProperty<Node::BatteryCharge>(0); // ?
 }
 
 

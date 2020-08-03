@@ -23,6 +23,7 @@ Camera *camera;
 CustomDevice *pycubed, *tempsensors, *sunsensors, *switches, *heater;
 bool perform_shutdown = false;
 
+
 Timer up_time_timer;
 
 // =========== Function Prototypes ===========
@@ -35,7 +36,7 @@ void GrabSOHData();
 //! Calls a system command on the Raspberry Pi
 void SystemCall(const std::string &command, std::string &output);
 
-string Request_DumpData();
+string Request_GetData();
 string Request_SSH(vector<string> args);
 string Request_Ping();
 string Request_Shutdown();
@@ -76,7 +77,7 @@ int main(int argc, char** argv) {
 	agent->Finalize();
 	
 	// Add requests
-	agent->AddRequest({"dumpdata", "agentdata"}, Request_DumpData, "Prints data collected from other agents");
+	agent->AddRequest({"get_data", "agent_data"}, Request_GetData, "Prints data collected from other agents");
 	agent->AddRequest({"ssh", "command"}, Request_SSH, "Runs a command on the Raspberry Pi");
 	agent->AddRequest({"ping", "is_up"}, Request_Ping, "Checks if the Raspberry Pi is up");
 	agent->AddRequest({"shutdown_raspi", "end"}, Request_Shutdown, "Attempts to shut down the Raspberry Pi");
@@ -270,7 +271,9 @@ void GrabSOHData() {
 											  "device_imu_accel_x_000", "device_imu_accel_y_000", "device_imu_accel_z_000",
 											  "device_imu_omega_x_000", "device_imu_omega_y_000", "device_imu_omega_z_000", "device_imu_utc_000",
 											  "device_cpu_volt_000", "device_cpu_amp_000", "device_cpu_utc_000",
-											  "device_batt_volt_000", "device_batt_amp_000", "device_batt_utc_000"});
+											  "device_batt_volt_000", "device_batt_amp_000", "device_batt_utc_000",
+											  "device_gps_utc_000", "device_gps_geods_000", "device_gps_geocv_000", "device_gps_sats_used_000"});
+		
 		if ( !values.empty() ) {
 			pycubed->SetCustomProperty<bool>("active", true);
 			
@@ -290,6 +293,16 @@ void GrabSOHData() {
 			pycubed->SetCustomProperty<float>("sys_current", values["device_cpu_amp_000"].nvalue);
 			pycubed->SetCustomProperty<float>("batt_voltage", values["device_batt_volt_000"].nvalue);
 			pycubed->SetCustomProperty<float>("batt_current", values["device_batt_amp_000"].nvalue);
+			
+			pycubed->SetCustomProperty<float>("gps_utc", values["device_gps_utc_000"].nvalue);
+			pycubed->SetCustomProperty<float>("gps_latitude", values["device_gps_geods_lat_000"].nvalue);
+			pycubed->SetCustomProperty<float>("gps_longitude", values["device_gps_geods_lon_000"].nvalue);
+			pycubed->SetCustomProperty<float>("gps_altitude", values["device_gps_geods_h_000"].nvalue);
+			pycubed->SetCustomProperty<float>("gps_velocity_x", values["device_gps_geocv_x_000"].nvalue);
+			pycubed->SetCustomProperty<float>("gps_velocity_y", values["device_gps_geocv_y_000"].nvalue);
+			pycubed->SetCustomProperty<float>("gps_velocity_z", values["device_gps_geocv_z_000"].nvalue);
+			pycubed->SetCustomProperty<int>("gps_satellites", (int)values["device_gps_sats_used_000"].nvalue);
+			
 		}
 		else
 			pycubed->SetCustomProperty<bool>("active", false);
@@ -315,7 +328,7 @@ void SystemCall(const std::string &command, std::string &output) {
 }
 
 
-string Request_DumpData() {
+string Request_GetData() {
 	
 	stringstream ss;
 	ss << "{";
@@ -329,7 +342,7 @@ string Request_DumpData() {
 	ss <<		"\"temp_pycubed\": " << tempsensors->GetCustomProperty<float>("temp_pycubed");
 	ss <<	"}, ";
 	
-	ss <<	"\"agent_sunsensor\": {";
+	ss <<	"\"agent_sun\": {";
 	ss <<		"\"active\": " << (sunsensors->GetCustomProperty<bool>("active") ? "true" : "false") << ", ";
 	ss <<		"\"ss_plusx\": " << tempsensors->GetCustomProperty<float>("lux_plusx") << ", ";
 	ss <<		"\"ss_minusx\": " << tempsensors->GetCustomProperty<float>("lux_minusx") << ", ";
@@ -356,6 +369,18 @@ string Request_DumpData() {
 	ss <<				 pycubed->GetCustomProperty<float>("imu_gyro_x") << ", ";
 	ss <<				 pycubed->GetCustomProperty<float>("imu_gyro_y") << ", ";
 	ss <<				 pycubed->GetCustomProperty<float>("imu_gyro_z");
+	ss <<			"]";
+	ss <<		"}, ";
+	ss <<		"\"gps\": {";
+	ss <<			"\"utc\": " << pycubed->GetCustomProperty<float>("gps_utc") << ", ";
+	ss <<			"\"latitude\": " << pycubed->GetCustomProperty<float>("gps_latitude") << ", ";
+	ss <<			"\"longitude\": " << pycubed->GetCustomProperty<float>("gps_longitude") << ", ";
+	ss <<			"\"altitude\": " << pycubed->GetCustomProperty<float>("gps_altitude") << ", ";
+	ss <<			"\"satellites\": " << pycubed->GetCustomProperty<int>("gps_satellites") << ", ";
+	ss <<			"\"velocity\": [";
+	ss <<				 pycubed->GetCustomProperty<float>("gps_velocity_x") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("gps_velocity_y") << ", ";
+	ss <<				 pycubed->GetCustomProperty<float>("gps_velocity_z");
 	ss <<			"]";
 	ss <<		"}, ";
 	ss <<		"\"power\": {";

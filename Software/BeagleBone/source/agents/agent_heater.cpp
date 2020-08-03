@@ -45,14 +45,8 @@ void GetTemperatures();
 void SetHeaterState(bool enabled);
 
 
-//! Request to enable the heaters
-string Request_Enable();
-//! Request to disable the heaters
-string Request_Disable();
-//! Request to set the heater state
-string Request_Set(vector<string> args);
-//! Request to check the heater state
-string Request_Get();
+//! Request to enable, disable, or check the status of the heaters
+string Request_Heater(vector<string> args);
 
 
 
@@ -88,10 +82,7 @@ int main(int argc, char** argv) {
 	agent->Finalize();
 	
 	// Add request callbacks
-	agent->AddRequest({"enable", "on"}, Request_Enable, "Enables the heater", "Enables the heater");
-	agent->AddRequest({"disable", "off"}, Request_Disable, "Disables the heater", "Disables the heater");
-	agent->AddRequest("set", Request_Set, "Sets the state of the heater", "Usage: set [on | off]");
-	agent->AddRequest({"state", "get"}, Request_Get, "Gets the state of the heater");
+	agent->AddRequest({"heater", "state", "set", "get"}, Request_Heater, "Enables, disables, or displays the status of the heater", "Usage: heater [on | off]");
 	
 	// Debug print
 	agent->DebugPrint();
@@ -201,33 +192,36 @@ void SetHeaterState(bool enabled) {
 }
 
 
-string Request_Enable() {
-	SetHeaterState(true);
+string Request_Heater(vector<string> args) {
 	
-	return "OK";
-}
-string Request_Disable() {
-	SetHeaterState(false);
+	bool change_state = false;
+	bool new_state = true;
 	
-	return "OK";
-}
-string Request_Set(vector<string> args) {
-	
-	// Make sure the number of arguments is correct
-	if ( args.size() != 1 )
-		return "Usage: set [on | off]";
-	
-	ToLowercaseInPlace(args[0]);
-	
-	if ( args[0] == "on" )
-		SetHeaterState(true);
-	else if ( args[0] == "off" )
-		SetHeaterState(false);
+	if ( args.size() == 0 );
+	else if ( args.size() == 1 ) {
+		change_state = true;
+		ToLowercaseInPlace(args[0]);
+		
+		if ( args[0] == "on" || args[0] == "yes" )
+			new_state = true;
+		else if ( args[0] == "off" || args[0] == "no" )
+			new_state = false;
+		else
+			return "Usage: heater [on | off]";
+	}
 	else
-		return "Usage: set [on | off]";
+		return "Usage: heater [on | off]";
 	
-	return "OK";
-}
-string Request_Get() {
-	return ToString(heater->enabled);
+	if ( change_state ) {
+		SetHeaterState(new_state);
+		return "OK";
+	}
+	else {
+		stringstream ss;
+		ss <<	"{";
+		ss <<		"\"enabled\": " << (heater->enabled ? "true" : "false");
+		ss <<	"}";
+		
+		return ss.str();
+	}
 }

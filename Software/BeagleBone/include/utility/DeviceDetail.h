@@ -150,6 +150,7 @@ namespace cubesat {
 	_RegisterProperty("UTC", battstruc, utc);
 	_RegisterProperty("Percent", battstruc, percentage);
 	_RegisterProperty("Capacity", battstruc, capacity);
+	_RegisterProperty("Charge", battstruc, charge);
 	_RegisterProperty("Efficiency", battstruc, efficiency);
 	_RegisterProperty("Time Remaining", battstruc, time_remaining);
 	
@@ -167,8 +168,8 @@ namespace cubesat {
 	_RegisterProperty("Power Out", tcvstruc, powerout);
 	_RegisterProperty("Max Power", tcvstruc, maxpower);
 	_RegisterProperty("Bandwidth", tcvstruc, band);
-	_RegisterProperty("Good Packet Count", tcvstruc, goodcnt);
-	_RegisterProperty("Bad Packet Count", tcvstruc, badcnt);
+	//_RegisterProperty("Good Packet Count", tcvstruc, goodcnt);
+	//_RegisterProperty("Bad Packet Count", tcvstruc, badcnt);
 	
 	//============ CPU ============
 	_RegisterProperty("Temperature", cpustruc, temp);
@@ -251,9 +252,9 @@ namespace cubesat {
 			static constexpr auto key = "node_battcap";
 			static constexpr const char *name = "Battery Capacity";
 		};
-		struct BatteryPercentage : NodeProperty<float, offsetof(nodestruc, battlev)> {
+		struct BatteryCharge : NodeProperty<float, offsetof(nodestruc, battlev)> {
 			static constexpr auto key = "node_battlev";
-			static constexpr const char *name = "Battery Percentage";
+			static constexpr const char *name = "Battery Charge";
 		};
 	}
 	

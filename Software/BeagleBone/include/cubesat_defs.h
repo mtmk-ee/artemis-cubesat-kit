@@ -8,7 +8,7 @@
 // Names for various agents
 #define CUBESAT_AGENT_TEMP_NAME "temp"
 #define CUBESAT_AGENT_HEATER_NAME "heater"
-#define CUBESAT_AGENT_SUNSENSOR_NAME "sunsensor"
+#define CUBESAT_AGENT_SUNSENSOR_NAME "sun"
 #define CUBESAT_AGENT_SWITCH_NAME "switch"
 #define CUBESAT_AGENT_PYCUBED_NAME "pycubed"
 #define CUBESAT_AGENT_RASPI_NAME "raspi"
